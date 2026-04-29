@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>设备 - IoT</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f0f2f5; height: 100vh; overflow: hidden; margin: 0; }
+
+  /* ===== HEADER (legacy, kept for reference) ===== */
+  .header {
+    height: 56px; background: linear-gradient(135deg, #008B8B, #00A0A0);
+    display: flex; align-items: center; padding: 0 24px; color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 100; position: relative;
+  }
+  .header-icon { font-size: 22px; margin-right: 10px; }
+  .header-title { font-size: 17px; font-weight: 600; }
+  .header-subtitle { font-size: 12px; opacity: 0.75; margin-left: 12px; }
+  .header-nav { margin-left: 30px; display: flex; gap: 4px; }
+  .header-nav a {
+    padding: 5px 14px; border-radius: 6px; color: rgba(255,255,255,0.7);
+    text-decoration: none; font-size: 12px; transition: all 0.2s; cursor: pointer;
+  }
+  .header-nav a:hover { background: rgba(255,255,255,0.15); color: #fff; }
+  .header-nav a.active { background: rgba(255,255,255,0.2); color: #fff; font-weight: 500; }
+  .header-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+  .header-btn {
+    padding: 6px 16px; border-radius: 6px; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: #fff; color: #008B8B; }
+  .btn-primary:hover { background: #f0f0f0; transform: translateY(-1px); }
+  .btn-outline { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+  .btn-outline:hover { background: rgba(255,255,255,0.25); }
+
+  /* ===== NAV SIDEBAR ===== */
+  .nav-sidebar {
+    width: 200px;
+    height: 100vh;
+    background: #001529;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .nav-sidebar-logo {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+  .nav-sidebar-menu {
+    flex: 1;
+    padding: 8px 0;
+  }
+  .nav-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    height: 44px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .nav-menu-item:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.06);
+  }
+  .nav-menu-item.active {
+    color: #fff;
+    background: #1890ff;
+  }
+  .nav-menu-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #fff;
+  }
+  .nav-menu-icon {
+    margin-right: 10px;
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+  }
+  .nav-menu-text {
+    flex: 1;
+  }
+  .nav-menu-arrow {
+    font-size: 10px;
+    transition: transform 0.2s;
+  }
+  .nav-menu-arrow.open {
+    transform: rotate(90deg);
+  }
+  .nav-menu-group .nav-menu-item.has-submenu.expanded {
+    color: #fff;
+    background: rgba(255,255,255,0.06);
+  }
+  .nav-submenu {
+    display: none;
+    background: rgba(0,0,0,0.15);
+  }
+  .nav-submenu.open {
+    display: block;
+  }
+  .nav-submenu-item {
+    display: block;
+    padding: 0 20px 0 50px;
+    height: 40px;
+    line-height: 40px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .nav-submenu-item:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.06);
+  }
+  .nav-submenu-item.active {
+    color: #1890ff;
+    background: rgba(24,144,255,0.08);
+  }
+
+  /* ===== MAIN LAYOUT ===== */
+  .main { display: flex; height: 100vh; margin-left: 200px; flex: 1; min-height: 100vh; }
+
+  /* ===== LEFT SIDEBAR - 设备分类 ===== */
+  .sidebar {
+    width: 220px; min-width: 220px; background: #fff; border-right: 1px solid #e8e8e8;
+    display: flex; flex-direction: column;
+  }
+  .sidebar-header {
+    padding: 14px 16px; border-bottom: 1px solid #f0f0f0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .sidebar-header h3 { font-size: 14px; font-weight: 600; color: #333; }
+  .sidebar-count { font-size: 11px; color: #999; background: #f5f5f5; padding: 2px 8px; border-radius: 10px; }
+  .sidebar-search {
+    padding: 10px 12px; border-bottom: 1px solid #f0f0f0;
+  }
+  .sidebar-search input {
+    width: 100%; padding: 7px 10px 7px 30px; border: 1px solid #e0e0e0; border-radius: 6px;
+    font-size: 12px; outline: none; background: #fafafa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 8px center no-repeat;
+    transition: border-color 0.2s;
+  }
+  .sidebar-search input:focus { border-color: #008B8B; background-color: #fff; }
+  .sidebar-tree { flex: 1; overflow-y: auto; padding: 8px; }
+  .sidebar-tree::-webkit-scrollbar { width: 4px; }
+  .sidebar-tree::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+
+  .tree-group { margin-bottom: 4px; }
+  .tree-group-header {
+    display: flex; align-items: center; gap: 6px; padding: 8px 10px;
+    border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;
+    color: #555; transition: all 0.15s; user-select: none;
+  }
+  .tree-group-header:hover { background: #f5f5f5; }
+  .tree-group-header.active { background: #E0F2F1; color: #008B8B; }
+  .tree-group-header .arrow { font-size: 10px; transition: transform 0.2s; color: #aaa; }
+  .tree-group-header.collapsed .arrow { transform: rotate(-90deg); }
+  .tree-group-header .group-icon { font-size: 16px; }
+  .tree-group-header .group-count { margin-left: auto; font-size: 11px; color: #aaa; font-weight: 400; }
+
+  .tree-children { padding-left: 20px; overflow: hidden; transition: max-height 0.3s ease; }
+  .tree-children.collapsed { max-height: 0 !important; }
+  .tree-item {
+    display: flex; align-items: center; gap: 6px; padding: 6px 10px;
+    border-radius: 5px; cursor: pointer; font-size: 12px; color: #666;
+    transition: all 0.15s; margin: 1px 0;
+  }
+  .tree-item:hover { background: #f5f5f5; color: #333; }
+  .tree-item.active { background: #E0F2F1; color: #008B8B; font-weight: 500; }
+  .tree-item .item-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .tree-item .item-status { margin-left: auto; font-size: 10px; }
+  .status-online { color: #4CAF50; }
+  .status-offline { color: #9E9E9E; }
+  .status-alarm { color: #f44336; }
+  .status-warning { color: #FF9800; }
+
+  /* ===== CONTENT AREA ===== */
+  .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Toolbar */
+  .toolbar {
+    padding: 12px 20px; background: #fff; border-bottom: 1px solid #e8e8e8;
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  }
+  .toolbar-breadcrumb { font-size: 13px; color: #999; }
+  .toolbar-breadcrumb span { color: #333; font-weight: 500; }
+  .toolbar-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .toolbar-btn {
+    padding: 6px 12px; border-radius: 6px; border: 1px solid #ddd; background: #fff;
+    cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;
+    transition: all 0.15s; color: #555;
+  }
+  .toolbar-btn:hover { border-color: #008B8B; color: #008B8B; }
+  .toolbar-btn.active { background: #008B8B; color: #fff; border-color: #008B8B; }
+  .toolbar-select {
+    padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px;
+    outline: none; background: #fff; color: #555;
+  }
+  .toolbar-select:focus { border-color: #008B8B; }
+
+  /* Stats Cards */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    padding: 16px 20px; flex-shrink: 0;
+  }
+  .stat-card {
+    background: #fff; border-radius: 10px; padding: 16px; border: 1px solid #f0f0f0;
+    display: flex; align-items: center; gap: 14px; transition: box-shadow 0.2s;
+  }
+  .stat-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .stat-icon {
+    width: 44px; height: 44px; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-size: 20px;
+  }
+  .stat-icon.total { background: #E3F2FD; }
+  .stat-icon.online { background: #E8F5E9; }
+  .stat-icon.alarm { background: #FFEBEE; }
+  .stat-icon.trigger { background: #F3E5F5; }
+  .stat-value { font-size: 22px; font-weight: 700; color: #333; }
+  .stat-label { font-size: 12px; color: #999; margin-top: 2px; }
+
+  /* Device Cards */
+  .card-container {
+    flex: 1; overflow-y: auto; display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px; align-content: start;
+  }
+  .device-card {
+    background: #fff; border-radius: 10px; border: 1px solid #f0f0f0;
+    padding: 16px; cursor: pointer; transition: all 0.2s; position: relative;
+  }
+  .device-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-2px); border-color: #008B8B; }
+  .device-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .device-card-avatar {
+    width: 44px; height: 44px; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-size: 22px;
+  }
+  .device-card-info { flex: 1; min-width: 0; }
+  .device-card-name { font-size: 14px; font-weight: 600; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .device-card-code { font-size: 11px; color: #999; margin-top: 2px; }
+  .device-card-status { position: absolute; top: 12px; right: 12px; }
+  .device-card-body { display: flex; flex-direction: column; gap: 6px; }
+  .device-card-row { display: flex; justify-content: space-between; font-size: 12px; }
+  .device-card-row .label { color: #999; }
+  .device-card-row .value { color: #333; font-weight: 500; }
+  .device-card-triggers { margin-top: 10px; padding-top: 10px; border-top: 1px solid #f5f5f5; display: flex; flex-wrap: wrap; gap: 4px; }
+  .device-card-trigger-tag {
+    font-size: 10px; padding: 2px 8px; border-radius: 4px;
+    background: #E3F2FD; color: #1565C0;
+  }
+
+  /* Device Table */
+  .table-container {
+    flex: 1; margin: 0 20px 20px; background: #fff; border-radius: 10px;
+    border: 1px solid #f0f0f0; overflow: hidden; display: flex; flex-direction: column;
+  }
+  .table-header-bar {
+    padding: 12px 16px; border-bottom: 1px solid #f0f0f0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .table-header-bar h4 { font-size: 14px; font-weight: 600; }
+  .table-search {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .table-search input {
+    padding: 6px 12px 6px 30px; border: 1px solid #e0e0e0; border-radius: 6px;
+    font-size: 12px; outline: none; width: 200px; background: #fafafa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 8px center no-repeat;
+    transition: border-color 0.2s;
+  }
+  .table-search input:focus { border-color: #008B8B; background-color: #fff; }
+
+  .table-wrapper { flex: 1; overflow-y: auto; }
+  .table-wrapper::-webkit-scrollbar { width: 6px; }
+  .table-wrapper::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead { position: sticky; top: 0; z-index: 5; }
+  thead th {
+    padding: 10px 14px; text-align: left; font-size: 12px; font-weight: 600;
+    color: #888; background: #fafafa; border-bottom: 1px solid #f0f0f0;
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid #f5f5f5; cursor: pointer; transition: background 0.15s;
+  }
+  tbody tr:hover { background: #f8fffe; }
+  tbody td { padding: 12px 14px; font-size: 13px; color: #444; vertical-align: middle; }
+
+  .device-name-cell { display: flex; align-items: center; gap: 10px; }
+  .device-avatar {
+    width: 36px; height: 36px; border-radius: 8px; display: flex;
+    align-items: center; justify-content: center; font-size: 18px;
+    flex-shrink: 0;
+  }
+  .device-name-text .name { font-weight: 500; color: #333; }
+  .device-name-text .code { font-size: 11px; color: #aaa; font-family: 'Courier New', monospace; }
+
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px;
+    border-radius: 12px; font-size: 11px; font-weight: 500;
+  }
+  .status-badge.online { background: #E8F5E9; color: #2E7D32; }
+  .status-badge.offline { background: #F5F5F5; color: #9E9E9E; }
+  .status-badge.alarm { background: #FFEBEE; color: #C62828; }
+  .status-badge.warning { background: #FFF3E0; color: #E65100; }
+  .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+  .status-badge.online::before { background: #4CAF50; }
+  .status-badge.offline::before { background: #9E9E9E; }
+  .status-badge.alarm::before { background: #f44336; animation: pulse 1.5s infinite; }
+  .status-badge.warning::before { background: #FF9800; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px;
+    margin: 1px 2px;
+  }
+  .tag-env { background: #E3F2FD; color: #1565C0; }
+  .tag-equip { background: #FFF3E0; color: #E65100; }
+  .tag-safety { background: #FFEBEE; color: #C62828; }
+  .tag-power { background: #F3E5F5; color: #7B1FA2; }
+
+  .trigger-link {
+    color: #7C4DFF; font-size: 12px; cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 3px;
+  }
+  .trigger-link:hover { text-decoration: underline; }
+
+  .action-btns { display: flex; gap: 6px; }
+  .action-btn {
+    padding: 4px 10px; border-radius: 5px; border: 1px solid #e0e0e0; background: #fff;
+    cursor: pointer; font-size: 11px; transition: all 0.15s; color: #666;
+  }
+  .action-btn:hover { border-color: #008B8B; color: #008B8B; }
+  .action-btn.danger:hover { border-color: #f44336; color: #f44336; }
+
+  /* Pagination */
+  .pagination {
+    padding: 12px 16px; border-top: 1px solid #f0f0f0;
+    display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #888;
+  }
+  .pagination-btns { display: flex; gap: 4px; }
+  .page-btn {
+    width: 30px; height: 30px; border-radius: 6px; border: 1px solid #e0e0e0;
+    background: #fff; cursor: pointer; font-size: 12px; display: flex;
+    align-items: center; justify-content: center; transition: all 0.15s;
+  }
+  .page-btn:hover { border-color: #008B8B; color: #008B8B; }
+  .page-btn.active { background: #008B8B; color: #fff; border-color: #008B8B; }
+
+  /* ===== DEVICE DETAIL DRAWER ===== */
+  .drawer-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.3); z-index: 200; display: none;
+    animation: fadeIn 0.2s ease;
+  }
+  .drawer-overlay.open { display: block; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .drawer {
+    position: fixed; top: 0; right: -560px; width: 560px; height: 100%;
+    background: #fff; z-index: 201; box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+    transition: right 0.3s ease; display: flex; flex-direction: column;
+  }
+  .drawer.open { right: 0; }
+
+  .drawer-header {
+    padding: 18px 24px; border-bottom: 1px solid #f0f0f0;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .drawer-header h3 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+  .drawer-close {
+    width: 32px; height: 32px; border-radius: 8px; border: none;
+    background: #f5f5f5; cursor: pointer; font-size: 16px; color: #666;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .drawer-close:hover { background: #eee; }
+
+  .drawer-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+  .drawer-body::-webkit-scrollbar { width: 4px; }
+  .drawer-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+
+  .detail-section { margin-bottom: 24px; }
+  .detail-section-title {
+    font-size: 13px; font-weight: 600; color: #333; margin-bottom: 12px;
+    padding-bottom: 8px; border-bottom: 1px solid #f0f0f0;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .detail-field { }
+  .detail-field .label { font-size: 11px; color: #999; margin-bottom: 3px; }
+  .detail-field .value { font-size: 13px; color: #333; font-weight: 500; }
+  .detail-field .value.mono { font-family: 'Courier New', monospace; }
+
+  /* Trigger association in detail */
+  .trigger-card {
+    background: #f8f9fa; border: 1px solid #e8e8e8; border-radius: 8px;
+    padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+    transition: all 0.15s; cursor: pointer;
+  }
+  .trigger-card:hover { border-color: #008B8B; background: #f0fffe; }
+  .trigger-card-icon {
+    width: 40px; height: 40px; border-radius: 8px; display: flex;
+    align-items: center; justify-content: center; font-size: 20px;
+    background: linear-gradient(135deg, #42A5F5, #5BA3F5); flex-shrink: 0;
+  }
+  .trigger-card-info { flex: 1; }
+  .trigger-card-info .name { font-size: 13px; font-weight: 500; color: #333; }
+  .trigger-card-info .cond { font-size: 11px; color: #888; font-family: 'Courier New', monospace; }
+  .trigger-card-status { font-size: 11px; }
+  .trigger-card-actions { display: flex; gap: 4px; }
+
+  .add-trigger-btn {
+    width: 100%; padding: 10px; border: 2px dashed #d0d0d0; border-radius: 8px;
+    background: transparent; cursor: pointer; font-size: 13px; color: #999;
+    transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .add-trigger-btn:hover { border-color: #008B8B; color: #008B8B; background: #f0fffe; }
+
+  /* Rule chain mini preview */
+  .rule-chain-mini {
+    background: #263238; border-radius: 8px; padding: 12px; margin-top: 8px;
+  }
+  .rule-chain-mini .chain-title { font-size: 11px; color: #80CBC4; margin-bottom: 8px; }
+  .chain-nodes { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .chain-node {
+    padding: 4px 10px; border-radius: 5px; font-size: 11px; color: #fff;
+  }
+  .chain-node.trigger { background: #42A5F5; }
+  .chain-node.condition { background: #FFA726; }
+  .chain-node.action { background: #66BB6A; }
+  .chain-arrow { color: #546E7A; font-size: 12px; }
+
+  /* ===== ADD TRIGGER MODAL ===== */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4); z-index: 300; display: none;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 12px; width: 520px; max-height: 80vh;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2); display: flex; flex-direction: column;
+  }
+  .modal-header {
+    padding: 18px 20px; border-bottom: 1px solid #f0f0f0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-header h3 { font-size: 15px; font-weight: 600; }
+  .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #999; }
+  .modal-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+  .modal-footer { padding: 14px 20px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 10px; }
+  .modal-btn {
+    padding: 8px 20px; border-radius: 6px; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 500;
+  }
+  .modal-btn-primary { background: #008B8B; color: #fff; }
+  .modal-btn-primary:hover { background: #007070; }
+  .modal-btn-secondary { background: #f5f5f5; color: #555; border: 1px solid #ddd; }
+  .modal-btn-secondary:hover { background: #eee; }
+
+  .trigger-select-list { display: flex; flex-direction: column; gap: 6px; }
+  .trigger-select-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    border: 1px solid #e8e8e8; border-radius: 8px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .trigger-select-item:hover { border-color: #008B8B; background: #f0fffe; }
+  .trigger-select-item.selected { border-color: #008B8B; background: #E0F2F1; }
+  .trigger-select-item .check {
+    width: 20px; height: 20px; border-radius: 4px; border: 2px solid #ddd;
+    display: flex; align-items: center; justify-content: center; font-size: 12px;
+    color: transparent; transition: all 0.15s; flex-shrink: 0;
+  }
+  .trigger-select-item.selected .check { background: #008B8B; border-color: #008B8B; color: #fff; }
+  .trigger-select-item .ts-icon { font-size: 20px; }
+  .trigger-select-item .ts-info { flex: 1; }
+  .trigger-select-item .ts-name { font-size: 13px; font-weight: 500; color: #333; }
+  .trigger-select-item .ts-cond { font-size: 11px; color: #888; font-family: 'Courier New', monospace; }
+  .trigger-select-item .ts-type { font-size: 10px; padding: 2px 6px; border-radius: 3px; background: #E3F2FD; color: #1565C0; }
+
+  /* Toast */
+  .toast-container { position: fixed; top: 70px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    padding: 10px 20px; border-radius: 8px; color: #fff; font-size: 13px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast-success { background: #4CAF50; }
+  .toast-info { background: #2196F3; }
+  .toast-warning { background: #FF9800; }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(40px); } }
+</style>
+</head>
+<body>
+
+<!-- Nav Sidebar -->
+<aside class="nav-sidebar">
+  <div class="nav-sidebar-logo">🚇 IoT</div>
+  <nav class="nav-sidebar-menu">
+    <div class="nav-menu-group">
+      <div class="nav-menu-item has-submenu expanded" onclick="toggleNavSubmenu(this)">
+        <span class="nav-menu-icon">📊</span>
+        <span class="nav-menu-text">设备管理</span>
+        <span class="nav-menu-arrow open">▶</span>
+      </div>
+      <div class="nav-submenu open">
+        <a href="metro-product-management.html" class="nav-submenu-item">产品</a>
+        <a href="metro-device-management.html" class="nav-submenu-item active">设备</a>
+      </div>
+    </div>
+    <a href="metro-alarm-rule-chain.html" class="nav-menu-item">
+      <span class="nav-menu-icon">⚙️</span>
+      <span class="nav-menu-text">规则引擎</span>
+    </a>
+    <a href="metro-alarm-management.html" class="nav-menu-item">
+      <span class="nav-menu-icon">🚨</span>
+      <span class="nav-menu-text">告警管理</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h3>设备分类</h3>
+      <span class="sidebar-count" id="totalDevices">24 台</span>
+    </div>
+    <div class="sidebar-search">
+      <input placeholder="搜索设备..." id="sidebarSearch" oninput="filterSidebar(this.value)" />
+    </div>
+    <div class="sidebar-tree" id="sidebarTree"></div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-breadcrumb">
+        设备 / <span id="currentCategory">全部设备</span>
+      </div>
+      <div class="toolbar-right">
+        <button class="toolbar-btn" onclick="showToast('数据已同步', 'info')">🔄 同步数据</button>
+        <button class="toolbar-btn" style="background:#008B8B;color:#fff;border-color:#008B8B" onclick="openAddDeviceModal()">➕ 添加设备</button>
+        <select class="toolbar-select" id="statusFilter" onchange="filterDevices()">
+          <option value="all">全部状态</option>
+          <option value="online">在线</option>
+          <option value="offline">离线</option>
+          <option value="alarm">告警</option>
+          <option value="warning">预警</option>
+        </select>
+        <select class="toolbar-select" id="stationFilter" onchange="filterDevices()">
+          <option value="all">全部站点</option>
+          <option value="1号线-人民广场">1号线-人民广场</option>
+          <option value="1号线-南京东路">1号线-南京东路</option>
+          <option value="2号线-中山公园">2号线-中山公园</option>
+          <option value="2号线-静安寺">2号线-静安寺</option>
+        </select>
+        <button class="toolbar-btn" id="viewToggleBtn" onclick="toggleDeviceView()" title="切换视图" style="background:#008B8B;color:#fff;border-color:#008B8B">📋</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon total">📦</div>
+        <div><div class="stat-value" id="statTotal">24</div><div class="stat-label">设备总数</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon online">✅</div>
+        <div><div class="stat-value" id="statOnline">18</div><div class="stat-label">在线运行</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon alarm">🚨</div>
+        <div><div class="stat-value" id="statAlarm">3</div><div class="stat-label">告警中</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon trigger">⚡</div>
+        <div><div class="stat-value" id="statTrigger">15</div><div class="stat-label">已关联触发器</div></div>
+      </div>
+    </div>
+
+    <!-- Card View -->
+    <div class="card-container" id="cardContainer" style="display:none;padding:0 16px 16px"></div>
+
+    <!-- Table View -->
+    <div class="table-container" id="tableContainer">
+      <div class="table-header-bar">
+        <h4>设备列表</h4>
+        <div class="table-search">
+          <input placeholder="搜索设备名称/编码..." id="tableSearch" oninput="filterDevices()" />
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:30px"><input type="checkbox" /></th>
+              <th>设备信息</th>
+              <th>设备类型</th>
+              <th>所属站点</th>
+              <th>位置</th>
+              <th>状态</th>
+              <th>关联触发器</th>
+              <th>最近更新</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="deviceTableBody"></tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span>共 <b id="pageTotal">24</b> 条记录，第 1/3 页</span>
+        <div class="pagination-btns">
+          <button class="page-btn">‹</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn">›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <h3 id="drawerTitle">设备详情</h3>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</div>
+
+<!-- ADD TRIGGER MODAL -->
+<div class="modal-overlay" id="triggerModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>关联触发器</h3>
+      <button class="modal-close" onclick="closeTriggerModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:#888;margin-bottom:12px">选择要关联到该设备的触发器：</p>
+      <div class="trigger-select-list" id="triggerSelectList"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn modal-btn-secondary" onclick="closeTriggerModal()">取消</button>
+      <button class="modal-btn modal-btn-primary" onclick="confirmTriggerAssociation()">确认关联</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ===== DATA =====
+const DEVICE_TYPES = {
+  hvac: { name: '环境监控设备', icon: '🌡️', color: '#42A5F5', bgColor: '#E3F2FD', tagClass: 'tag-env' },
+  fan: { name: '通风系统', icon: '🌀', color: '#42A5F5', bgColor: '#E3F2FD', tagClass: 'tag-env' },
+  pump: { name: '排水系统', icon: '💧', color: '#42A5F5', bgColor: '#E3F2FD', tagClass: 'tag-env' },
+  door: { name: '屏蔽门系统', icon: '🚪', color: '#E65100', bgColor: '#FFF3E0', tagClass: 'tag-equip' },
+  escalator: { name: '电扶梯系统', icon: '🛑', color: '#E65100', bgColor: '#FFF3E0', tagClass: 'tag-equip' },
+  fire: { name: '消防系统', icon: '🔥', color: '#C62828', bgColor: '#FFEBEE', tagClass: 'tag-safety' },
+  power: { name: '供电系统', icon: '⚡', color: '#7B1FA2', bgColor: '#F3E5F5', tagClass: 'tag-power' },
+};
+
+const TRIGGER_DEFS = [
+  { id: 'temp_high', name: '站台温度过高', cond: 'temp > 28°C', icon: '🌡️' },
+  { id: 'co2_high', name: '二氧化碳超标', cond: 'co2 > 1000ppm', icon: '☁️' },
+  { id: 'fan_fault', name: '风机故障', cond: 'fan_status = fault', icon: '⚠️' },
+  { id: 'water_high', name: '集水池水位超高', cond: 'water_level = High', icon: '💧' },
+  { id: 'pump_trip', name: '水泵跳闸', cond: 'pump_status = tripped', icon: '🔧' },
+  { id: 'door_open', name: '屏蔽门未关严', cond: 'door_status = false', icon: '🚪' },
+  { id: 'escalator_stop', name: '扶梯急停', cond: 'emergency_stop = true', icon: '🛑' },
+  { id: 'power_fail', name: '供电系统异常', cond: 'power_status = abnormal', icon: '⚡' },
+  { id: 'smoke_detect', name: '烟雾报警', cond: 'smoke_detected = true', icon: '🔥' },
+];
+
+let devices = [
+  { id: 'DEV-001', name: '1号站台温度传感器', type: 'hvac', station: '1号线-人民广场', location: 'B1层-1号站台', status: 'online', triggers: ['temp_high', 'co2_high'], updatedAt: '2026-04-23 14:30', params: { temp: '26.5°C', co2: '680ppm', humidity: '65%' } },
+  { id: 'DEV-002', name: '2号站台温度传感器', type: 'hvac', station: '1号线-人民广场', location: 'B1层-2号站台', status: 'alarm', triggers: ['temp_high'], updatedAt: '2026-04-23 14:28', params: { temp: '29.2°C', co2: '720ppm', humidity: '58%' } },
+  { id: 'DEV-003', name: 'A出口CO₂传感器', type: 'hvac', station: '1号线-人民广场', location: '1F层-A出口', status: 'online', triggers: ['co2_high'], updatedAt: '2026-04-23 14:25', params: { temp: '24.1°C', co2: '550ppm', humidity: '70%' } },
+  { id: 'DEV-004', name: '1号通风机组', type: 'fan', station: '1号线-人民广场', location: 'B2层-通风机房', status: 'online', triggers: ['fan_fault'], updatedAt: '2026-04-23 14:32', params: { speed: '1450rpm', runtime: '2360h', power: '15kW' } },
+  { id: 'DEV-005', name: '2号通风机组', type: 'fan', station: '1号线-南京东路', location: 'B2层-通风机房', status: 'alarm', triggers: ['fan_fault'], updatedAt: '2026-04-23 14:15', params: { speed: '0rpm', runtime: '3120h', power: '0kW' } },
+  { id: 'DEV-006', name: '3号通风机组', type: 'fan', station: '2号线-中山公园', location: 'B2层-通风机房', status: 'online', triggers: [], updatedAt: '2026-04-23 14:30', params: { speed: '1480rpm', runtime: '1580h', power: '15kW' } },
+  { id: 'DEV-007', name: '1号集水池', type: 'pump', station: '1号线-人民广场', location: 'B3层-排水泵房', status: 'online', triggers: ['water_high'], updatedAt: '2026-04-23 14:20', params: { level: '45%', pump1: '运行', pump2: '待机' } },
+  { id: 'DEV-008', name: '2号集水池', type: 'pump', station: '1号线-南京东路', location: 'B3层-排水泵房', status: 'warning', triggers: ['water_high', 'pump_trip'], updatedAt: '2026-04-23 14:18', params: { level: '82%', pump1: '故障', pump2: '运行' } },
+  { id: 'DEV-009', name: '3号集水池', type: 'pump', station: '2号线-静安寺', location: 'B3层-排水泵房', status: 'online', triggers: [], updatedAt: '2026-04-23 14:30', params: { level: '30%', pump1: '待机', pump2: '待机' } },
+  { id: 'DEV-010', name: '1号站台屏蔽门-上行', type: 'door', station: '1号线-人民广场', location: 'B1层-1号站台上行侧', status: 'online', triggers: ['door_open'], updatedAt: '2026-04-23 14:29', params: { doors: '24扇', status: '全部关闭', lastMaint: '2026-03-15' } },
+  { id: 'DEV-011', name: '1号站台屏蔽门-下行', type: 'door', station: '1号线-人民广场', location: 'B1层-1号站台下行侧', status: 'online', triggers: ['door_open'], updatedAt: '2026-04-23 14:29', params: { doors: '24扇', status: '全部关闭', lastMaint: '2026-03-15' } },
+  { id: 'DEV-012', name: '2号站台屏蔽门', type: 'door', station: '1号线-南京东路', location: 'B1层-2号站台', status: 'alarm', triggers: ['door_open'], updatedAt: '2026-04-23 14:10', params: { doors: '24扇', status: '3扇未关', lastMaint: '2026-02-20' } },
+  { id: 'DEV-013', name: 'A出口电扶梯-上行', type: 'escalator', station: '1号线-人民广场', location: '1F层-A出口', status: 'online', triggers: ['escalator_stop'], updatedAt: '2026-04-23 14:30', params: { speed: '0.5m/s', direction: '上行', runtime: '8920h' } },
+  { id: 'DEV-014', name: 'B出口电扶梯-下行', type: 'escalator', station: '1号线-人民广场', location: '1F层-B出口', status: 'offline', triggers: ['escalator_stop'], updatedAt: '2026-04-23 12:00', params: { speed: '0m/s', direction: '停止', runtime: '12300h' } },
+  { id: 'DEV-015', name: 'C出口电扶梯', type: 'escalator', station: '2号线-中山公园', location: '1F层-C出口', status: 'online', triggers: [], updatedAt: '2026-04-23 14:30', params: { speed: '0.5m/s', direction: '上行', runtime: '5640h' } },
+  { id: 'DEV-016', name: '1号烟感探测器', type: 'fire', station: '1号线-人民广场', location: 'B1层-站厅', status: 'online', triggers: ['smoke_detect'], updatedAt: '2026-04-23 14:30', params: { sensitivity: '标准', battery: '92%', lastTest: '2026-04-01' } },
+  { id: 'DEV-017', name: '2号烟感探测器', type: 'fire', station: '1号线-南京东路', location: 'B1层-站台', status: 'online', triggers: ['smoke_detect'], updatedAt: '2026-04-23 14:30', params: { sensitivity: '高', battery: '88%', lastTest: '2026-04-01' } },
+  { id: 'DEV-018', name: '3号烟感探测器', type: 'fire', station: '2号线-静安寺', location: 'B2层-设备区', status: 'online', triggers: [], updatedAt: '2026-04-23 14:30', params: { sensitivity: '标准', battery: '95%', lastTest: '2026-03-28' } },
+  { id: 'DEV-019', name: '1号配电柜', type: 'power', station: '1号线-人民广场', location: 'B2层-配电室', status: 'online', triggers: ['power_fail'], updatedAt: '2026-04-23 14:30', params: { voltage: '380V', current: '125A', load: '72%' } },
+  { id: 'DEV-020', name: '2号配电柜', type: 'power', station: '1号线-南京东路', location: 'B2层-配电室', status: 'online', triggers: ['power_fail'], updatedAt: '2026-04-23 14:30', params: { voltage: '378V', current: '98A', load: '58%' } },
+  { id: 'DEV-021', name: 'UPS不间断电源', type: 'power', station: '2号线-中山公园', location: 'B2层-配电室', status: 'online', triggers: ['power_fail'], updatedAt: '2026-04-23 14:30', params: { voltage: '380V', battery: '100%', backup: '30min' } },
+  { id: 'DEV-022', name: '4号通风机组', type: 'fan', station: '2号线-静安寺', location: 'B2层-通风机房', status: 'online', triggers: [], updatedAt: '2026-04-23 14:30', params: { speed: '1460rpm', runtime: '890h', power: '15kW' } },
+  { id: 'DEV-023', name: '4号站台温度传感器', type: 'hvac', station: '2号线-静安寺', location: 'B1层-4号站台', status: 'online', triggers: ['temp_high'], updatedAt: '2026-04-23 14:30', params: { temp: '25.8°C', co2: '620ppm', humidity: '62%' } },
+  { id: 'DEV-024', name: 'D出口电扶梯', type: 'escalator', station: '2号线-静安寺', location: '1F层-D出口', status: 'online', triggers: [], updatedAt: '2026-04-23 14:30', params: { speed: '0.5m/s', direction: '下行', runtime: '7230h' } },
+];
+
+let currentFilter = { category: 'all', status: 'all', station: 'all', search: '' };
+let currentDeviceId = null;
+let selectedTriggers = [];
+
+// ===== INIT =====
+function init() {
+  renderSidebar();
+  filterDevices();
+  updateStats();
+}
+
+// ===== SIDEBAR =====
+function renderSidebar() {
+  const tree = document.getElementById('sidebarTree');
+  const groups = {};
+  Object.entries(DEVICE_TYPES).forEach(([key, val]) => {
+    const count = devices.filter(d => d.type === key).length;
+    groups[key] = { ...val, count, devices: devices.filter(d => d.type === key) };
+  });
+
+  let html = `<div class="tree-group">
+    <div class="tree-group-header ${currentFilter.category === 'all' ? 'active' : ''}" onclick="selectCategory('all')">
+      <span class="arrow">▼</span><span class="group-icon">📦</span>全部设备<span class="group-count">${devices.length}</span>
+    </div>
+  </div>`;
+
+  Object.entries(groups).forEach(([key, g]) => {
+    html += `<div class="tree-group">
+      <div class="tree-group-header ${currentFilter.category === key ? 'active' : ''}" onclick="selectCategory('${key}')">
+        <span class="arrow">▼</span><span class="group-icon">${g.icon}</span>${g.name}<span class="group-count">${g.count}</span>
+      </div>
+      <div class="tree-children" style="max-height:500px">
+        ${g.devices.map(d => `
+          <div class="tree-item ${currentDeviceId === d.id ? 'active' : ''}" onclick="openDrawer('${d.id}')">
+            <span class="item-dot" style="background:${d.status === 'online' ? '#4CAF50' : d.status === 'alarm' ? '#f44336' : d.status === 'warning' ? '#FF9800' : '#9E9E9E'}"></span>
+            ${d.name}
+            <span class="item-status status-${d.status}">${d.status === 'online' ? '在线' : d.status === 'alarm' ? '告警' : d.status === 'warning' ? '预警' : '离线'}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  });
+  tree.innerHTML = html;
+}
+
+function selectCategory(cat) {
+  currentFilter.category = cat;
+  const catName = cat === 'all' ? '全部设备' : DEVICE_TYPES[cat]?.name || cat;
+  document.getElementById('currentCategory').textContent = catName;
+  renderSidebar();
+  filterDevices();
+}
+
+function filterSidebar(val) {
+  currentFilter.search = val;
+  filterDevices();
+}
+
+// ===== TABLE =====
+function getFilteredDevices() {
+  const statusFilter = document.getElementById('statusFilter').value;
+  const stationFilter = document.getElementById('stationFilter').value;
+  const tableSearch = document.getElementById('tableSearch').value.toLowerCase();
+
+  return devices.filter(d => {
+    if (currentFilter.category !== 'all' && d.type !== currentFilter.category) return false;
+    if (statusFilter !== 'all' && d.status !== statusFilter) return false;
+    if (stationFilter !== 'all' && d.station !== stationFilter) return false;
+    if (tableSearch && !d.name.toLowerCase().includes(tableSearch) && !d.id.toLowerCase().includes(tableSearch)) return false;
+    return true;
+  });
+}
+
+function filterDevices() {
+  const filtered = getFilteredDevices();
+  renderTable(filtered);
+  if (currentView === 'card') renderCards(filtered);
+  document.getElementById('pageTotal').textContent = filtered.length;
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('deviceTableBody');
+  tbody.innerHTML = data.map(d => {
+    const typeInfo = DEVICE_TYPES[d.type];
+    const statusText = { online: '在线', offline: '离线', alarm: '告警', warning: '预警' };
+    const triggerNames = d.triggers.map(tid => {
+      const t = TRIGGER_DEFS.find(x => x.id === tid);
+      return t ? t : null;
+    }).filter(Boolean);
+
+    return `<tr onclick="openDrawer('${d.id}')">
+      <td><input type="checkbox" onclick="event.stopPropagation()" /></td>
+      <td>
+        <div class="device-name-cell">
+          <div class="device-avatar" style="background:${typeInfo.bgColor}">${typeInfo.icon}</div>
+          <div class="device-name-text">
+            <div class="name">${d.name}</div>
+            <div class="code">${d.id}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="tag ${typeInfo.tagClass}">${typeInfo.name}</span></td>
+      <td style="font-size:12px">${d.station}</td>
+      <td style="font-size:12px;color:#888">${d.location}</td>
+      <td><span class="status-badge ${d.status}">${statusText[d.status]}</span></td>
+      <td>
+        ${triggerNames.length > 0
+          ? triggerNames.map(t => `<a class="trigger-link" onclick="event.stopPropagation()" title="${t.cond}">${t.icon} ${t.name}</a>`).join('<br>')
+          : '<span style="color:#ccc;font-size:12px">未关联</span>'}
+      </td>
+      <td style="font-size:12px;color:#999">${d.updatedAt}</td>
+      <td>
+        <div class="action-btns">
+          <button class="action-btn" onclick="event.stopPropagation();openDrawer('${d.id}')">详情</button>
+          <button class="action-btn" onclick="event.stopPropagation();openAddTriggerForDevice('${d.id}')">关联</button>
+          <button class="action-btn danger" onclick="event.stopPropagation();showToast('设备已停用','warning')">停用</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ===== STATS =====
+function updateStats() {
+  document.getElementById('statTotal').textContent = devices.length;
+  document.getElementById('statOnline').textContent = devices.filter(d => d.status === 'online').length;
+  document.getElementById('statAlarm').textContent = devices.filter(d => d.status === 'alarm').length;
+  document.getElementById('statTrigger').textContent = devices.filter(d => d.triggers.length > 0).length;
+  document.getElementById('totalDevices').textContent = devices.length + ' 台';
+}
+
+// ===== DRAWER =====
+function openDrawer(deviceId) {
+  currentDeviceId = deviceId;
+  const d = devices.find(x => x.id === deviceId);
+  if (!d) return;
+  const typeInfo = DEVICE_TYPES[d.type];
+  const statusText = { online: '在线运行', offline: '已离线', alarm: '告警中', warning: '预警' };
+
+  document.getElementById('drawerTitle').innerHTML = `${typeInfo.icon} ${d.name} <span class="status-badge ${d.status}" style="font-size:12px">${statusText[d.status]}</span>`;
+
+  const triggerCards = d.triggers.map(tid => {
+    const t = TRIGGER_DEFS.find(x => x.id === tid);
+    if (!t) return '';
+    return `<div class="trigger-card" onclick="showToast('查看触发器: ${t.name}', 'info')">
+      <div class="trigger-card-icon">${t.icon}</div>
+      <div class="trigger-card-info">
+        <div class="name">${t.name}</div>
+        <div class="cond">${t.cond}</div>
+      </div>
+      <div class="trigger-card-actions">
+        <button class="action-btn danger" onclick="event.stopPropagation();removeTriggerFromDevice('${d.id}','${tid}')">解除</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  const paramsHtml = Object.entries(d.params).map(([k, v]) => {
+    const labels = {
+      temp: '当前温度', co2: 'CO₂浓度', humidity: '湿度', speed: '转速',
+      runtime: '累计运行', power: '功率', level: '水位', pump1: '水泵1', pump2: '水泵2',
+      doors: '门数量', status: '状态', lastMaint: '上次维护', direction: '方向',
+      sensitivity: '灵敏度', battery: '电池电量', lastTest: '上次测试',
+      voltage: '电压', current: '电流', load: '负载率', backup: '备用时间',
+    };
+    return `<div class="detail-field"><div class="label">${labels[k] || k}</div><div class="value mono">${v}</div></div>`;
+  }).join('');
+
+  // Simulate related rule chains
+  const ruleChains = d.triggers.length > 0 ? `
+    <div class="detail-section">
+      <div class="detail-section-title">🔗 关联规则链</div>
+      <div class="rule-chain-mini">
+        <div class="chain-title">规则链: ${d.name}-联动告警</div>
+        <div class="chain-nodes">
+          <span class="chain-node trigger">${TRIGGER_DEFS.find(t=>t.id===d.triggers[0])?.icon || ''} ${TRIGGER_DEFS.find(t=>t.id===d.triggers[0])?.name || ''}</span>
+          <span class="chain-arrow">→</span>
+          <span class="chain-node condition">⏰ 告警时段</span>
+          <span class="chain-arrow">→</span>
+          <span class="chain-node action">📢 发送告警通知</span>
+          <span class="chain-arrow">→</span>
+          <span class="chain-node action">📋 记录事件日志</span>
+        </div>
+      </div>
+      ${d.triggers.length > 1 ? `
+      <div class="rule-chain-mini" style="margin-top:8px">
+        <div class="chain-title">规则链: ${d.name}-应急响应</div>
+        <div class="chain-nodes">
+          <span class="chain-node trigger">${TRIGGER_DEFS.find(t=>t.id===d.triggers[1])?.icon || ''} ${TRIGGER_DEFS.find(t=>t.id===d.triggers[1])?.name || ''}</span>
+          <span class="chain-arrow">→</span>
+          <span class="chain-node action">🔊 车站广播</span>
+          <span class="chain-arrow">→</span>
+          <span class="chain-node action">🚆 列车限速/扣停</span>
+        </div>
+      </div>` : ''}
+    </div>
+  ` : '';
+
+  document.getElementById('drawerBody').innerHTML = `
+    <div class="detail-section">
+      <div class="detail-section-title">📋 基本信息</div>
+      <div class="detail-grid">
+        <div class="detail-field"><div class="label">设备编码</div><div class="value mono">${d.id}</div></div>
+        <div class="detail-field"><div class="label">设备类型</div><div class="value"><span class="tag ${typeInfo.tagClass}">${typeInfo.name}</span></div></div>
+        <div class="detail-field"><div class="label">所属站点</div><div class="value">${d.station}</div></div>
+        <div class="detail-field"><div class="label">安装位置</div><div class="value">${d.location}</div></div>
+        <div class="detail-field"><div class="label">运行状态</div><div class="value"><span class="status-badge ${d.status}">${statusText[d.status]}</span></div></div>
+        <div class="detail-field"><div class="label">最近更新</div><div class="value">${d.updatedAt}</div></div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">📊 实时参数</div>
+      <div class="detail-grid">${paramsHtml}</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">⚡ 关联触发器 (${d.triggers.length})</div>
+      ${triggerCards}
+      <button class="add-trigger-btn" onclick="openAddTriggerForDevice('${d.id}')">➕ 添加触发器关联</button>
+    </div>
+
+    ${ruleChains}
+  `;
+
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  renderSidebar();
+}
+
+function closeDrawer() {
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+  currentDeviceId = null;
+  renderSidebar();
+}
+
+// ===== TRIGGER ASSOCIATION =====
+function openAddTriggerForDevice(deviceId) {
+  currentDeviceId = deviceId;
+  const d = devices.find(x => x.id === deviceId);
+  if (!d) return;
+  selectedTriggers = [...d.triggers];
+
+  const list = document.getElementById('triggerSelectList');
+  list.innerHTML = TRIGGER_DEFS.map(t => `
+    <div class="trigger-select-item ${d.triggers.includes(t.id) ? 'selected' : ''}" onclick="toggleTriggerSelect('${t.id}', this)">
+      <div class="check">✓</div>
+      <span class="ts-icon">${t.icon}</span>
+      <div class="ts-info">
+        <div class="ts-name">${t.name}</div>
+        <div class="ts-cond">${t.cond}</div>
+      </div>
+      <span class="ts-type">触发器</span>
+    </div>
+  `).join('');
+
+  document.getElementById('triggerModal').classList.add('open');
+}
+
+function toggleTriggerSelect(triggerId, el) {
+  const idx = selectedTriggers.indexOf(triggerId);
+  if (idx >= 0) {
+    selectedTriggers.splice(idx, 1);
+    el.classList.remove('selected');
+  } else {
+    selectedTriggers.push(triggerId);
+    el.classList.add('selected');
+  }
+}
+
+function closeTriggerModal() {
+  document.getElementById('triggerModal').classList.remove('open');
+}
+
+function confirmTriggerAssociation() {
+  const d = devices.find(x => x.id === currentDeviceId);
+  if (!d) return;
+  d.triggers = [...selectedTriggers];
+  closeTriggerModal();
+  filterDevices();
+  updateStats();
+  if (document.getElementById('drawer').classList.contains('open')) {
+    openDrawer(currentDeviceId);
+  }
+  showToast(`已更新 ${d.name} 的触发器关联 (${d.triggers.length}个)`, 'success');
+}
+
+function removeTriggerFromDevice(deviceId, triggerId) {
+  const d = devices.find(x => x.id === deviceId);
+  if (!d) return;
+  d.triggers = d.triggers.filter(t => t !== triggerId);
+  const t = TRIGGER_DEFS.find(x => x.id === triggerId);
+  openDrawer(deviceId);
+  filterDevices();
+  updateStats();
+  showToast(`已解除触发器: ${t?.name || triggerId}`, 'warning');
+}
+
+// ===== VIEW TOGGLE =====
+let currentView = 'list';
+
+function setView(view) {
+  currentView = view;
+  var btn = document.getElementById('viewToggleBtn');
+  btn.textContent = view === 'list' ? '📋' : '🔲';
+  btn.title = view === 'list' ? '切换为卡片视图' : '切换为列表视图';
+  document.getElementById('tableContainer').style.display = view === 'list' ? 'flex' : 'none';
+  document.getElementById('cardContainer').style.display = view === 'card' ? 'grid' : 'none';
+  if (view === 'card') renderCards(getFilteredDevices());
+}
+
+function toggleDeviceView() {
+  setView(currentView === 'list' ? 'card' : 'list');
+}
+
+function renderCards(data) {
+  const container = document.getElementById('cardContainer');
+  const statusText = { online: '在线', offline: '离线', alarm: '告警', warning: '预警' };
+  container.innerHTML = data.map(d => {
+    const typeInfo = DEVICE_TYPES[d.type];
+    const triggerNames = d.triggers.map(tid => {
+      const t = TRIGGER_DEFS.find(x => x.id === tid);
+      return t ? t : null;
+    }).filter(Boolean);
+    return '<div class="device-card" onclick="openDrawer(\'' + d.id + '\')">' +
+      '<div class="device-card-status"><span class="status-badge ' + d.status + '">' + statusText[d.status] + '</span></div>' +
+      '<div class="device-card-header">' +
+        '<div class="device-card-avatar" style="background:' + typeInfo.bgColor + '">' + typeInfo.icon + '</div>' +
+        '<div class="device-card-info">' +
+          '<div class="device-card-name">' + d.name + '</div>' +
+          '<div class="device-card-code">' + d.id + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="device-card-body">' +
+        '<div class="device-card-row"><span class="label">类型</span><span class="value">' + typeInfo.name + '</span></div>' +
+        '<div class="device-card-row"><span class="label">站点</span><span class="value">' + d.station + '</span></div>' +
+        '<div class="device-card-row"><span class="label">位置</span><span class="value">' + d.location + '</span></div>' +
+        '<div class="device-card-row"><span class="label">更新</span><span class="value">' + d.updatedAt + '</span></div>' +
+      '</div>' +
+      (triggerNames.length > 0 ?
+        '<div class="device-card-triggers">' + triggerNames.map(t => '<span class="device-card-trigger-tag">' + t.icon + ' ' + t.name + '</span>').join('') + '</div>'
+        : '') +
+    '</div>';
+  }).join('');
+}
+
+// ===== ADD DEVICE (placeholder) =====
+function openAddDeviceModal() {
+  showToast('添加设备功能演示', 'info');
+}
+
+// ===== TOAST =====
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  const icons = { success: '✅', info: 'ℹ️', warning: '⚠️' };
+  toast.innerHTML = `<span>${icons[type] || ''}</span> ${msg}`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ===== NAV SIDEBAR =====
+function toggleNavSubmenu(el) {
+  const submenu = el.nextElementSibling;
+  const arrow = el.querySelector('.nav-menu-arrow');
+  el.classList.toggle('expanded');
+  arrow.classList.toggle('open');
+  submenu.classList.toggle('open');
+}
+
+// ===== START =====
+init();
+</script>
+</body>
+</html>

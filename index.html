@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IoT 规则链</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  @font-face { font-family: 'NotoSansSC'; src: local('Noto Sans SC'), local('Microsoft YaHei'), local('PingFang SC'), local('sans-serif'); }
+  body { font-family: 'NotoSansSC', 'Microsoft YaHei', 'PingFang SC', sans-serif; overflow: hidden; height: 100vh; background: #f0f2f5; margin: 0; }
+
+  /* ===== NAV SIDEBAR ===== */
+  .nav-sidebar {
+    width: 200px; height: 100vh; background: #001529;
+    position: fixed; left: 0; top: 0; z-index: 100;
+    display: flex; flex-direction: column; overflow-y: auto;
+  }
+  .nav-sidebar-logo {
+    height: 56px; display: flex; align-items: center; padding: 0 20px;
+    font-size: 18px; font-weight: 700; color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+  }
+  .nav-sidebar-menu { flex: 1; padding: 8px 0; }
+  .nav-menu-item {
+    display: flex; align-items: center; padding: 0 20px; height: 44px;
+    color: rgba(255,255,255,0.65); text-decoration: none; font-size: 14px;
+    cursor: pointer; transition: all 0.2s; position: relative;
+  }
+  .nav-menu-item:hover { color: #fff; background: rgba(255,255,255,0.06); }
+  .nav-menu-item.active { color: #fff; background: #1890ff; }
+  .nav-menu-item.active::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #fff;
+  }
+  .nav-menu-icon { margin-right: 10px; font-size: 16px; width: 20px; text-align: center; }
+  .nav-menu-text { flex: 1; }
+  .nav-menu-arrow { font-size: 10px; transition: transform 0.2s; }
+  .nav-menu-arrow.open { transform: rotate(90deg); }
+  .nav-menu-group .nav-menu-item.has-submenu.expanded { color: #fff; background: rgba(255,255,255,0.06); }
+  .nav-submenu { display: none; background: rgba(0,0,0,0.15); }
+  .nav-submenu.open { display: block; }
+  .nav-submenu-item {
+    display: block; padding: 0 20px 0 50px; height: 40px; line-height: 40px;
+    color: rgba(255,255,255,0.65); text-decoration: none; font-size: 14px; transition: all 0.2s;
+  }
+  .nav-submenu-item:hover { color: #fff; background: rgba(255,255,255,0.06); }
+  .nav-submenu-item.active { color: #1890ff; background: rgba(24,144,255,0.08); }
+
+  /* ===== CANVAS TOOLBAR (migrated from header) ===== */
+  .canvas-toolbar {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; align-items: center; z-index: 50;
+    background: #fff; padding: 6px 12px; border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;
+  }
+  .canvas-toolbar .toolbar-btn {
+    padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px;
+    transition: all 0.2s;
+  }
+  .canvas-toolbar .btn-test { background: #7C4DFF; color: #fff; }
+  .canvas-toolbar .btn-test:hover { background: #651FFF; transform: translateY(-1px); }
+  .canvas-toolbar .btn-save { background: #fff; color: #333; border: 1px solid #d9d9d9; }
+  .canvas-toolbar .btn-save:hover { border-color: #1890ff; color: #1890ff; }
+  .canvas-toolbar .btn-undo, .canvas-toolbar .btn-redo {
+    background: #fff; color: #333; border: 1px solid #d9d9d9; padding: 6px 10px;
+    border-radius: 6px; cursor: pointer; font-size: 16px;
+  }
+  .canvas-toolbar .btn-undo:hover, .canvas-toolbar .btn-redo:hover { border-color: #1890ff; color: #1890ff; }
+  .canvas-toolbar .btn-undo:disabled, .canvas-toolbar .btn-redo:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ===== MAIN LAYOUT ===== */
+  .main { display: flex; height: 100vh; margin-left: 200px; }
+
+  /* ===== LEFT SIDEBAR ===== */
+  .sidebar {
+    width: 240px; min-width: 240px; background: #fff; border-right: 1px solid #e0e0e0;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .sidebar-header {
+    padding: 14px 16px; background: linear-gradient(135deg, #008B8B, #009999);
+    color: #fff;
+  }
+  .sidebar-header h3 { font-size: 15px; font-weight: 600; }
+  .sidebar-header p { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+  .sidebar-content { flex: 1; overflow-y: auto; padding: 8px; }
+  .sidebar-content::-webkit-scrollbar { width: 4px; }
+  .sidebar-content::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+
+  .node-category { margin-bottom: 6px; }
+  .category-header {
+    display: flex; align-items: center; gap: 6px; padding: 8px 10px;
+    border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
+    user-select: none; transition: background 0.2s;
+  }
+  .category-header:hover { filter: brightness(0.95); }
+  .category-header .arrow { transition: transform 0.2s; font-size: 10px; }
+  .category-header.collapsed .arrow { transform: rotate(-90deg); }
+  .category-items { overflow: hidden; transition: max-height 0.3s ease; }
+  .category-items.collapsed { max-height: 0 !important; }
+
+  .cat-trigger .category-header { background: #E3F2FD; color: #1565C0; }
+  .cat-condition .category-header { background: #FFF8E1; color: #F57F17; }
+  .cat-action .category-header { background: #E8F5E9; color: #2E7D32; }
+
+  .node-item {
+    display: flex; align-items: center; gap: 8px; padding: 8px 10px; margin: 3px 0;
+    border-radius: 8px; cursor: grab; font-size: 12px; color: #333;
+    transition: all 0.2s; border: 1px solid transparent; position: relative;
+  }
+  .node-item:hover { transform: translateX(3px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .node-item:active { cursor: grabbing; }
+  .node-item .node-icon { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+  .node-item .node-info { flex: 1; min-width: 0; }
+  .node-item .node-name { font-weight: 500; font-size: 12px; }
+  .node-item .node-cond { font-size: 10px; color: #888; font-family: 'Courier New', monospace; }
+
+  .trigger-item { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); border-color: #90CAF9; }
+  .condition-item { background: linear-gradient(135deg, #FFF8E1, #FFECB3); border-color: #FFE082; }
+  .action-item { background: linear-gradient(135deg, #E8F5E9, #C8E6C9); border-color: #A5D6A7; }
+  .notification-item { background: linear-gradient(135deg, #E8F5E9, #C8E6C9); border-color: #A5D6A7; }
+  .notification-item .drag-handle { background: #2E7D32; }
+
+  .node-item .drag-handle {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    width: 8px; height: 8px; border-radius: 50%; opacity: 0.4;
+  }
+  .trigger-item .drag-handle { background: #1565C0; }
+  .condition-item .drag-handle { background: #F57F17; }
+  .action-item .drag-handle { background: #2E7D32; }
+
+  /* ===== CANVAS AREA ===== */
+  .canvas-wrapper {
+    flex: 1; position: relative; overflow: hidden; background: #fafbfc;
+  }
+  .canvas-container {
+    width: 100%; height: 100%; position: relative;
+    background-image: radial-gradient(circle, #d0d0d0 1px, transparent 1px);
+    background-size: 20px 20px;
+    cursor: default;
+  }
+  .canvas-container.drag-over { background-color: #f0f7ff; }
+
+  /* SVG for connections */
+  .connections-svg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 5;
+  }
+  .connection-path {
+    fill: none; stroke: #999; stroke-width: 2; pointer-events: stroke;
+    cursor: pointer; transition: stroke 0.2s;
+  }
+  .connection-path:hover { stroke: #f44336; stroke-width: 3; }
+  .connection-path.temp { stroke: #7C4DFF; stroke-width: 2; stroke-dasharray: 8 4; }
+  .connection-path.trigger-line { stroke: #42A5F5; }
+  .connection-path.condition-line { stroke: #FFA726; }
+  .connection-path.action-line { stroke: #66BB6A; }
+
+  /* Canvas Nodes */
+  .canvas-node {
+    position: absolute; min-width: 160px; border-radius: 10px; padding: 10px 14px;
+    cursor: move; user-select: none; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    transition: box-shadow 0.2s;
+  }
+  .canvas-node:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+  .canvas-node.selected { box-shadow: 0 0 0 3px #7C4DFF, 0 4px 16px rgba(0,0,0,0.2); }
+  .canvas-node .node-header { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
+  .canvas-node .node-header .node-icon { font-size: 16px; }
+  .canvas-node .node-cond { font-size: 10px; margin-top: 4px; font-family: 'Courier New', monospace; opacity: 0.8; }
+  .canvas-node .node-device-badge {
+    position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+    background: #fff; color: #333; font-size: 9px; padding: 1px 6px; border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15); white-space: nowrap; max-width: 140px;
+    overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 3px;
+    border: 1px solid #e0e0e0; z-index: 15;
+  }
+  .canvas-node .node-device-badge .badge-dot {
+    width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+  }
+  .canvas-node .node-device-badge .badge-dot.online { background: #4CAF50; }
+  .canvas-node .node-device-badge .badge-dot.alarm { background: #f44336; }
+  .canvas-node .node-device-badge .badge-dot.offline { background: #9E9E9E; }
+  .canvas-node .node-device-badge .badge-dot.warning { background: #FF9800; }
+
+  .canvas-node.trigger-node { background: linear-gradient(135deg, #42A5F5, #5BA3F5); color: #fff; }
+  .canvas-node.condition-node { background: linear-gradient(135deg, #FFA726, #FFB74D); color: #fff; }
+  .canvas-node.action-node { background: linear-gradient(135deg, #66BB6A, #81C784); color: #fff; }
+
+  /* Connection Ports */
+  .port {
+    position: absolute; width: 16px; height: 16px; border-radius: 50%;
+    border: 2.5px solid #fff; cursor: crosshair; z-index: 20;
+    transition: all 0.2s; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .port:hover { transform: scale(1.6); box-shadow: 0 0 10px rgba(0,0,0,0.3); }
+  .port.active { transform: scale(1.8); animation: portPulse 1s infinite; }
+  .port-in { left: -8px; top: 50%; margin-top: -8px; }
+  .port-out { right: -8px; top: 50%; margin-top: -8px; }
+  .trigger-node .port { border-color: #1565C0; }
+  .trigger-node .port-out:hover, .trigger-node .port.active { background: #1565C0; }
+  .condition-node .port { border-color: #F57F17; }
+  .condition-node .port-out:hover, .condition-node .port.active { background: #F57F17; }
+  .action-node .port { border-color: #2E7D32; }
+  .action-node .port-in:hover, .action-node .port.active { background: #2E7D32; }
+  @keyframes portPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(124, 77, 255, 0.5); }
+    50% { box-shadow: 0 0 0 10px rgba(124, 77, 255, 0); }
+  }
+
+  /* Connection hint */
+  .connection-hint {
+    position: fixed; background: rgba(0,0,0,0.75); color: #fff; padding: 8px 14px;
+    border-radius: 6px; font-size: 12px; z-index: 1000; pointer-events: none;
+    display: none; align-items: center; gap: 6px;
+  }
+  .connection-hint.show { display: flex; }
+
+  /* Delete button on node */
+  .node-delete {
+    position: absolute; top: -8px; right: -8px; width: 20px; height: 20px;
+    border-radius: 50%; background: #f44336; color: #fff; border: 2px solid #fff;
+    font-size: 11px; cursor: pointer; display: none; align-items: center;
+    justify-content: center; line-height: 1; z-index: 30;
+  }
+  .canvas-node:hover .node-delete, .canvas-node.selected .node-delete { display: flex; }
+
+  /* ===== ZOOM CONTROLS ===== */
+  .zoom-controls {
+    position: absolute; bottom: 16px; right: 16px; display: flex; flex-direction: column;
+    gap: 4px; z-index: 50;
+  }
+  .zoom-btn {
+    width: 36px; height: 36px; border-radius: 8px; border: 1px solid #ddd;
+    background: #fff; cursor: pointer; font-size: 18px; display: flex;
+    align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+  }
+  .zoom-btn:hover { background: #f5f5f5; }
+  .zoom-label { text-align: center; font-size: 11px; color: #666; padding: 2px 0; }
+
+  /* ===== MINIMAP ===== */
+  .minimap {
+    position: absolute; bottom: 16px; left: 16px; width: 160px; height: 100px;
+    background: #fff; border: 1px solid #ddd; border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 50; overflow: hidden;
+  }
+  .minimap-title { font-size: 10px; color: #999; padding: 4px 8px; background: #f5f5f5; border-bottom: 1px solid #eee; }
+  .minimap-canvas { width: 100%; height: calc(100% - 22px); position: relative; }
+  .minimap-node { position: absolute; border-radius: 2px; opacity: 0.7; }
+  .minimap-viewport { position: absolute; border: 1.5px solid #7C4DFF; background: rgba(124,77,255,0.08); border-radius: 2px; }
+
+  /* ===== CONFIG PANEL ===== */
+  .config-panel {
+    position: absolute; top: 0; right: 0; width: 300px; height: 100%;
+    background: #fff; border-left: 1px solid #e0e0e0; z-index: 60;
+    transform: translateX(100%); transition: transform 0.3s ease;
+    box-shadow: -4px 0 16px rgba(0,0,0,0.1); display: flex; flex-direction: column;
+  }
+  .config-panel.open { transform: translateX(0); }
+  .config-header {
+    padding: 14px 16px; background: #f5f5f5; border-bottom: 1px solid #e0e0e0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .config-header h4 { font-size: 14px; font-weight: 600; }
+  .config-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #666; padding: 0 4px; }
+  .config-close:hover { color: #333; }
+  .config-body { flex: 1; overflow-y: auto; padding: 16px; }
+  .config-field { margin-bottom: 14px; }
+  .config-label { font-size: 12px; color: #666; margin-bottom: 4px; font-weight: 500; }
+  .config-input {
+    width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px;
+    font-size: 13px; outline: none; transition: border-color 0.2s;
+  }
+  .config-input:focus { border-color: #008B8B; }
+  .config-select { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; background: #fff; }
+  .config-textarea { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; resize: vertical; min-height: 60px; font-family: 'Courier New', monospace; }
+  .config-textarea:focus, .config-select:focus { border-color: #008B8B; }
+  .config-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500;
+  }
+  .badge-trigger { background: #E3F2FD; color: #1565C0; }
+  .badge-condition { background: #FFF8E1; color: #F57F17; }
+  .badge-action { background: #E8F5E9; color: #2E7D32; }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    height: 36px; background: #fff; border-top: 1px solid #e0e0e0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; font-size: 12px; color: #888;
+  }
+  .footer-stats { display: flex; gap: 16px; }
+  .footer-stats span { display: flex; align-items: center; gap: 4px; }
+  .footer-hint { display: flex; align-items: center; gap: 6px; }
+  .footer-help { background: none; border: 1px solid #ddd; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; color: #999; display: flex; align-items: center; justify-content: center; }
+
+  /* ===== CONTEXT MENU ===== */
+  .context-menu {
+    position: absolute; background: #fff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border: 1px solid #e0e0e0; z-index: 200; min-width: 160px; padding: 6px 0; display: none;
+  }
+  .context-menu-item {
+    padding: 8px 16px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+    transition: background 0.15s;
+  }
+  .context-menu-item:hover { background: #f5f5f5; }
+  .context-menu-item.danger { color: #f44336; }
+  .context-menu-divider { height: 1px; background: #eee; margin: 4px 0; }
+
+  /* ===== TOAST ===== */
+  .toast-container { position: fixed; top: 70px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    padding: 10px 20px; border-radius: 8px; color: #fff; font-size: 13px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast-success { background: #4CAF50; }
+  .toast-info { background: #2196F3; }
+  .toast-warning { background: #FF9800; }
+  .toast-error { background: #f44336; }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(40px); } }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4); z-index: 500; display: none;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 12px; padding: 24px; min-width: 400px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2); max-width: 90vw;
+  }
+  .modal h3 { font-size: 16px; margin-bottom: 16px; }
+  .modal-body { margin-bottom: 20px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .modal-btn {
+    padding: 8px 20px; border-radius: 6px; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 500;
+  }
+  .modal-btn-primary { background: #008B8B; color: #fff; }
+  .modal-btn-primary:hover { background: #007070; }
+  .modal-btn-secondary { background: #f5f5f5; color: #333; border: 1px solid #ddd; }
+  .modal-btn-secondary:hover { background: #eee; }
+
+  /* Test result */
+  .test-result { padding: 12px; border-radius: 8px; font-size: 13px; line-height: 1.6; }
+  .test-pass { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+  .test-fail { background: #FFEBEE; color: #C62828; border: 1px solid #EF9A9A; }
+  .test-log { font-family: 'Courier New', monospace; font-size: 12px; margin-top: 8px; padding: 8px; background: #263238; color: #80CBC4; border-radius: 6px; white-space: pre-wrap; }
+
+  /* Animations */
+  .canvas-node { animation: nodeAppear 0.3s ease; }
+  @keyframes nodeAppear { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
+  /* Header nav */
+  .header-nav { margin-left: 30px; display: flex; gap: 4px; }
+  .header-nav a {
+    padding: 5px 14px; border-radius: 6px; color: rgba(255,255,255,0.7);
+    text-decoration: none; font-size: 12px; transition: all 0.2s; cursor: pointer;
+  }
+  .header-nav a:hover { background: rgba(255,255,255,0.15); color: #fff; }
+  .header-nav a.active { background: rgba(255,255,255,0.2); color: #fff; font-weight: 500; }
+
+  /* Device select modal */
+  .device-select-list { display: flex; flex-direction: column; gap: 6px; max-height: 350px; overflow-y: auto; }
+  .device-select-list::-webkit-scrollbar { width: 4px; }
+  .device-select-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+  .device-select-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    border: 1px solid #e8e8e8; border-radius: 8px; cursor: pointer; transition: all 0.15s;
+  }
+  .device-select-item:hover { border-color: #008B8B; background: #f0fffe; }
+  .device-select-item.selected { border-color: #008B8B; background: #E0F2F1; }
+  .device-select-item .ds-check {
+    width: 20px; height: 20px; border-radius: 4px; border: 2px solid #ddd;
+    display: flex; align-items: center; justify-content: center; font-size: 12px;
+    color: transparent; transition: all 0.15s; flex-shrink: 0;
+  }
+  .device-select-item.selected .ds-check { background: #008B8B; border-color: #008B8B; color: #fff; }
+  .device-select-item .ds-icon { font-size: 18px; width: 32px; text-align: center; }
+  .device-select-item .ds-info { flex: 1; }
+  .device-select-item .ds-name { font-size: 13px; font-weight: 500; color: #333; }
+  .device-select-item .ds-meta { font-size: 11px; color: #999; }
+  .device-select-item .ds-status { font-size: 11px; }
+  .ds-status-badge {
+    display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px;
+    border-radius: 10px; font-size: 10px; font-weight: 500;
+  }
+  .ds-status-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
+  .ds-status-badge.online { background: #E8F5E9; color: #2E7D32; }
+  .ds-status-badge.online::before { background: #4CAF50; }
+  .ds-status-badge.alarm { background: #FFEBEE; color: #C62828; }
+  .ds-status-badge.alarm::before { background: #f44336; }
+  .ds-status-badge.offline { background: #F5F5F5; color: #9E9E9E; }
+  .ds-status-badge.offline::before { background: #9E9E9E; }
+  .ds-status-badge.warning { background: #FFF3E0; color: #E65100; }
+  .ds-status-badge.warning::before { background: #FF9800; }
+</style>
+</head>
+<body>
+
+<!-- Nav Sidebar -->
+<aside class="nav-sidebar">
+  <div class="nav-sidebar-logo">🚇 IoT</div>
+  <nav class="nav-sidebar-menu">
+    <div class="nav-menu-group">
+      <div class="nav-menu-item has-submenu" onclick="toggleNavSubmenu(this)">
+        <span class="nav-menu-icon">📊</span>
+        <span class="nav-menu-text">设备管理</span>
+        <span class="nav-menu-arrow">▶</span>
+      </div>
+      <div class="nav-submenu">
+        <a href="metro-product-management.html" class="nav-submenu-item">产品</a>
+        <a href="metro-device-management.html" class="nav-submenu-item">设备</a>
+      </div>
+    </div>
+    <a href="metro-alarm-rule-chain.html" class="nav-menu-item active">
+      <span class="nav-menu-icon">⚙️</span>
+      <span class="nav-menu-text">规则引擎</span>
+    </a>
+    <a href="metro-alarm-management.html" class="nav-menu-item">
+      <span class="nav-menu-icon">🚨</span>
+      <span class="nav-menu-text">告警管理</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h3>地铁联动规则</h3>
+      <p>拖拽节点到画布创建规则</p>
+    </div>
+    <div class="sidebar-content" id="sidebarContent">
+      <!-- Triggers -->
+      <div class="node-category cat-trigger">
+        <div class="category-header" onclick="toggleCategory(this)">
+          <span class="arrow">▼</span> ⚡ 触发器
+        </div>
+        <div class="category-items" style="max-height:500px">
+          <div class="node-item trigger-item" draggable="true" data-type="trigger" data-id="temp_high">
+            <span class="node-icon">🌡️</span>
+            <div class="node-info"><div class="node-name">站台温度过高</div><div class="node-cond">temp > 28°C</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item trigger-item" draggable="true" data-type="trigger" data-id="co2_high">
+            <span class="node-icon">☁️</span>
+            <div class="node-info"><div class="node-name">二氧化碳超标</div><div class="node-cond">co2 > 1000ppm</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item trigger-item" draggable="true" data-type="trigger" data-id="fan_fault">
+            <span class="node-icon">⚠️</span>
+            <div class="node-info"><div class="node-name">风机故障</div><div class="node-cond">fan_status = fault</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item trigger-item" draggable="true" data-type="trigger" data-id="water_high">
+            <span class="node-icon">💧</span>
+            <div class="node-info"><div class="node-name">集水池水位超高</div><div class="node-cond">water_level = High</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item trigger-item" draggable="true" data-type="trigger" data-id="pump_trip">
+            <span class="node-icon">🔧</span>
+            <div class="node-info"><div class="node-name">水泵跳闸</div><div class="node-cond">pump_status = tripped</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item trigger-item" draggable="true" data-type="trigger" data-id="door_open">
+            <span class="node-icon">🚪</span>
+            <div class="node-info"><div class="node-name">屏蔽门未关严</div><div class="node-cond">door_status = false</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item trigger-item" draggable="true" data-type="trigger" data-id="escalator_stop">
+            <span class="node-icon">🛑</span>
+            <div class="node-info"><div class="node-name">扶梯急停</div><div class="node-cond">emergency_stop = true</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item trigger-item" draggable="true" data-type="trigger" data-id="power_fail">
+            <span class="node-icon">⚡</span>
+            <div class="node-info"><div class="node-name">供电系统异常</div><div class="node-cond">power_status = abnormal</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item trigger-item" draggable="true" data-type="trigger" data-id="smoke_detect">
+            <span class="node-icon">🔥</span>
+            <div class="node-info"><div class="node-name">烟雾报警</div><div class="node-cond">smoke_detected = true</div></div>
+            <span class="drag-handle"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conditions -->
+      <div class="node-category cat-condition">
+        <div class="category-header" onclick="toggleCategory(this)">
+          <span class="arrow">▼</span> 🔀 条件
+        </div>
+        <div class="category-items" style="max-height:500px">
+          <div class="node-item condition-item" draggable="true" data-type="condition" data-id="alarm_time">
+            <span class="node-icon">⏰</span>
+            <div class="node-info"><div class="node-name">告警时段</div><div class="node-cond">alarm_time</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item condition-item" draggable="true" data-type="condition" data-id="night_mode">
+            <span class="node-icon">🌙</span>
+            <div class="node-info"><div class="node-name">夜间模式</div><div class="node-cond">22:00-06:00</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item condition-item" draggable="true" data-type="condition" data-id="normal_mode">
+            <span class="node-icon">✅</span>
+            <div class="node-info"><div class="node-name">正常运营模式</div><div class="node-cond">station_mode = normal</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item condition-item" draggable="true" data-type="condition" data-id="rush_hour">
+            <span class="node-icon">🚶</span>
+            <div class="node-info"><div class="node-name">高峰时段</div><div class="node-cond">07:00-09:00 / 17:00-19:00</div></div>
+            <span class="drag-handle"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="node-category cat-action">
+        <div class="category-header" onclick="toggleCategory(this)">
+          <span class="arrow">▼</span> 🎯 执行器
+        </div>
+        <div class="category-items" style="max-height:500px">
+          <div class="node-item action-item" draggable="true" data-type="action" data-id="fan_boost">
+            <span class="node-icon">🌀</span>
+            <div class="node-info"><div class="node-name">启动风机加速</div><div class="node-cond">fan_speed = high</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item action-item" draggable="true" data-type="action" data-id="pump_start">
+            <span class="node-icon">💧</span>
+            <div class="node-info"><div class="node-name">启动排水泵</div><div class="node-cond">pump = start</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item action-item" draggable="true" data-type="action" data-id="send_alert">
+            <span class="node-icon">📢</span>
+            <div class="node-info"><div class="node-name">发送告警通知</div><div class="node-cond">notify(ops_team)</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item action-item" draggable="true" data-type="action" data-id="broadcast">
+            <span class="node-icon">🔊</span>
+            <div class="node-info"><div class="node-name">车站广播</div><div class="node-cond">broadcast(msg)</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item action-item" draggable="true" data-type="action" data-id="close_door">
+            <span class="node-icon">🔒</span>
+            <div class="node-info"><div class="node-name">关闭屏蔽门</div><div class="node-cond">door_cmd = close</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item action-item" draggable="true" data-type="action" data-id="evacuate">
+            <span class="node-icon">🚨</span>
+            <div class="node-info"><div class="node-name">启动疏散预案</div><div class="node-cond">evacuate = true</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item action-item" draggable="true" data-type="action" data-id="log_event">
+            <span class="node-icon">📋</span>
+            <div class="node-info"><div class="node-name">记录事件日志</div><div class="node-cond">log(event)</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item action-item" draggable="true" data-type="action" data-id="delay_train">
+            <span class="node-icon">🚆</span>
+            <div class="node-info"><div class="node-name">列车限速/扣停</div><div class="node-cond">train_cmd = hold</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item notification-item" draggable="true" data-type="action" data-id="send_notification">
+            <span class="node-icon">📡</span>
+            <div class="node-info"><div class="node-name">告警推送</div><div class="node-cond">push(type, to, content)</div></div>
+            <span class="drag-handle"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-wrapper" id="canvasWrapper">
+    <!-- Canvas Toolbar (migrated from header) -->
+    <div class="canvas-toolbar">
+      <button class="btn-undo" id="btnUndo" title="撤销 (Ctrl+Z)" disabled>↩</button>
+      <button class="btn-redo" id="btnRedo" title="重做 (Ctrl+Y)" disabled>↪</button>
+      <button class="toolbar-btn btn-test" id="btnTest">▶ 测试</button>
+      <button class="toolbar-btn btn-save" id="btnSave">💾 保存规则</button>
+    </div>
+    <div class="canvas-container" id="canvasContainer">
+      <svg class="connections-svg" id="connectionsSvg"></svg>
+    </div>
+
+    <!-- Zoom Controls -->
+    <div class="zoom-controls">
+      <button class="zoom-btn" onclick="zoomIn()" title="放大">+</button>
+      <div class="zoom-label" id="zoomLabel">100%</div>
+      <button class="zoom-btn" onclick="zoomOut()" title="缩小">−</button>
+      <button class="zoom-btn" onclick="zoomReset()" title="重置" style="font-size:12px">⌂</button>
+    </div>
+
+    <!-- Minimap -->
+    <div class="minimap" id="minimap">
+      <div class="minimap-title">小地图</div>
+      <div class="minimap-canvas" id="minimapCanvas"></div>
+    </div>
+
+    <!-- Config Panel -->
+    <div class="config-panel" id="configPanel">
+      <div class="config-header">
+        <h4 id="configTitle">节点配置</h4>
+        <button class="config-close" onclick="closeConfig()">✕</button>
+      </div>
+      <div class="config-body" id="configBody"></div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+      <div class="context-menu-item" onclick="duplicateNode()">📋 复制节点</div>
+      <div class="context-menu-divider"></div>
+      <div class="context-menu-item danger" onclick="deleteSelectedNode()">🗑️ 删除节点</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-stats">
+    <span>🔵 节点数: <b id="nodeCount">0</b></span>
+    <span>🔗 连接数: <b id="connCount">0</b></span>
+  </div>
+  <div class="footer-hint">
+    💡 从左侧拖拽节点到画布，点击节点圆点创建连接
+    <button class="footer-help" title="帮助">?</button>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Connection Hint -->
+<div class="connection-hint" id="connectionHint">🔗 拖动到目标节点的输入端口完成连接</div>
+
+<!-- Test Modal -->
+<div class="modal-overlay" id="testModal">
+  <div class="modal">
+    <h3>🧪 规则链测试结果</h3>
+    <div class="modal-body" id="testResult"></div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-secondary" onclick="closeTestModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- Save Modal -->
+<div class="modal-overlay" id="saveModal">
+  <div class="modal">
+    <h3>💾 保存规则链</h3>
+    <div class="modal-body">
+      <div class="config-field">
+        <div class="config-label">规则链名称</div>
+        <input class="config-input" id="ruleName" value="地铁告警联动规则-01" />
+      </div>
+      <div class="config-field">
+        <div class="config-label">描述</div>
+        <textarea class="config-textarea" id="ruleDesc" rows="3">站台环境监测与设备联动告警规则</textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-secondary" onclick="closeSaveModal()">取消</button>
+      <button class="modal-btn modal-btn-primary" onclick="confirmSave()">确认保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Device Select Modal -->
+<div class="modal-overlay" id="deviceModal">
+  <div class="modal" style="width:560px">
+    <div class="modal-header" style="padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between">
+      <h3 style="margin:0;font-size:15px">🔗 关联设备</h3>
+      <button class="config-close" onclick="closeDeviceModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px">
+      <p style="font-size:12px;color:#888;margin-bottom:10px">选择要关联到此触发器的设备（可多选）：</p>
+      <div style="margin-bottom:10px">
+        <input class="config-input" placeholder="搜索设备名称/编码..." id="deviceSearchInput" oninput="filterDeviceList(this.value)" style="padding-left:30px;background:#fafafa url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E&quot;) 8px center no-repeat" />
+      </div>
+      <div class="device-select-list" id="deviceSelectList"></div>
+    </div>
+    <div class="modal-actions" style="padding:14px 20px;border-top:1px solid #f0f0f0">
+      <button class="modal-btn modal-btn-secondary" onclick="closeDeviceModal()">取消</button>
+      <button class="modal-btn modal-btn-primary" onclick="confirmDeviceAssociation()">确认关联</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== NAV SIDEBAR =====
+function toggleNavSubmenu(el) {
+  const submenu = el.nextElementSibling;
+  const arrow = el.querySelector('.nav-menu-arrow');
+  el.classList.toggle('expanded');
+  arrow.classList.toggle('open');
+  submenu.classList.toggle('open');
+}
+
+// ===== STATE =====
+const state = {
+  nodes: [],
+  connections: [],
+  nextId: 1,
+  selectedNode: null,
+  draggingNode: null,
+  dragOffset: { x: 0, y: 0 },
+  connecting: null, // { nodeId, portType }
+  tempLine: null,
+  zoom: 1,
+  pan: { x: 0, y: 0 },
+  history: [],
+  historyIndex: -1,
+  maxHistory: 50,
+};
+
+const NODE_DEFS = {
+  temp_high:      { icon: '🌡️', name: '站台温度过高', cond: 'temp > 28°C', type: 'trigger' },
+  co2_high:       { icon: '☁️', name: '二氧化碳超标', cond: 'co2 > 1000ppm', type: 'trigger' },
+  fan_fault:      { icon: '⚠️', name: '风机故障', cond: 'fan_status = fault', type: 'trigger' },
+  water_high:     { icon: '💧', name: '集水池水位超高', cond: 'water_level = High', type: 'trigger' },
+  pump_trip:      { icon: '🔧', name: '水泵跳闸', cond: 'pump_status = tripped', type: 'trigger' },
+  door_open:      { icon: '🚪', name: '屏蔽门未关严', cond: 'door_status = false', type: 'trigger' },
+  escalator_stop: { icon: '🛑', name: '扶梯急停', cond: 'emergency_stop = true', type: 'trigger' },
+  power_fail:     { icon: '⚡', name: '供电系统异常', cond: 'power_status = abnormal', type: 'trigger' },
+  smoke_detect:   { icon: '🔥', name: '烟雾报警', cond: 'smoke_detected = true', type: 'trigger' },
+  alarm_time:     { icon: '⏰', name: '告警时段', cond: 'alarm_time', type: 'condition' },
+  night_mode:     { icon: '🌙', name: '夜间模式', cond: '22:00-06:00', type: 'condition' },
+  normal_mode:    { icon: '✅', name: '正常运营模式', cond: 'station_mode = normal', type: 'condition' },
+  rush_hour:      { icon: '🚶', name: '高峰时段', cond: '07:00-09:00 / 17:00-19:00', type: 'condition' },
+  fan_boost:      { icon: '🌀', name: '启动风机加速', cond: 'fan_speed = high', type: 'action' },
+  pump_start:     { icon: '💧', name: '启动排水泵', cond: 'pump = start', type: 'action' },
+  send_alert:     { icon: '📢', name: '发送告警通知', cond: 'notify(ops_team)', type: 'action' },
+  broadcast:      { icon: '🔊', name: '车站广播', cond: 'broadcast(msg)', type: 'action' },
+  close_door:     { icon: '🔒', name: '关闭屏蔽门', cond: 'door_cmd = close', type: 'action' },
+  evacuate:       { icon: '🚨', name: '启动疏散预案', cond: 'evacuate = true', type: 'action' },
+  log_event:      { icon: '📋', name: '记录事件日志', cond: 'log(event)', type: 'action' },
+  delay_train:    { icon: '🚆', name: '列车限速/扣停', cond: 'train_cmd = hold', type: 'action' },
+  // 告警推送
+  send_notification:{ icon: '📡', name: '告警推送', cond: 'push(type, to, content)', type: 'action', subtype: 'notification' },
+};
+
+// ===== DEVICE DATA (shared with device management page) =====
+const DEVICE_TYPES = {
+  hvac: { name: '环境监控设备', icon: '🌡️' },
+  fan: { name: '通风系统', icon: '🌀' },
+  pump: { name: '排水系统', icon: '💧' },
+  door: { name: '屏蔽门系统', icon: '🚪' },
+  escalator: { name: '电扶梯系统', icon: '🛑' },
+  fire: { name: '消防系统', icon: '🔥' },
+  power: { name: '供电系统', icon: '⚡' },
+};
+
+const DEVICES = [
+  { id: 'DEV-001', name: '1号站台温度传感器', type: 'hvac', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-002', name: '2号站台温度传感器', type: 'hvac', station: '1号线-人民广场', status: 'alarm' },
+  { id: 'DEV-003', name: 'A出口CO₂传感器', type: 'hvac', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-004', name: '1号通风机组', type: 'fan', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-005', name: '2号通风机组', type: 'fan', station: '1号线-南京东路', status: 'alarm' },
+  { id: 'DEV-006', name: '3号通风机组', type: 'fan', station: '2号线-中山公园', status: 'online' },
+  { id: 'DEV-007', name: '1号集水池', type: 'pump', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-008', name: '2号集水池', type: 'pump', station: '1号线-南京东路', status: 'warning' },
+  { id: 'DEV-009', name: '3号集水池', type: 'pump', station: '2号线-静安寺', status: 'online' },
+  { id: 'DEV-010', name: '1号站台屏蔽门-上行', type: 'door', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-011', name: '1号站台屏蔽门-下行', type: 'door', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-012', name: '2号站台屏蔽门', type: 'door', station: '1号线-南京东路', status: 'alarm' },
+  { id: 'DEV-013', name: 'A出口电扶梯-上行', type: 'escalator', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-014', name: 'B出口电扶梯-下行', type: 'escalator', station: '1号线-人民广场', status: 'offline' },
+  { id: 'DEV-015', name: 'C出口电扶梯', type: 'escalator', station: '2号线-中山公园', status: 'online' },
+  { id: 'DEV-016', name: '1号烟感探测器', type: 'fire', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-017', name: '2号烟感探测器', type: 'fire', station: '1号线-南京东路', status: 'online' },
+  { id: 'DEV-018', name: '3号烟感探测器', type: 'fire', station: '2号线-静安寺', status: 'online' },
+  { id: 'DEV-019', name: '1号配电柜', type: 'power', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-020', name: '2号配电柜', type: 'power', station: '1号线-南京东路', status: 'online' },
+  { id: 'DEV-021', name: 'UPS不间断电源', type: 'power', station: '2号线-中山公园', status: 'online' },
+  { id: 'DEV-022', name: '4号通风机组', type: 'fan', station: '2号线-静安寺', status: 'online' },
+  { id: 'DEV-023', name: '4号站台温度传感器', type: 'hvac', station: '2号线-静安寺', status: 'online' },
+  { id: 'DEV-024', name: 'D出口电扶梯', type: 'escalator', station: '2号线-静安寺', status: 'online' },
+];
+
+// Trigger-to-device type mapping for auto-suggestion
+const TRIGGER_DEVICE_MAP = {
+  temp_high: ['hvac'],
+  co2_high: ['hvac'],
+  fan_fault: ['fan'],
+  water_high: ['pump'],
+  pump_trip: ['pump'],
+  door_open: ['door'],
+  escalator_stop: ['escalator'],
+  power_fail: ['power'],
+  smoke_detect: ['fire'],
+};
+
+let deviceModalTargetNodeId = null;
+let selectedDeviceIds = [];
+
+// ===== DOM REFS =====
+const canvasContainer = document.getElementById('canvasContainer');
+const connectionsSvg = document.getElementById('connectionsSvg');
+const configPanel = document.getElementById('configPanel');
+const configBody = document.getElementById('configBody');
+const configTitle = document.getElementById('configTitle');
+const contextMenu = document.getElementById('contextMenu');
+
+// ===== CATEGORY TOGGLE =====
+function toggleCategory(header) {
+  header.classList.toggle('collapsed');
+  const items = header.nextElementSibling;
+  items.classList.toggle('collapsed');
+}
+
+// ===== DRAG FROM SIDEBAR =====
+document.querySelectorAll('.node-item[draggable]').forEach(item => {
+  item.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text/plain', JSON.stringify({
+      type: item.dataset.type,
+      id: item.dataset.id,
+    }));
+    e.dataTransfer.effectAllowed = 'copy';
+  });
+});
+
+canvasContainer.addEventListener('dragover', e => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+  canvasContainer.classList.add('drag-over');
+});
+canvasContainer.addEventListener('dragleave', () => canvasContainer.classList.remove('drag-over'));
+canvasContainer.addEventListener('drop', e => {
+  e.preventDefault();
+  canvasContainer.classList.remove('drag-over');
+  try {
+    const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+    const rect = canvasContainer.getBoundingClientRect();
+    const x = (e.clientX - rect.left - state.pan.x) / state.zoom;
+    const y = (e.clientY - rect.top - state.pan.y) / state.zoom;
+    addNode(data.id, data.type, x, y);
+  } catch (err) {}
+});
+
+// ===== NODE MANAGEMENT =====
+function addNode(defId, type, x, y) {
+  const def = NODE_DEFS[defId];
+  if (!def) return;
+  const node = {
+    id: state.nextId++,
+    defId,
+    type,
+    icon: def.icon,
+    name: def.name,
+    cond: def.cond,
+    x: x - 80,
+    y: y - 25,
+    config: { threshold: '', enabled: true, priority: 'medium', description: '' },
+    deviceIds: [], // associated device IDs for triggers
+  };
+  state.nodes.push(node);
+  renderNode(node);
+  saveHistory();
+  updateStats();
+  showToast(`已添加节点: ${node.name}`, 'success');
+}
+
+function renderNode(node) {
+  const el = document.createElement('div');
+  el.className = 'canvas-node ' + node.type + '-node';
+  el.id = `node-${node.id}`;
+  el.style.left = node.x + 'px';
+  el.style.top = node.y + 'px';
+
+  // Build device badge for trigger nodes
+  let deviceBadge = '';
+  if (node.type === 'trigger' && node.deviceIds && node.deviceIds.length > 0) {
+    const dev = DEVICES.find(d => d.id === node.deviceIds[0]);
+    if (dev) {
+      const statusText = { online: '在线', offline: '离线', alarm: '告警', warning: '预警' };
+      deviceBadge = `<div class="node-device-badge" title="${dev.name} - ${statusText[dev.status]}"><span class="badge-dot ${dev.status}"></span>${dev.name}${node.deviceIds.length > 1 ? ' +' + (node.deviceIds.length - 1) : ''}</div>`;
+    }
+  }
+
+  el.innerHTML = `
+    <div class="port port-in" data-node="${node.id}" data-port="in"></div>
+    <div class="node-header"><span class="node-icon">${node.icon}</span>${node.name}</div>
+    <div class="node-cond">${node.cond}</div>
+    <div class="port port-out" data-node="${node.id}" data-port="out"></div>
+    <div class="node-delete" data-node="${node.id}">✕</div>
+    ${deviceBadge}
+  `;
+  canvasContainer.appendChild(el);
+
+  // Node drag & click
+  let mouseDownPos = null;
+  let isDragging = false;
+
+  el.addEventListener('mousedown', e => {
+    // If clicking on port or delete button, do NOT start node drag
+    if (e.target.classList.contains('port') || e.target.classList.contains('node-delete')) return;
+    e.preventDefault();
+    selectNode(node.id);
+    mouseDownPos = { x: e.clientX, y: e.clientY };
+    isDragging = false;
+    state.draggingNode = node;
+    const rect = canvasContainer.getBoundingClientRect();
+    state.dragOffset.x = (e.clientX - rect.left) / state.zoom - node.x;
+    state.dragOffset.y = (e.clientY - rect.top) / state.zoom - node.y;
+  });
+
+  el.addEventListener('click', e => {
+    if (e.target.classList.contains('port') || e.target.classList.contains('node-delete')) return;
+    e.stopPropagation();
+    // Only open config if it was a click (not a drag)
+    if (!isDragging) {
+      openConfig(node.id);
+    }
+  });
+
+  // Port interaction for connecting (use mousedown + mouseup on the port itself)
+  el.querySelectorAll('.port').forEach(port => {
+    port.addEventListener('mousedown', e => {
+      e.stopPropagation();
+      e.preventDefault();
+      const portType = port.dataset.port;
+      const nodeId = parseInt(port.dataset.node);
+
+      if (portType === 'out') {
+        // Start connecting from output port
+        state.connecting = { nodeId, portType: 'out' };
+        port.classList.add('active');
+        // Show connection hint
+        const hint = document.getElementById('connectionHint');
+        hint.classList.add('show');
+        hint.style.left = (e.clientX + 15) + 'px';
+        hint.style.top = (e.clientY + 15) + 'px';
+        // Create temp line
+        const svgRect = connectionsSvg.getBoundingClientRect();
+        const portRect = port.getBoundingClientRect();
+        state.tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        state.tempLine.classList.add('connection-path', 'temp');
+        connectionsSvg.appendChild(state.tempLine);
+        state.tempLineStart = {
+          x: portRect.left + 8 - svgRect.left,
+          y: portRect.top + 8 - svgRect.top
+        };
+      } else if (portType === 'in' && state.connecting) {
+        // Complete connection on input port
+        completeConnection(nodeId);
+      }
+    });
+
+    // Highlight ports on hover during connecting
+    port.addEventListener('mouseenter', () => {
+      if (state.connecting && port.dataset.port === 'in') {
+        port.classList.add('active');
+      }
+    });
+    port.addEventListener('mouseleave', () => {
+      port.classList.remove('active');
+    });
+  });
+
+  // Track dragging state for click vs drag distinction
+  el._nodeDragHandler = (e) => {
+    if (state.draggingNode && state.draggingNode.id === node.id && mouseDownPos) {
+      const dx = e.clientX - mouseDownPos.x;
+      const dy = e.clientY - mouseDownPos.y;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        isDragging = true;
+      }
+    }
+  };
+  document.addEventListener('mousemove', el._nodeDragHandler);
+
+  // Delete button
+  el.querySelector('.node-delete').addEventListener('click', e => {
+    e.stopPropagation();
+    removeNode(node.id);
+  });
+
+  // Right-click context menu
+  el.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    selectNode(node.id);
+    contextMenu.style.display = 'block';
+    contextMenu.style.left = e.clientX + 'px';
+    contextMenu.style.top = e.clientY + 'px';
+  });
+}
+
+function removeNode(id) {
+  state.nodes = state.nodes.filter(n => n.id !== id);
+  state.connections = state.connections.filter(c => c.from !== id && c.to !== id);
+  const el = document.getElementById(`node-${id}`);
+  if (el) el.remove();
+  if (state.selectedNode === id) { state.selectedNode = null; closeConfig(); }
+  saveHistory();
+  updateStats();
+  renderConnections();
+  updateMinimap();
+  showToast('节点已删除', 'warning');
+}
+
+function selectNode(id) {
+  document.querySelectorAll('.canvas-node.selected').forEach(el => el.classList.remove('selected'));
+  state.selectedNode = id;
+  const el = document.getElementById(`node-${id}`);
+  if (el) el.classList.add('selected');
+}
+
+function connectionExists(from, to) {
+  return state.connections.some(c => c.from === from && c.to === to);
+}
+
+// ===== MOUSE MOVE/UP FOR DRAGGING & CONNECTING =====
+document.addEventListener('mousemove', e => {
+  // Node dragging
+  if (state.draggingNode) {
+    const rect = canvasContainer.getBoundingClientRect();
+    const node = state.draggingNode;
+    node.x = (e.clientX - rect.left) / state.zoom - state.dragOffset.x;
+    node.y = (e.clientY - rect.top) / state.zoom - state.dragOffset.y;
+    const el = document.getElementById(`node-${node.id}`);
+    if (el) {
+      el.style.left = node.x + 'px';
+      el.style.top = node.y + 'px';
+    }
+    renderConnections();
+    updateMinimap();
+  }
+  // Connection line drawing
+  if (state.connecting && state.tempLine) {
+    const svgRect = connectionsSvg.getBoundingClientRect();
+    const mx = e.clientX - svgRect.left;
+    const my = e.clientY - svgRect.top;
+    const sx = state.tempLineStart.x;
+    const sy = state.tempLineStart.y;
+    const cx = (sx + mx) / 2;
+    state.tempLine.setAttribute('d', `M${sx},${sy} C${cx},${sy} ${cx},${my} ${mx},${my}`);
+    // Move hint near cursor
+    const hint = document.getElementById('connectionHint');
+    hint.style.left = (e.clientX + 15) + 'px';
+    hint.style.top = (e.clientY + 15) + 'px';
+  }
+});
+
+document.addEventListener('mouseup', e => {
+  // Finish node dragging
+  if (state.draggingNode) {
+    saveHistory();
+    state.draggingNode = null;
+  }
+  // Cancel connecting (if mouse released NOT on an input port)
+  if (state.connecting) {
+    // Check if released on a port element
+    const target = e.target;
+    if (target && target.classList.contains('port') && target.dataset.port === 'in') {
+      const toId = parseInt(target.dataset.node);
+      completeConnection(toId);
+    } else {
+      // Cancel connection
+      cancelConnection();
+    }
+  }
+});
+
+// ===== CONNECTION HELPERS =====
+function completeConnection(toId) {
+  const fromId = state.connecting.nodeId;
+  if (fromId !== toId && !connectionExists(fromId, toId)) {
+    state.connections.push({ from: fromId, to: toId });
+    saveHistory();
+    updateStats();
+    showToast('✅ 连接已创建', 'success');
+  } else if (fromId === toId) {
+    showToast('⚠️ 不能连接到自己', 'warning');
+  } else {
+    showToast('⚠️ 连接已存在', 'warning');
+  }
+  cancelConnection();
+  renderConnections();
+}
+
+function cancelConnection() {
+  state.connecting = null;
+  document.getElementById('connectionHint').classList.remove('show');
+  document.querySelectorAll('.port.active').forEach(p => p.classList.remove('active'));
+  if (state.tempLine) { state.tempLine.remove(); state.tempLine = null; }
+}
+
+// Click on canvas to deselect
+canvasContainer.addEventListener('mousedown', e => {
+  if (e.target === canvasContainer || e.target === connectionsSvg) {
+    document.querySelectorAll('.canvas-node.selected').forEach(el => el.classList.remove('selected'));
+    state.selectedNode = null;
+    closeConfig();
+  }
+  contextMenu.style.display = 'none';
+});
+
+// ===== CONNECTION RENDERING =====
+function renderConnections() {
+  connectionsSvg.querySelectorAll('.connection-path:not(.temp)').forEach(p => p.remove());
+  state.connections.forEach((conn, idx) => {
+    const fromEl = document.getElementById(`node-${conn.from}`);
+    const toEl = document.getElementById(`node-${conn.to}`);
+    if (!fromEl || !toEl) return;
+    const svgRect = connectionsSvg.getBoundingClientRect();
+    const outPort = fromEl.querySelector('.port-out');
+    const inPort = toEl.querySelector('.port-in');
+    if (!outPort || !inPort) return;
+    const outRect = outPort.getBoundingClientRect();
+    const inRect = inPort.getBoundingClientRect();
+    const x1 = outRect.left + 8 - svgRect.left;
+    const y1 = outRect.top + 8 - svgRect.top;
+    const x2 = inRect.left + 8 - svgRect.left;
+    const y2 = inRect.top + 8 - svgRect.top;
+    const cx = (x1 + x2) / 2;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const fromNode = state.nodes.find(n => n.id === conn.from);
+    const lineClass = fromNode ? `${fromNode.type}-line` : '';
+    path.classList.add('connection-path', lineClass);
+    path.setAttribute('d', `M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}`);
+    path.dataset.index = idx;
+    path.addEventListener('dblclick', () => {
+      state.connections.splice(idx, 1);
+      renderConnections();
+      saveHistory();
+      updateStats();
+      showToast('连接已删除', 'warning');
+    });
+    connectionsSvg.appendChild(path);
+  });
+  updateMinimap();
+}
+
+// ===== CONFIG PANEL =====
+function openConfig(nodeId) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  selectNode(nodeId);
+  const typeLabel = { trigger: '触发器', condition: '条件', action: '执行器' };
+  const badgeClass = { trigger: 'badge-trigger', condition: 'badge-condition', action: 'badge-action' };
+  configTitle.innerHTML = `${node.icon} ${node.name} <span class="config-badge ${badgeClass[node.type]}">${typeLabel[node.type]}</span>`;
+
+  // Initialize config if not exists
+  if (!node.config) node.config = {};
+  if (!node.config.params) node.config.params = {};
+
+  // Build type-specific config sections
+  let typeSpecificSection = '';
+
+  // ===== TRIGGER: 设备关联 + 阈值设置 =====
+  if (node.type === 'trigger') {
+    const associatedDevices = (node.deviceIds || []).map(did => DEVICES.find(d => d.id === did)).filter(Boolean);
+    const statusText = { online: '在线', offline: '离线', alarm: '告警', warning: '预警' };
+
+    // Get default threshold based on trigger type
+    const defaultThresholds = {
+      temp_high: { value: '28', unit: '°C', label: '温度阈值' },
+      co2_high: { value: '1000', unit: 'ppm', label: 'CO₂阈值' },
+      fan_fault: { value: 'fault', unit: '', label: '故障状态' },
+      water_high: { value: 'High', unit: '', label: '水位阈值' },
+      pump_trip: { value: 'tripped', unit: '', label: '跳闸状态' },
+      door_open: { value: 'false', unit: '', label: '门状态' },
+      escalator_stop: { value: 'true', unit: '', label: '急停状态' },
+      power_fail: { value: 'abnormal', unit: '', label: '供电状态' },
+      smoke_detect: { value: 'true', unit: '', label: '烟雾检测' },
+    };
+    const thresholdInfo = defaultThresholds[node.defId] || { value: '', unit: '', label: '阈值' };
+
+    typeSpecificSection = `
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+        <div class="config-label" style="margin-bottom:8px">⚙️ 触发参数</div>
+        <div class="config-field" style="margin-bottom:10px">
+          <div class="config-label">${thresholdInfo.label}</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input class="config-input" style="flex:1" placeholder="${thresholdInfo.value}" value="${node.config.threshold || thresholdInfo.value}" onchange="updateNodeConfig(${node.id}, 'threshold', this.value)" />
+            ${thresholdInfo.unit ? `<span style="font-size:13px;color:#666;min-width:40px">${thresholdInfo.unit}</span>` : ''}
+          </div>
+        </div>
+        <div class="config-field">
+          <div class="config-label">触发类型</div>
+          <select class="config-select" onchange="updateNodeConfig(${node.id}, 'triggerType', this.value); openConfig(${node.id})">
+            <option value="simple" ${(!node.config.triggerType || node.config.triggerType==='simple')?'selected':''}>⚡ 简单触发</option>
+            <option value="duration" ${node.config.triggerType==='duration'?'selected':''}>⏱️ 持续时长触发</option>
+            <option value="repeat" ${node.config.triggerType==='repeat'?'selected':''}>🔄 重复触发</option>
+          </select>
+        </div>
+        ${(!node.config.triggerType || node.config.triggerType==='simple') ? `
+        <div style="margin-top:8px;padding:8px 10px;background:#E3F2FD;border-radius:6px;font-size:11px;color:#1565C0;line-height:1.5">
+          ⚡ <b>简单触发</b>：条件满足时立即触发告警，无需等待。
+        </div>
+        ` : ''}
+        ${node.config.triggerType==='duration' ? `
+        <div style="margin-top:8px;padding:8px 10px;background:#FFF8E1;border-radius:6px;font-size:11px;color:#F57F17;line-height:1.5;margin-bottom:8px">
+          ⏱️ <b>持续时长触发</b>：条件需连续满足指定时长后才触发告警，避免瞬时波动误报。
+        </div>
+        <div class="config-field">
+          <div class="config-label">持续时长</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input class="config-input" type="number" min="1" placeholder="30" value="${node.config.triggerDuration || 30}" onchange="updateNodeConfig(${node.id}, 'triggerDuration', parseInt(this.value)||30)" style="flex:1" />
+            <select class="config-select" style="width:80px" onchange="updateNodeConfig(${node.id}, 'triggerDurationUnit', this.value)">
+              <option value="seconds" ${(!node.config.triggerDurationUnit || node.config.triggerDurationUnit==='seconds')?'selected':''}>秒</option>
+              <option value="minutes" ${node.config.triggerDurationUnit==='minutes'?'selected':''}>分钟</option>
+            </select>
+          </div>
+          <div style="font-size:10px;color:#999;margin-top:4px">条件连续满足 <b>${node.config.triggerDuration || 30}</b> ${(!node.config.triggerDurationUnit || node.config.triggerDurationUnit==='seconds') ? '秒' : '分钟'} 后触发告警</div>
+        </div>
+        ` : ''}
+        ${node.config.triggerType==='repeat' ? `
+        <div style="margin-top:8px;padding:8px 10px;background:#E8F5E9;border-radius:6px;font-size:11px;color:#2E7D32;line-height:1.5;margin-bottom:8px">
+          🔄 <b>重复触发</b>：告警产生后，若条件仍持续满足，按设定周期重复发送告警通知。
+        </div>
+        <div class="config-field">
+          <div class="config-label">重复周期</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input class="config-input" type="number" min="1" placeholder="5" value="${node.config.repeatInterval || 5}" onchange="updateNodeConfig(${node.id}, 'repeatInterval', parseInt(this.value)||5)" style="flex:1" />
+            <select class="config-select" style="width:80px" onchange="updateNodeConfig(${node.id}, 'repeatIntervalUnit', this.value)">
+              <option value="seconds" ${(!node.config.repeatIntervalUnit || node.config.repeatIntervalUnit==='seconds')?'selected':''}>秒</option>
+              <option value="minutes" ${node.config.repeatIntervalUnit==='minutes'?'selected':''}>分钟</option>
+              <option value="hours" ${node.config.repeatIntervalUnit==='hours'?'selected':''}>小时</option>
+            </select>
+          </div>
+          <div style="font-size:10px;color:#999;margin-top:4px">每 <b>${node.config.repeatInterval || 5}</b> ${(!node.config.repeatIntervalUnit || node.config.repeatIntervalUnit==='seconds') ? '秒' : node.config.repeatIntervalUnit==='minutes' ? '分钟' : '小时'} 重复发送一次</div>
+        </div>
+        <div class="config-field">
+          <div class="config-label">最大重复次数</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input class="config-input" type="number" min="0" placeholder="0" value="${node.config.repeatMaxCount || 0}" onchange="updateNodeConfig(${node.id}, 'repeatMaxCount', parseInt(this.value)||0)" style="flex:1" />
+            <span style="font-size:11px;color:#999;min-width:60px">0 = 不限</span>
+          </div>
+          <div style="font-size:10px;color:#999;margin-top:4px">达到最大次数后停止重复，0 表示不限制次数</div>
+        </div>
+        ` : ''}
+      </div>
+
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+        <div class="config-label" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+          <span>🔗 关联设备 (${associatedDevices.length})</span>
+          <button class="action-btn" style="padding:3px 10px;border:1px solid #008B8B;color:#008B8B;border-radius:5px;background:transparent;cursor:pointer;font-size:11px" onclick="openDeviceModal(${node.id})">+ 关联设备</button>
+        </div>
+        ${associatedDevices.length > 0 ? associatedDevices.map(d => `
+          <div style="display:flex;align-items:center;gap:8px;padding:8px;background:#f8f9fa;border-radius:6px;margin-bottom:4px;border:1px solid #eee">
+            <span style="font-size:16px">${DEVICE_TYPES[d.type]?.icon || '📦'}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;font-weight:500;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</div>
+              <div style="font-size:10px;color:#999">${d.station} · ${d.id}</div>
+            </div>
+            <span class="ds-status-badge ${d.status}">${statusText[d.status]}</span>
+            <button style="background:none;border:none;color:#f44336;cursor:pointer;font-size:14px;padding:2px" onclick="removeDeviceFromTrigger(${node.id},'${d.id}')" title="解除关联">✕</button>
+          </div>
+        `).join('') : '<div style="font-size:12px;color:#ccc;padding:12px;text-align:center;background:#fafafa;border-radius:6px;border:1px dashed #e0e0e0">暂未关联设备，点击上方按钮关联</div>'}
+      </div>
+    `;
+  }
+
+  // ===== CONDITION: 时间/模式设置 =====
+  if (node.type === 'condition') {
+    const timeConditions = {
+      alarm_time: { start: '08:00', end: '22:00', label: '告警时段' },
+      night_mode: { start: '22:00', end: '06:00', label: '夜间时段' },
+      rush_hour: { start: '07:00', end: '09:00', label: '高峰时段' },
+    };
+    const timeInfo = timeConditions[node.defId];
+
+    typeSpecificSection = `
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+        <div class="config-label" style="margin-bottom:8px">⚙️ 条件参数</div>
+        ${timeInfo ? `
+        <div class="config-field">
+          <div class="config-label">${timeInfo.label}</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input class="config-input" type="time" style="flex:1" value="${node.config.startTime || timeInfo.start}" onchange="updateNodeConfig(${node.id}, 'startTime', this.value)" />
+            <span style="color:#999">至</span>
+            <input class="config-input" type="time" style="flex:1" value="${node.config.endTime || timeInfo.end}" onchange="updateNodeConfig(${node.id}, 'endTime', this.value)" />
+          </div>
+        </div>
+        ` : ''}
+        ${node.defId === 'normal_mode' ? `
+        <div class="config-field">
+          <div class="config-label">运营模式</div>
+          <select class="config-select" onchange="updateNodeConfig(${node.id}, 'mode', this.value)">
+            <option value="normal" ${node.config.mode==='normal'?'selected':''}>正常运营</option>
+            <option value="maintenance" ${node.config.mode==='maintenance'?'selected':''}>维护模式</option>
+            <option value="emergency" ${node.config.mode==='emergency'?'selected':''}>应急模式</option>
+          </select>
+        </div>
+        ` : ''}
+        <div class="config-field">
+          <div class="config-label">条件逻辑</div>
+          <select class="config-select" onchange="updateNodeConfig(${node.id}, 'logic', this.value)">
+            <option value="and" ${node.config.logic==='and'?'selected':''}>满足所有条件 (AND)</option>
+            <option value="or" ${node.config.logic==='or'?'selected':''}>满足任一条件 (OR)</option>
+          </select>
+        </div>
+      </div>
+    `;
+  }
+
+  // ===== ACTION: 执行参数设置 =====
+  if (node.type === 'action') {
+    const isNotification = NODE_DEFS[node.defId]?.subtype === 'notification';
+
+    if (isNotification) {
+      // ===== 告警推送类：专属配置 =====
+      // 推送方式配置（key 对应 node.config.pushType）
+      const pushTypeConfigs = {};
+      pushTypeConfigs.email = {
+        label: '📧 电子邮件',
+        channels: [
+          { id: 'smtp', name: 'SMTP 邮件服务器', icon: '🖥️' },
+          { id: 'exchange', name: 'Exchange 邮件', icon: '🏢' },
+        ],
+        fields: [
+          { key: 'recipients', label: '收件人', type: 'text', placeholder: '多个邮箱用逗号分隔，如: zhangsan@metro.com, lisi@metro.com' },
+          { key: 'cc', label: '抄送人', type: 'text', placeholder: '可选，多个邮箱用逗号分隔' },
+          { key: 'subject', label: '邮件主题', type: 'text', placeholder: '如: 【告警】' + '${alarmName}' + ' - ' + '${severity}' },
+          { key: 'bodyTemplate', label: '邮件正文模板', type: 'textarea', placeholder: '支持变量: ' + '${alarmName}' + ', ' + '${severity}' + ', ' + '${deviceName}' + ', ' + '${time}' + ', ' + '${value}' },
+        ],
+        defaultBody: '告警名称: ' + '${alarmName}' + '\n告警级别: ' + '${severity}' + '\n设备名称: ' + '${deviceName}' + '\n触发时间: ' + '${time}' + '\n当前值: ' + '${value}' + '\n\n请及时处理。'
+      };
+      pushTypeConfigs.sms = {
+        label: '📱 短信',
+        channels: [
+          { id: 'aliyun', name: '阿里云短信', icon: '☁️' },
+          { id: 'tencent', name: '腾讯云短信', icon: '📱' },
+          { id: 'huawei', name: '华为云短信', icon: '🌐' },
+        ],
+        fields: [
+          { key: 'recipients', label: '接收号码', type: 'text', placeholder: '多个手机号用逗号分隔，如: 138****1234, 139****5678' },
+          { key: 'smsTemplate', label: '短信模板ID', type: 'text', placeholder: '如: SMS_20240101' },
+          { key: 'smsContent', label: '短信内容', type: 'textarea', placeholder: '支持变量: ' + '${alarmName}' + ', ' + '${severity}' + ', ' + '${deviceName}' + ', ' + '${time}' },
+          { key: 'signName', label: '短信签名', type: 'text', placeholder: '如: 地铁运营中心' },
+        ],
+        defaultBody: '【地铁告警】' + '${alarmName}' + '，级别:' + '${severity}' + '，设备:' + '${deviceName}' + '，时间:' + '${time}' + '。'
+      };
+      pushTypeConfigs.wechat = {
+        label: '💬 企业微信',
+        channels: [
+          { id: 'wechat_work', name: '企业微信机器人', icon: '🤖' },
+          { id: 'wechat_app', name: '企业微信应用消息', icon: '💼' },
+        ],
+        fields: [
+          { key: 'webhook', label: 'Webhook 地址', type: 'text', placeholder: '如: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx' },
+          { key: 'mentionedList', label: '@指定成员', type: 'text', placeholder: '可选，企业微信用户ID，用逗号分隔。@all 表示所有人' },
+          { key: 'msgType', label: '消息类型', type: 'select', options: ['markdown', 'text', 'news'], labels: ['Markdown (推荐)', '纯文本', '图文消息'] },
+          { key: 'contentTemplate', label: '消息内容模板', type: 'textarea', placeholder: '支持变量: ' + '${alarmName}' + ', ' + '${severity}' + ', ' + '${deviceName}' + ', ' + '${time}' + ', ' + '${value}' },
+        ],
+        defaultBody: '## 🚨 告警通知\n> **' + '${alarmName}' + '**\n\n- **级别**: <font color="warning">' + '${severity}' + '</font>\n- **设备**: ' + '${deviceName}' + '\n- **时间**: ' + '${time}' + '\n- **当前值**: ' + '${value}' + '\n\n> 请相关人员及时处理！'
+      };
+      pushTypeConfigs.notification = {
+        label: '🔔 站内通知',
+        channels: [
+          { id: 'platform', name: '平台站内通知', icon: '🔔' },
+          { id: 'app_push', name: 'APP 推送', icon: '📲' },
+          { id: 'websocket', name: 'WebSocket 实时推送', icon: '⚡' },
+        ],
+        fields: [
+          { key: 'recipients', label: '通知对象', type: 'text', placeholder: '用户ID或角色，如: admin, ops_team, maintainer' },
+          { key: 'notifyTitle', label: '通知标题', type: 'text', placeholder: '如: ' + '${alarmName}' },
+          { key: 'notifyContent', label: '通知内容', type: 'textarea', placeholder: '支持变量: ' + '${alarmName}' + ', ' + '${severity}' + ', ' + '${deviceName}' + ', ' + '${time}' },
+          { key: 'jumpUrl', label: '跳转链接', type: 'text', placeholder: '可选，点击通知后跳转的页面地址' },
+        ],
+        defaultBody: '${alarmName}' + '（' + '${severity}' + '），设备: ' + '${deviceName}' + '，时间: ' + '${time}'
+      };
+
+      const currentPushType = node.config.pushType || 'email';
+      const ptc = pushTypeConfigs[currentPushType] || pushTypeConfigs.email;
+
+      typeSpecificSection = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:8px">📡 推送方式</div>
+          <div class="config-field">
+            <div class="config-label">选择推送方式</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id}, 'pushType', this.value); openConfig(${node.id})">
+              <option value="email" ${currentPushType==='email'?'selected':''}>📧 电子邮件</option>
+              <option value="sms" ${currentPushType==='sms'?'selected':''}>📱 短信</option>
+              <option value="wechat" ${currentPushType==='wechat'?'selected':''}>💬 企业微信</option>
+              <option value="notification" ${currentPushType==='notification'?'selected':''}>🔔 站内通知</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:8px">🔧 服务渠道</div>
+          <div class="config-field">
+            <div class="config-label">服务提供商</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id}, 'channel', this.value)">
+              ${(ptc.channels || []).map(ch => '<option value="' + ch.id + '"' + (node.config.channel===ch.id?' selected':'') + '>' + ch.icon + ' ' + ch.name + '</option>').join('')}
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:8px">👥 接收人与内容</div>
+          ${(ptc.fields || []).map(f => {
+            if (f.type === 'textarea') {
+              return '<div class="config-field"><div class="config-label">' + f.label + '</div><textarea class="config-textarea" rows="3" placeholder="' + f.placeholder + '" onchange="updateNodeConfig(' + node.id + ', \'' + f.key + '\', this.value)">' + (node.config[f.key] || (f.key === 'bodyTemplate' || f.key === 'smsContent' || f.key === 'contentTemplate' || f.key === 'notifyContent' ? ptc.defaultBody : '')) + '</textarea></div>';
+            } else if (f.type === 'select') {
+              return '<div class="config-field"><div class="config-label">' + f.label + '</div><select class="config-select" onchange="updateNodeConfig(' + node.id + ', \'' + f.key + '\', this.value)">' + (f.options || []).map(function(opt, i) { return '<option value="' + opt + '"' + (node.config[f.key]===opt?' selected':'') + '>' + ((f.labels||[])[i] || opt) + '</option>'; }).join('') + '</select></div>';
+            } else {
+              return '<div class="config-field"><div class="config-label">' + f.label + '</div><input class="config-input" placeholder="' + f.placeholder + '" value="' + (node.config[f.key] || '') + '" onchange="updateNodeConfig(' + node.id + ', \'' + f.key + '\', this.value)" /></div>';
+            }
+          }).join('')}
+        </div>
+
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:8px">⏱️ 执行控制</div>
+          <div class="config-field">
+            <div class="config-label">执行延迟 (秒)</div>
+            <input class="config-input" type="number" min="0" placeholder="0" value="${node.config.execDelay || 0}" onchange="updateNodeConfig(${node.id}, 'execDelay', parseInt(this.value)||0)" />
+          </div>
+          <div class="config-field">
+            <div class="config-label">重试次数</div>
+            <input class="config-input" type="number" min="0" max="5" placeholder="0" value="${node.config.retryCount || 0}" onchange="updateNodeConfig(${node.id}, 'retryCount', parseInt(this.value)||0)" />
+          </div>
+          <div class="config-field">
+            <div class="config-label">超时时间 (秒)</div>
+            <input class="config-input" type="number" min="1" placeholder="30" value="${node.config.timeout || 30}" onchange="updateNodeConfig(${node.id}, 'timeout', parseInt(this.value)||30)" />
+          </div>
+          <div class="config-field">
+            <div class="config-label">失败时继续执行后续节点</div>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="checkbox" ${node.config.continueOnError?'checked':''} onchange="updateNodeConfig(${node.id}, 'continueOnError', this.checked)" />
+              <span style="font-size:13px">${node.config.continueOnError?'是':'否'}</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:8px">📋 可用变量</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px">
+            ${('${alarmName},${severity},${deviceName},${station},${time},${value},${ruleChain}'.split(',')).map(v =>
+              '<span style="display:inline-block;padding:2px 8px;background:#FFF3E0;color:#E65100;border-radius:4px;font-size:11px;font-family:monospace;border:1px solid #FFCC80">${' + v + '}</span>'
+            ).join('')}
+          </div>
+        </div>
+      `;
+    } else {
+      // ===== 设备控制类：原有配置 =====
+      const actionParams = {
+        fan_boost: { param: 'fan_speed', options: ['low', 'medium', 'high'], label: '风机转速' },
+        pump_start: { param: 'pump_mode', options: ['auto', 'manual', 'force'], label: '水泵模式' },
+        send_alert: { param: 'alert_level', options: ['info', 'warning', 'critical'], label: '告警级别' },
+        broadcast: { param: 'broadcast_type', options: ['auto', 'manual'], label: '广播类型' },
+        close_door: { param: 'door_action', options: ['close', 'lock'], label: '门动作' },
+        evacuate: { param: 'evacuate_level', options: ['partial', 'full'], label: '疏散级别' },
+        log_event: { param: 'log_level', options: ['debug', 'info', 'warn', 'error'], label: '日志级别' },
+        delay_train: { param: 'train_action', options: ['slow', 'hold', 'bypass'], label: '列车动作' },
+      };
+      const actionInfo = actionParams[node.defId];
+
+      typeSpecificSection = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:8px">⚙️ 执行参数</div>
+          ${actionInfo ? `
+          <div class="config-field">
+            <div class="config-label">${actionInfo.label}</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id}, 'actionParam', this.value)">
+              ${actionInfo.options.map(opt => `<option value="${opt}" ${node.config.actionParam===opt?'selected':''}>${opt.toUpperCase()}</option>`).join('')}
+            </select>
+          </div>
+          ` : ''}
+          <div class="config-field">
+            <div class="config-label">执行延迟 (秒)</div>
+            <input class="config-input" type="number" min="0" placeholder="0" value="${node.config.execDelay || 0}" onchange="updateNodeConfig(${node.id}, 'execDelay', parseInt(this.value)||0)" />
+          </div>
+          <div class="config-field">
+            <div class="config-label">重试次数</div>
+            <input class="config-input" type="number" min="0" max="5" placeholder="0" value="${node.config.retryCount || 0}" onchange="updateNodeConfig(${node.id}, 'retryCount', parseInt(this.value)||0)" />
+          </div>
+          <div class="config-field">
+            <div class="config-label">超时时间 (秒)</div>
+            <input class="config-input" type="number" min="1" placeholder="30" value="${node.config.timeout || 30}" onchange="updateNodeConfig(${node.id}, 'timeout', parseInt(this.value)||30)" />
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  configBody.innerHTML = `
+    <div class="config-field">
+      <div class="config-label">节点名称</div>
+      <input class="config-input" value="${node.name}" onchange="updateNodeConfig(${node.id}, 'name', this.value)" />
+    </div>
+    <div class="config-field">
+      <div class="config-label">条件表达式</div>
+      <textarea class="config-textarea" onchange="updateNodeConfig(${node.id}, 'cond', this.value)">${node.cond}</textarea>
+    </div>
+    <div class="config-field">
+      <div class="config-label">优先级</div>
+      <select class="config-select" onchange="updateNodeConfig(${node.id}, 'priority', this.value)">
+        <option value="low" ${node.config.priority==='low'?'selected':''}>低</option>
+        <option value="medium" ${node.config.priority==='medium' || !node.config.priority?'selected':''}>中</option>
+        <option value="high" ${node.config.priority==='high'?'selected':''}>高</option>
+        <option value="critical" ${node.config.priority==='critical'?'selected':''}>紧急</option>
+      </select>
+    </div>
+    <div class="config-field">
+      <div class="config-label">是否启用</div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" ${node.config.enabled!==false?'checked':''} onchange="updateNodeConfig(${node.id}, 'enabled', this.checked)" />
+        <span style="font-size:13px">${node.config.enabled!==false?'已启用':'已禁用'}</span>
+      </label>
+    </div>
+    <div class="config-field">
+      <div class="config-label">备注说明</div>
+      <textarea class="config-textarea" placeholder="添加备注..." onchange="updateNodeConfig(${node.id}, 'description', this.value)">${node.config.description || ''}</textarea>
+    </div>
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+      <div class="config-label" style="margin-bottom:8px">📊 连接信息</div>
+      <div style="font-size:12px;color:#666">
+        <div>入站连接: ${state.connections.filter(c=>c.to===node.id).length} 条</div>
+        <div>出站连接: ${state.connections.filter(c=>c.from===node.id).length} 条</div>
+      </div>
+    </div>
+    ${typeSpecificSection}
+  `;
+  configPanel.classList.add('open');
+}
+
+function closeConfig() { configPanel.classList.remove('open'); }
+
+function updateNodeConfig(nodeId, key, value) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  if (key === 'name' || key === 'cond') {
+    node[key] = value;
+    const el = document.getElementById(`node-${nodeId}`);
+    if (el) {
+      el.querySelector('.node-header').innerHTML = `<span class="node-icon">${node.icon}</span>${node.name}`;
+      el.querySelector('.node-cond').textContent = node.cond;
+    }
+  } else {
+    node.config[key] = value;
+  }
+  saveHistory();
+}
+
+// ===== CONTEXT MENU =====
+function duplicateNode() {
+  contextMenu.style.display = 'none';
+  const node = state.nodes.find(n => n.id === state.selectedNode);
+  if (!node) return;
+  addNode(node.defId, node.type, node.x + 40 + 160, node.y + 40);
+}
+
+function deleteSelectedNode() {
+  contextMenu.style.display = 'none';
+  if (state.selectedNode) removeNode(state.selectedNode);
+}
+
+document.addEventListener('click', () => { contextMenu.style.display = 'none'; });
+
+// ===== ZOOM =====
+function applyZoom() {
+  canvasContainer.style.transform = `scale(${state.zoom})`;
+  canvasContainer.style.transformOrigin = '0 0';
+  document.getElementById('zoomLabel').textContent = Math.round(state.zoom * 100) + '%';
+  renderConnections();
+}
+function zoomIn() { state.zoom = Math.min(2, state.zoom + 0.1); applyZoom(); }
+function zoomOut() { state.zoom = Math.max(0.3, state.zoom - 0.1); applyZoom(); }
+function zoomReset() { state.zoom = 1; applyZoom(); }
+
+canvasContainer.addEventListener('wheel', e => {
+  e.preventDefault();
+  if (e.deltaY < 0) zoomIn(); else zoomOut();
+}, { passive: false });
+
+// ===== MINIMAP =====
+function updateMinimap() {
+  const mc = document.getElementById('minimapCanvas');
+  mc.innerHTML = '';
+  if (state.nodes.length === 0) return;
+  const xs = state.nodes.map(n => n.x);
+  const ys = state.nodes.map(n => n.y);
+  const minX = Math.min(...xs) - 20, maxX = Math.max(...xs) + 200;
+  const minY = Math.min(...ys) - 20, maxY = Math.max(...ys) + 60;
+  const rangeX = maxX - minX || 1, rangeY = maxY - minY || 1;
+  const scale = Math.min(140 / rangeX, 70 / rangeY);
+  const offX = (140 - rangeX * scale) / 2, offY = (70 - rangeY * scale) / 2;
+  const colors = { trigger: '#42A5F5', condition: '#FFA726', action: '#66BB6A' };
+  state.nodes.forEach(n => {
+    const dot = document.createElement('div');
+    dot.className = 'minimap-node';
+    dot.style.left = (offX + (n.x - minX) * scale) + 'px';
+    dot.style.top = (offY + (n.y - minY) * scale) + 'px';
+    dot.style.width = (160 * scale) + 'px';
+    dot.style.height = (50 * scale) + 'px';
+    dot.style.background = colors[n.type] || '#999';
+    mc.appendChild(dot);
+  });
+}
+
+// ===== UNDO / REDO =====
+function saveHistory() {
+  const snapshot = JSON.stringify({ nodes: state.nodes, connections: state.connections, nextId: state.nextId });
+  state.history = state.history.slice(0, state.historyIndex + 1);
+  state.history.push(snapshot);
+  if (state.history.length > state.maxHistory) state.history.shift();
+  state.historyIndex = state.history.length - 1;
+  updateUndoRedoButtons();
+}
+
+function undo() {
+  if (state.historyIndex <= 0) return;
+  state.historyIndex--;
+  restoreSnapshot(state.history[state.historyIndex]);
+}
+
+function redo() {
+  if (state.historyIndex >= state.history.length - 1) return;
+  state.historyIndex++;
+  restoreSnapshot(state.history[state.historyIndex]);
+}
+
+function restoreSnapshot(snapshot) {
+  const data = JSON.parse(snapshot);
+  // Clear canvas
+  document.querySelectorAll('.canvas-node').forEach(el => el.remove());
+  connectionsSvg.querySelectorAll('.connection-path').forEach(p => p.remove());
+  state.nodes = data.nodes;
+  state.connections = data.connections;
+  state.nextId = data.nextId;
+  state.selectedNode = null;
+  closeConfig();
+  state.nodes.forEach(n => renderNode(n));
+  renderConnections();
+  updateStats();
+  updateMinimap();
+  updateUndoRedoButtons();
+}
+
+function updateUndoRedoButtons() {
+  document.getElementById('btnUndo').disabled = state.historyIndex <= 0;
+  document.getElementById('btnRedo').disabled = state.historyIndex >= state.history.length - 1;
+}
+
+document.getElementById('btnUndo').addEventListener('click', undo);
+document.getElementById('btnRedo').addEventListener('click', redo);
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo(); }
+  if (e.ctrlKey && e.key === 'y') { e.preventDefault(); redo(); }
+  if (e.key === 'Delete' && state.selectedNode) { removeNode(state.selectedNode); }
+  if (e.key === 'Escape') { state.selectedNode = null; closeConfig(); contextMenu.style.display = 'none'; }
+});
+
+// ===== STATS =====
+function updateStats() {
+  document.getElementById('nodeCount').textContent = state.nodes.length;
+  document.getElementById('connCount').textContent = state.connections.length;
+}
+
+// ===== TOAST =====
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  const icons = { success: '✅', info: 'ℹ️', warning: '⚠️', error: '❌' };
+  toast.innerHTML = `<span>${icons[type] || ''}</span> ${msg}`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ===== TEST =====
+document.getElementById('btnTest').addEventListener('click', () => {
+  const modal = document.getElementById('testModal');
+  const result = document.getElementById('testResult');
+  if (state.nodes.length === 0) {
+    result.innerHTML = '<div class="test-result test-fail">⚠️ 画布为空，请先添加节点并建立连接。</div>';
+    modal.classList.add('open');
+    return;
+  }
+  const triggers = state.nodes.filter(n => n.type === 'trigger');
+  const conditions = state.nodes.filter(n => n.type === 'condition');
+  const actions = state.nodes.filter(n => n.type === 'action');
+  let issues = [];
+  let log = [];
+
+  triggers.forEach(t => {
+    const outConns = state.connections.filter(c => c.from === t.id);
+    if (outConns.length === 0) issues.push(`触发器 "${t.name}" 没有出站连接`);
+  });
+  actions.forEach(a => {
+    const inConns = state.connections.filter(c => c.to === a.id);
+    if (inConns.length === 0) issues.push(`执行器 "${a.name}" 没有入站连接`);
+  });
+  if (triggers.length === 0) issues.push('缺少触发器节点');
+  if (actions.length === 0) issues.push('缺少执行器节点');
+
+  log.push(`[INFO] 开始测试规则链...`);
+  log.push(`[INFO] 节点总数: ${state.nodes.length} (触发器:${triggers.length}, 条件:${conditions.length}, 执行器:${actions.length})`);
+  log.push(`[INFO] 连接总数: ${state.connections.length}`);
+
+  // Simulate chain traversal
+  const visited = new Set();
+  triggers.forEach(t => {
+    log.push(`[TEST] 检查触发器: ${t.name} (${t.cond})`);
+    const queue = [t.id];
+    while (queue.length > 0) {
+      const curr = queue.shift();
+      if (visited.has(curr)) continue;
+      visited.add(curr);
+      const node = state.nodes.find(n => n.id === curr);
+      if (node && node.type !== 'trigger') log.push(`  → ${node.name} (${node.type})`);
+      state.connections.filter(c => c.from === curr).forEach(c => queue.push(c.to));
+    }
+  });
+
+  const unreachable = state.nodes.filter(n => !visited.has(n.id));
+  unreachable.forEach(n => log.push(`[WARN] 节点 "${n.name}" 未被连接到任何规则链`));
+
+  const passed = issues.length === 0;
+  let html = `<div class="test-result ${passed ? 'test-pass' : 'test-fail'}">${passed ? '✅ 规则链测试通过！所有节点和连接均有效。' : '⚠️ 发现 ' + issues.length + ' 个问题：'}</div>`;
+  if (issues.length > 0) {
+    html += '<ul style="margin:10px 0 10px 20px;font-size:13px;color:#C62828">';
+    issues.forEach(i => html += `<li>${i}</li>`);
+    html += '</ul>';
+  }
+  html += `<div class="test-log">${log.join('\n')}</div>`;
+  result.innerHTML = html;
+  modal.classList.add('open');
+});
+
+function closeTestModal() { document.getElementById('testModal').classList.remove('open'); }
+
+// ===== SAVE =====
+document.getElementById('btnSave').addEventListener('click', () => {
+  if (state.nodes.length === 0) { showToast('画布为空，无法保存', 'warning'); return; }
+  document.getElementById('saveModal').classList.add('open');
+});
+
+function closeSaveModal() { document.getElementById('saveModal').classList.remove('open'); }
+
+// ===== DEVICE ASSOCIATION =====
+function openDeviceModal(nodeId) {
+  deviceModalTargetNodeId = nodeId;
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  selectedDeviceIds = [...(node.deviceIds || [])];
+  document.getElementById('deviceSearchInput').value = '';
+  renderDeviceSelectList('');
+  document.getElementById('deviceModal').classList.add('open');
+}
+
+function closeDeviceModal() { document.getElementById('deviceModal').classList.remove('open'); }
+
+function renderDeviceSelectList(search) {
+  const node = state.nodes.find(n => n.id === deviceModalTargetNodeId);
+  const suggestedTypes = node ? (TRIGGER_DEVICE_MAP[node.defId] || []) : [];
+  const statusText = { online: '在线', offline: '离线', alarm: '告警', warning: '预警' };
+  const searchLower = search.toLowerCase();
+
+  let filtered = DEVICES;
+  if (searchLower) {
+    filtered = filtered.filter(d => d.name.toLowerCase().includes(searchLower) || d.id.toLowerCase().includes(searchLower));
+  }
+
+  // Sort: suggested types first, then others
+  filtered.sort((a, b) => {
+    const aSug = suggestedTypes.includes(a.type) ? 0 : 1;
+    const bSug = suggestedTypes.includes(b.type) ? 0 : 1;
+    return aSug - bSug;
+  });
+
+  const list = document.getElementById('deviceSelectList');
+  list.innerHTML = filtered.map(d => {
+    const isSelected = selectedDeviceIds.includes(d.id);
+    const isSuggested = suggestedTypes.includes(d.type);
+    return `
+      <div class="device-select-item ${isSelected ? 'selected' : ''}" onclick="toggleDeviceSelect('${d.id}', this)">
+        <div class="ds-check">✓</div>
+        <span class="ds-icon">${DEVICE_TYPES[d.type]?.icon || '📦'}</span>
+        <div class="ds-info">
+          <div class="ds-name">${d.name} ${isSuggested ? '<span style="font-size:10px;color:#008B8B;background:#E0F2F1;padding:1px 5px;border-radius:3px;margin-left:4px">推荐</span>' : ''}</div>
+          <div class="ds-meta">${d.station} · ${DEVICE_TYPES[d.type]?.name || d.type} · ${d.id}</div>
+        </div>
+        <span class="ds-status"><span class="ds-status-badge ${d.status}">${statusText[d.status]}</span></span>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterDeviceList(val) { renderDeviceSelectList(val); }
+
+function toggleDeviceSelect(deviceId, el) {
+  const idx = selectedDeviceIds.indexOf(deviceId);
+  if (idx >= 0) {
+    selectedDeviceIds.splice(idx, 1);
+    el.classList.remove('selected');
+  } else {
+    selectedDeviceIds.push(deviceId);
+    el.classList.add('selected');
+  }
+}
+
+function confirmDeviceAssociation() {
+  const node = state.nodes.find(n => n.id === deviceModalTargetNodeId);
+  if (!node) return;
+  node.deviceIds = [...selectedDeviceIds];
+  closeDeviceModal();
+  saveHistory();
+  // Re-render the node to update badge
+  const el = document.getElementById(`node-${node.id}`);
+  if (el) el.remove();
+  renderNode(node);
+  renderConnections();
+  // Refresh config panel if open
+  if (configPanel.classList.contains('open') && state.selectedNode === node.id) {
+    openConfig(node.id);
+  }
+  showToast(`已关联 ${node.deviceIds.length} 个设备到 "${node.name}"`, 'success');
+}
+
+function removeDeviceFromTrigger(nodeId, deviceId) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  node.deviceIds = (node.deviceIds || []).filter(id => id !== deviceId);
+  const dev = DEVICES.find(d => d.id === deviceId);
+  saveHistory();
+  // Re-render node
+  const el = document.getElementById(`node-${nodeId}`);
+  if (el) el.remove();
+  renderNode(node);
+  renderConnections();
+  // Refresh config
+  if (configPanel.classList.contains('open') && state.selectedNode === nodeId) {
+    openConfig(nodeId);
+  }
+  showToast(`已解除设备 "${dev?.name || deviceId}" 的关联`, 'warning');
+}
+
+function confirmSave() {
+  const name = document.getElementById('ruleName').value;
+  const desc = document.getElementById('ruleDesc').value;
+  const data = {
+    name, description: desc,
+    nodes: state.nodes.map(n => ({ id: n.id, defId: n.defId, type: n.type, name: n.name, cond: n.cond, x: Math.round(n.x), y: Math.round(n.y), config: n.config })),
+    connections: state.connections,
+    createdAt: new Date().toISOString(),
+  };
+  // Download as JSON
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${name}.json`; a.click();
+  URL.revokeObjectURL(url);
+  closeSaveModal();
+  showToast(`规则链 "${name}" 已保存`, 'success');
+}
+
+// ===== INIT =====
+saveHistory();
+updateStats();
+</script>
+</body>
+</html>

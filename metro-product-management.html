@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>产品 - IoT</title>
+<style>
+:root {
+  --primary: #008B8B;
+  --primary-light: #00A0A0;
+  --primary-lighter: #E0F7F7;
+  --primary-dark: #006B6B;
+  --bg: #F0F2F5;
+  --card-bg: #FFFFFF;
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --border: #E5E7EB;
+  --border-light: #F3F4F6;
+  --success: #10B981;
+  --success-bg: #D1FAE5;
+  --warning: #F59E0B;
+  --warning-bg: #FEF3C7;
+  --danger: #EF4444;
+  --danger-bg: #FEE2E2;
+  --info: #3B82F6;
+  --info-bg: #DBEAFE;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+  --radius: 8px;
+  --radius-sm: 6px;
+  --radius-lg: 12px;
+  --transition: all 0.2s ease;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  margin: 0;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 200px;
+  height: 100vh;
+  background: #001529;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.sidebar-logo {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+.sidebar-menu {
+  flex: 1;
+  padding: 8px 0;
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  height: 44px;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.menu-item:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+}
+.menu-item.active {
+  color: #fff;
+  background: #1890ff;
+}
+.menu-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #fff;
+}
+.menu-icon {
+  margin-right: 10px;
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+.menu-text {
+  flex: 1;
+}
+.menu-arrow {
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+.menu-arrow.open {
+  transform: rotate(90deg);
+}
+.menu-group .menu-item.has-submenu {
+  color: rgba(255,255,255,0.65);
+}
+.menu-group .menu-item.has-submenu.expanded {
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+}
+.submenu {
+  display: none;
+  background: rgba(0,0,0,0.15);
+}
+.submenu.open {
+  display: block;
+}
+.submenu-item {
+  display: block;
+  padding: 0 20px 0 50px;
+  height: 40px;
+  line-height: 40px;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.submenu-item:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+}
+.submenu-item.active {
+  color: #1890ff;
+  background: rgba(24,144,255,0.08);
+}
+
+/* Main Content */
+.main-content {
+  padding: 16px 20px;
+  margin-left: 200px;
+  flex: 1;
+  min-height: 100vh;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: #fff;
+  color: var(--primary);
+}
+
+.btn-primary:hover {
+  background: rgba(255,255,255,0.9);
+  box-shadow: var(--shadow);
+}
+
+.btn-default {
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.btn-default:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: #DC2626;
+}
+
+.btn-success {
+  background: var(--success);
+  color: #fff;
+}
+
+.btn-success:hover {
+  background: #059669;
+}
+
+.btn-warning {
+  background: var(--warning);
+  color: #fff;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--primary);
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.btn-text:hover {
+  background: var(--primary-lighter);
+}
+
+/* Main Content */
+.main-content {
+  padding: 16px 20px;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.breadcrumb a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  color: var(--primary);
+}
+
+.breadcrumb .separator {
+  color: var(--text-muted);
+}
+
+.breadcrumb .current {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-select {
+  padding: 6px 30px 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--card-bg);
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' stroke='%236B7280' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  transition: var(--transition);
+}
+
+.filter-select:hover {
+  border-color: var(--primary);
+}
+
+.filter-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0,139,139,0.1);
+}
+
+.search-box {
+  position: relative;
+}
+
+.search-box input {
+  padding: 6px 10px 6px 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  width: 200px;
+  outline: none;
+  transition: var(--transition);
+}
+
+.search-box input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0,139,139,0.1);
+  width: 240px;
+}
+
+.search-box::before {
+  content: '🔍';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+}
+
+.view-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.view-toggle button {
+  padding: 6px 10px;
+  border: none;
+  background: var(--card-bg);
+  cursor: pointer;
+  font-size: 14px;
+  transition: var(--transition);
+  line-height: 1;
+}
+
+.view-toggle button:not(:last-child) {
+  border-right: 1px solid var(--border);
+}
+
+.view-toggle button.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.view-toggle button:hover:not(.active) {
+  background: var(--primary-lighter);
+}
+
+/* Stats Bar */
+.stats-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 16px;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+}
+
+.stat-card {
+  flex: 1;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: var(--transition);
+}
+
+.stat-card:last-child {
+  border-right: none;
+}
+
+.stat-card:hover {
+  background: var(--bg-hover);
+}
+
+.stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.stat-icon.total { background: var(--primary-lighter); }
+.stat-icon.published { background: var(--success-bg); }
+.stat-icon.draft { background: var(--warning-bg); }
+.stat-icon.devices { background: var(--info-bg); }
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+/* Table View */
+.table-container {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #F9FAFB;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr {
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+tbody tr:hover {
+  background: var(--primary-lighter);
+}
+
+.product-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.product-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--primary-lighter);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.product-name {
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.product-id {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.status-badge.published {
+  background: var(--success-bg);
+  color: #065F46;
+}
+
+.status-badge.draft {
+  background: #F3F4F6;
+  color: #6B7280;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.published { background: var(--success); }
+.status-dot.draft { background: #9CA3AF; }
+
+.category-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: var(--primary-lighter);
+  color: var(--primary-dark);
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.protocol-tag {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.action-btns {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-btns .btn-text {
+  padding: 4px 6px;
+}
+
+/* Card View */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.product-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  padding: 20px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.product-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius);
+  background: var(--primary-lighter);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.card-id {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+.card-body {
+  margin-bottom: 14px;
+}
+
+.card-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.card-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.card-meta-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.card-meta-value {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+}
+
+.card-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.card-device-count {
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Drawer */
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 200;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.drawer-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: -560px;
+  width: 560px;
+  height: 100%;
+  background: var(--card-bg);
+  z-index: 201;
+  box-shadow: var(--shadow-lg);
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer.open {
+  right: 0;
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.drawer-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.drawer-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.drawer-close:hover {
+  background: var(--bg);
+  color: var(--text-primary);
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.drawer-section {
+  margin-bottom: 24px;
+}
+
+.drawer-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-item.full {
+  grid-column: 1 / -1;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.detail-value {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.detail-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  padding: 10px 14px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+}
+
+.thing-model-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.thing-model-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: #F9FAFB;
+  border-bottom: 1px solid var(--border);
+}
+
+.thing-model-table td {
+  padding: 8px 12px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.thing-model-table tr:last-child td {
+  border-bottom: none;
+}
+
+.drawer-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Toast */
+.toast-container {
+  position: fixed;
+  top: 72px;
+  right: 20px;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  font-size: 13px;
+  color: #fff;
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+  min-width: 240px;
+}
+
+.toast.success { background: var(--success); }
+.toast.error { background: var(--danger); }
+.toast.warning { background: var(--warning); }
+.toast.info { background: var(--info); }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(100px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(100px); }
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.empty-state-text {
+  font-size: 14px;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 250;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 480px;
+  max-width: 90vw;
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+.modal-overlay.open .modal {
+  transform: scale(1);
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .toolbar-right {
+    flex-wrap: wrap;
+  }
+  .drawer {
+    width: 100%;
+    right: -100%;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">🚇 IoT</div>
+  <nav class="sidebar-menu">
+    <div class="menu-group">
+      <div class="menu-item has-submenu expanded" onclick="toggleSubmenu(this)">
+        <span class="menu-icon">📊</span>
+        <span class="menu-text">设备管理</span>
+        <span class="menu-arrow open">▶</span>
+      </div>
+      <div class="submenu open" id="submenuDevice">
+        <a href="metro-product-management.html" class="submenu-item active">产品</a>
+        <a href="metro-device-management.html" class="submenu-item">设备</a>
+      </div>
+    </div>
+    <a href="metro-alarm-rule-chain.html" class="menu-item">
+      <span class="menu-icon">⚙️</span>
+      <span class="menu-text">规则引擎</span>
+    </a>
+    <a href="metro-alarm-management.html" class="menu-item">
+      <span class="menu-icon">🚨</span>
+      <span class="menu-text">告警管理</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="breadcrumb">
+      <a href="#">产品</a>
+      <span class="separator">/</span>
+      <span class="current">全部产品</span>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn btn-primary" onclick="showToast('新建产品功能开发中', 'info')">➕ 新建产品</button>
+      <select class="filter-select" id="categoryFilter" onchange="applyFilters()">
+        <option value="">全部分类</option>
+      </select>
+      <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+        <option value="">全部状态</option>
+        <option value="published">已发布</option>
+        <option value="draft">开发中</option>
+      </select>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="搜索产品名称/ID..." oninput="applyFilters()">
+      </div>
+      <div class="view-toggle">
+        <button id="viewToggleBtn" onclick="toggleView()" title="切换视图">🔲</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon total">📦</div>
+      <div class="stat-info">
+        <div class="stat-label">产品总数</div>
+        <div class="stat-value" id="statTotal">10</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon published">✅</div>
+      <div class="stat-info">
+        <div class="stat-label">已发布</div>
+        <div class="stat-value" id="statPublished">8</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon draft">📝</div>
+      <div class="stat-info">
+        <div class="stat-label">开发中</div>
+        <div class="stat-value" id="statDraft">2</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon devices">🔧</div>
+      <div class="stat-info">
+        <div class="stat-label">设备总数</div>
+        <div class="stat-value" id="statDevices">24</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- List View -->
+  <div id="listView" class="table-container">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>产品信息</th>
+            <th>分类</th>
+            <th>型号</th>
+            <th>厂商</th>
+            <th>协议</th>
+            <th>传输方式</th>
+            <th>状态</th>
+            <th>设备数</th>
+            <th>更新时间</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Card View -->
+  <div id="cardView" class="card-grid" style="display:none;">
+  </div>
+
+  <!-- Empty State -->
+  <div id="emptyState" class="empty-state" style="display:none;">
+    <div class="empty-state-icon">🔍</div>
+    <div class="empty-state-text">没有找到匹配的产品</div>
+  </div>
+</main>
+
+<!-- Drawer Overlay -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- Drawer -->
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title" id="drawerTitle">产品详情</div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerBody">
+  </div>
+  <div class="drawer-footer" id="drawerFooter">
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">确认删除</div>
+      <button class="drawer-close" onclick="closeDeleteModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color: var(--text-secondary);">确定要删除产品 <strong id="deleteProductName"></strong> 吗？此操作不可撤销，关联的设备也将被移除。</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeDeleteModal()">取消</button>
+      <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+function toggleSubmenu(el) {
+  const submenu = el.nextElementSibling;
+  const arrow = el.querySelector('.menu-arrow');
+  el.classList.toggle('expanded');
+  arrow.classList.toggle('open');
+  submenu.classList.toggle('open');
+}
+
+const PRODUCTS = [
+  { id:'PRD-001', name:'智能温控器', category:'hvac', model:'TC-2000', manufacturer:'华为', protocol:'MQTT', transport:'TCP', status:'published', deviceCount:4, description:'站台环境温度监测与控制设备', createdAt:'2026-01-15', updatedAt:'2026-04-20' },
+  { id:'PRD-002', name:'CO₂浓度传感器', category:'hvac', model:'CO2-S100', manufacturer:'海康威视', protocol:'MQTT', transport:'TCP', status:'published', deviceCount:3, description:'实时监测空气中CO₂浓度', createdAt:'2026-01-18', updatedAt:'2026-04-18' },
+  { id:'PRD-003', name:'智能风机控制器', category:'fan', model:'FC-3000', manufacturer:'西门子', protocol:'Modbus TCP', transport:'TCP', status:'published', deviceCount:3, description:'地铁通风系统智能控制', createdAt:'2026-02-01', updatedAt:'2026-04-15' },
+  { id:'PRD-004', name:'液位传感器', category:'pump', model:'LS-500', manufacturer:'艾默生', protocol:'MQTT', transport:'TCP', status:'published', deviceCount:2, description:'集水池液位实时监测', createdAt:'2026-02-10', updatedAt:'2026-04-12' },
+  { id:'PRD-005', name:'排水泵控制器', category:'pump', model:'PC-800', manufacturer:'施耐德', protocol:'Modbus RTU', transport:'RS485', status:'published', deviceCount:2, description:'排水泵启停控制与状态监测', createdAt:'2026-02-15', updatedAt:'2026-04-10' },
+  { id:'PRD-006', name:'屏蔽门控制器', category:'door', model:'DC-1000', manufacturer:'方大集团', protocol:'OPC UA', transport:'TCP', status:'published', deviceCount:3, description:'站台屏蔽门开关控制与状态监测', createdAt:'2026-03-01', updatedAt:'2026-04-08' },
+  { id:'PRD-007', name:'扶梯监测终端', category:'escalator', model:'EM-200', manufacturer:'三菱', protocol:'MQTT', transport:'TCP', status:'draft', deviceCount:2, description:'电扶梯运行状态监测与故障预警', createdAt:'2026-03-10', updatedAt:'2026-04-05' },
+  { id:'PRD-008', name:'烟雾探测器', category:'fire', model:'SD-100', manufacturer:'海湾安全技术', protocol:'MQTT', transport:'TCP', status:'published', deviceCount:2, description:'高灵敏度光电烟雾探测', createdAt:'2026-03-15', updatedAt:'2026-04-01' },
+  { id:'PRD-009', name:'电力监测仪', category:'power', model:'PM-5000', manufacturer:'ABB', protocol:'Modbus TCP', transport:'TCP', status:'draft', deviceCount:2, description:'供电系统电压电流功率监测', createdAt:'2026-03-20', updatedAt:'2026-03-28' },
+  { id:'PRD-010', name:'温湿度传感器', category:'hvac', model:'TH-300', manufacturer:'霍尼韦尔', protocol:'MQTT', transport:'TCP', status:'published', deviceCount:1, description:'环境温湿度一体化监测', createdAt:'2026-04-01', updatedAt:'2026-04-22' },
+];
+
+const PRODUCT_CATEGORIES = {
+  hvac: { name: '环境监控', icon: '🌡️' },
+  fan: { name: '通风系统', icon: '🌀' },
+  pump: { name: '排水系统', icon: '💧' },
+  door: { name: '屏蔽门系统', icon: '🚪' },
+  escalator: { name: '电扶梯系统', icon: '🛑' },
+  fire: { name: '消防系统', icon: '🔥' },
+  power: { name: '供电系统', icon: '⚡' }
+};
+
+const THING_MODELS = {
+  hvac: [
+    { id: 'temperature', name: '温度', identifier: 'temperature', type: 'float', unit: '°C', desc: '当前环境温度' },
+    { id: 'humidity', name: '湿度', identifier: 'humidity', type: 'float', unit: '%RH', desc: '当前环境湿度' },
+    { id: 'co2', name: 'CO₂浓度', identifier: 'co2', type: 'float', unit: 'ppm', desc: 'CO₂浓度值' },
+    { id: 'status', name: '设备状态', identifier: 'status', type: 'enum', unit: '', desc: '在线/离线/故障' },
+    { id: 'reportInterval', name: '上报间隔', identifier: 'reportInterval', type: 'int', unit: 's', desc: '数据上报周期' },
+  ],
+  fan: [
+    { id: 'speed', name: '转速', identifier: 'speed', type: 'int', unit: 'RPM', desc: '风机当前转速' },
+    { id: 'mode', name: '运行模式', identifier: 'mode', type: 'enum', unit: '', desc: '自动/手动/停止' },
+    { id: 'status', name: '设备状态', identifier: 'status', type: 'enum', unit: '', desc: '运行/停止/故障' },
+    { id: 'vibration', name: '振动值', identifier: 'vibration', type: 'float', unit: 'mm/s', desc: '风机振动幅度' },
+  ],
+  pump: [
+    { id: 'level', name: '液位', identifier: 'level', type: 'float', unit: 'm', desc: '当前液位高度' },
+    { id: 'pumpStatus', name: '泵状态', identifier: 'pumpStatus', type: 'enum', unit: '', desc: '运行/停止/故障' },
+    { id: 'flowRate', name: '流量', identifier: 'flowRate', type: 'float', unit: 'm³/h', desc: '排水流量' },
+    { id: 'status', name: '设备状态', identifier: 'status', type: 'enum', unit: '', desc: '在线/离线/故障' },
+  ],
+  door: [
+    { id: 'doorStatus', name: '门状态', identifier: 'doorStatus', type: 'enum', unit: '', desc: '开/关/故障' },
+    { id: 'openCount', name: '开关次数', identifier: 'openCount', type: 'int', unit: '次', desc: '当日开关次数' },
+    { id: 'motorTemp', name: '电机温度', identifier: 'motorTemp', type: 'float', unit: '°C', desc: '电机运行温度' },
+    { id: 'status', name: '设备状态', identifier: 'status', type: 'enum', unit: '', desc: '正常/告警/故障' },
+  ],
+  escalator: [
+    { id: 'runStatus', name: '运行状态', identifier: 'runStatus', type: 'enum', unit: '', desc: '上行/下行/停止' },
+    { id: 'speed', name: '运行速度', identifier: 'speed', type: 'float', unit: 'm/s', desc: '当前运行速度' },
+    { id: 'passengerCount', name: '乘客计数', identifier: 'passengerCount', type: 'int', unit: '人', desc: '当日乘客数' },
+    { id: 'alarm', name: '故障码', identifier: 'alarm', type: 'string', unit: '', desc: '当前故障码' },
+    { id: 'status', name: '设备状态', identifier: 'status', type: 'enum', unit: '', desc: '正常/告警/故障' },
+  ],
+  fire: [
+    { id: 'smokeValue', name: '烟雾浓度', identifier: 'smokeValue', type: 'float', unit: '%obs/m', desc: '烟雾浓度值' },
+    { id: 'batteryLevel', name: '电池电量', identifier: 'batteryLevel', type: 'int', unit: '%', desc: '电池剩余电量' },
+    { id: 'alarm', name: '告警状态', identifier: 'alarm', type: 'enum', unit: '', desc: '正常/预警/火警' },
+    { id: 'status', name: '设备状态', identifier: 'status', type: 'enum', unit: '', desc: '在线/离线/故障' },
+  ],
+  power: [
+    { id: 'voltage', name: '电压', identifier: 'voltage', type: 'float', unit: 'V', desc: '当前电压值' },
+    { id: 'current', name: '电流', identifier: 'current', type: 'float', unit: 'A', desc: '当前电流值' },
+    { id: 'power', name: '功率', identifier: 'power', type: 'float', unit: 'kW', desc: '当前功率' },
+    { id: 'energy', name: '电能', identifier: 'energy', type: 'float', unit: 'kWh', desc: '累计用电量' },
+    { id: 'status', name: '设备状态', identifier: 'status', type: 'enum', unit: '', desc: '正常/告警/故障' },
+  ],
+};
+
+let currentView = 'card';
+let filteredProducts = [...PRODUCTS];
+let selectedProduct = null;
+let deleteTargetId = null;
+
+// Initialize
+function init() {
+  populateCategoryFilter();
+  applyFilters();
+}
+
+function populateCategoryFilter() {
+  const select = document.getElementById('categoryFilter');
+  Object.entries(PRODUCT_CATEGORIES).forEach(([key, val]) => {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = `${val.icon} ${val.name}`;
+    select.appendChild(opt);
+  });
+}
+
+function applyFilters() {
+  const category = document.getElementById('categoryFilter').value;
+  const status = document.getElementById('statusFilter').value;
+  const search = document.getElementById('searchInput').value.toLowerCase().trim();
+
+  filteredProducts = PRODUCTS.filter(p => {
+    if (category && p.category !== category) return false;
+    if (status && p.status !== status) return false;
+    if (search && !p.name.toLowerCase().includes(search) && !p.id.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  updateStats();
+  renderListView();
+  renderCardView();
+  toggleEmptyState();
+}
+
+function updateStats() {
+  const total = filteredProducts.length;
+  const published = filteredProducts.filter(p => p.status === 'published').length;
+  const draft = filteredProducts.filter(p => p.status === 'draft').length;
+  const devices = filteredProducts.reduce((sum, p) => sum + p.deviceCount, 0);
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statPublished').textContent = published;
+  document.getElementById('statDraft').textContent = draft;
+  document.getElementById('statDevices').textContent = devices;
+}
+
+function getCategoryInfo(category) {
+  return PRODUCT_CATEGORIES[category] || { name: '未知', icon: '❓' };
+}
+
+function getStatusLabel(status) {
+  return status === 'published' ? '已发布' : '开发中';
+}
+
+function renderListView() {
+  const tbody = document.getElementById('tableBody');
+  if (filteredProducts.length === 0) {
+    tbody.innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = filteredProducts.map(p => {
+    const cat = getCategoryInfo(p.category);
+    return `
+      <tr onclick="location.href='metro-product-detail.html?id=${p.id}'">
+        <td>
+          <div class="product-cell">
+            <div class="product-icon">${cat.icon}</div>
+            <div>
+              <div class="product-name">${p.name}</div>
+              <div class="product-id">${p.id}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="category-tag">${cat.icon} ${cat.name}</span></td>
+        <td>${p.model}</td>
+        <td>${p.manufacturer}</td>
+        <td><span class="protocol-tag">${p.protocol}</span></td>
+        <td>${p.transport}</td>
+        <td><span class="status-badge ${p.status}"><span class="status-dot ${p.status}"></span>${getStatusLabel(p.status)}</span></td>
+        <td>${p.deviceCount}</td>
+        <td>${p.updatedAt}</td>
+        <td>
+          <div class="action-btns" onclick="event.stopPropagation()">
+            <button class="btn-text" onclick="location.href='metro-product-detail.html?id=${p.id}'">详情</button>
+            <button class="btn-text" onclick="editProduct('${p.id}')">编辑</button>
+            <button class="btn-text" style="color:var(--danger)" onclick="deleteProduct('${p.id}')">删除</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderCardView() {
+  const container = document.getElementById('cardView');
+  if (filteredProducts.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = filteredProducts.map(p => {
+    const cat = getCategoryInfo(p.category);
+    return `
+      <div class="product-card" onclick="location.href='metro-product-detail.html?id=${p.id}'">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon">${cat.icon}</div>
+            <div>
+              <div class="card-title">${p.name}</div>
+              <div class="card-id">${p.id}</div>
+            </div>
+          </div>
+          <span class="status-badge ${p.status}"><span class="status-dot ${p.status}"></span>${getStatusLabel(p.status)}</span>
+        </div>
+        <div class="card-body">
+          <div class="card-desc">${p.description}</div>
+          <div class="card-meta">
+            <div class="card-meta-item">
+              <span class="card-meta-label">型号</span>
+              <span class="card-meta-value">${p.model}</span>
+            </div>
+            <div class="card-meta-item">
+              <span class="card-meta-label">厂商</span>
+              <span class="card-meta-value">${p.manufacturer}</span>
+            </div>
+            <div class="card-meta-item">
+              <span class="card-meta-label">协议</span>
+              <span class="card-meta-value">${p.protocol}</span>
+            </div>
+            <div class="card-meta-item">
+              <span class="card-meta-label">传输</span>
+              <span class="card-meta-value">${p.transport}</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="category-tag">${cat.icon} ${cat.name}</span>
+          </div>
+          <div class="card-device-count">🔗 ${p.deviceCount} 台设备</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleEmptyState() {
+  const empty = document.getElementById('emptyState');
+  const listView = document.getElementById('listView');
+  const cardView = document.getElementById('cardView');
+
+  if (filteredProducts.length === 0) {
+    empty.style.display = 'block';
+    listView.style.display = 'none';
+    cardView.style.display = 'none';
+  } else {
+    empty.style.display = 'none';
+    if (currentView === 'list') {
+      listView.style.display = 'block';
+      cardView.style.display = 'none';
+    } else {
+      listView.style.display = 'none';
+      cardView.style.display = 'grid';
+    }
+  }
+}
+
+function switchView(view) {
+  currentView = view;
+  document.getElementById('viewToggleBtn').textContent = view === 'card' ? '🔲' : '📋';
+  document.getElementById('viewToggleBtn').title = view === 'card' ? '切换为列表视图' : '切换为卡片视图';
+  toggleEmptyState();
+}
+
+function toggleView() {
+  switchView(currentView === 'card' ? 'list' : 'card');
+}
+
+function openDrawer(productId) {
+  selectedProduct = PRODUCTS.find(p => p.id === productId);
+  if (!selectedProduct) return;
+
+  const cat = getCategoryInfo(selectedProduct.category);
+  const models = THING_MODELS[selectedProduct.category] || [];
+
+  document.getElementById('drawerTitle').innerHTML = `${cat.icon} ${selectedProduct.name}`;
+
+  document.getElementById('drawerBody').innerHTML = `
+    <div class="drawer-section">
+      <div class="drawer-section-title">📋 基本信息</div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">产品名称</span>
+          <span class="detail-value">${selectedProduct.name}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">产品ID</span>
+          <span class="detail-value" style="font-family:monospace;font-size:13px;">${selectedProduct.id}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">产品分类</span>
+          <span class="detail-value">${cat.icon} ${cat.name}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">产品型号</span>
+          <span class="detail-value">${selectedProduct.model}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">制造商</span>
+          <span class="detail-value">${selectedProduct.manufacturer}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">当前状态</span>
+          <span class="detail-value"><span class="status-badge ${selectedProduct.status}"><span class="status-dot ${selectedProduct.status}"></span>${getStatusLabel(selectedProduct.status)}</span></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">创建时间</span>
+          <span class="detail-value">${selectedProduct.createdAt}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">更新时间</span>
+          <span class="detail-value">${selectedProduct.updatedAt}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">📝 产品描述</div>
+      <div class="detail-desc">${selectedProduct.description}</div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">📡 接入信息</div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">接入协议</span>
+          <span class="detail-value">${selectedProduct.protocol}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">传输方式</span>
+          <span class="detail-value">${selectedProduct.transport}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">🔗 设备统计</div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">关联设备数</span>
+          <span class="detail-value" style="font-size:20px;color:var(--primary);">${selectedProduct.deviceCount} <span style="font-size:13px;color:var(--text-muted);">台</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">🔧 物模型属性</div>
+      <table class="thing-model-table">
+        <thead>
+          <tr>
+            <th>属性名称</th>
+            <th>标识符</th>
+            <th>数据类型</th>
+            <th>单位</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${models.map(m => `
+            <tr>
+              <td style="font-weight:500;">${m.name}</td>
+              <td style="font-family:monospace;font-size:12px;color:var(--text-secondary);">${m.identifier}</td>
+              <td>${m.type}</td>
+              <td>${m.unit || '-'}</td>
+              <td style="color:var(--text-secondary);">${m.desc}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  const statusBtn = selectedProduct.status === 'published'
+    ? `<button class="btn btn-warning" onclick="togglePublish('${selectedProduct.id}')">⬇️ 下架</button>`
+    : `<button class="btn btn-success" onclick="togglePublish('${selectedProduct.id}')">🚀 发布</button>`;
+
+  document.getElementById('drawerFooter').innerHTML = `
+    <button class="btn btn-default" onclick="editProduct('${selectedProduct.id}')">✏️ 编辑</button>
+    ${statusBtn}
+    <div style="flex:1;"></div>
+    <button class="btn btn-danger" onclick="deleteProduct('${selectedProduct.id}')">🗑️ 删除</button>
+  `;
+
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+  selectedProduct = null;
+}
+
+function editProduct(id) {
+  showToast('编辑产品功能开发中', 'info');
+}
+
+function deleteProduct(id) {
+  const product = PRODUCTS.find(p => p.id === id);
+  if (!product) return;
+  deleteTargetId = id;
+  document.getElementById('deleteProductName').textContent = product.name;
+  document.getElementById('deleteModal').classList.add('open');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+  deleteTargetId = null;
+}
+
+function confirmDelete() {
+  if (!deleteTargetId) return;
+  const idx = PRODUCTS.findIndex(p => p.id === deleteTargetId);
+  if (idx !== -1) {
+    PRODUCTS.splice(idx, 1);
+    showToast('产品已删除', 'success');
+    closeDeleteModal();
+    closeDrawer();
+    applyFilters();
+  }
+}
+
+function togglePublish(id) {
+  const product = PRODUCTS.find(p => p.id === id);
+  if (!product) return;
+  product.status = product.status === 'published' ? 'draft' : 'published';
+  const label = product.status === 'published' ? '已发布' : '已下架';
+  showToast(`产品${label}`, 'success');
+  closeDrawer();
+  applyFilters();
+}
+
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+  toast.innerHTML = `<span>${icons[type] || ''}</span><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    if (toast.parentNode) toast.parentNode.removeChild(toast);
+  }, 3000);
+}
+
+// Keyboard shortcut: ESC to close drawer/modal
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeDrawer();
+    closeDeleteModal();
+  }
+});
+
+// Init
+init();
+</script>
+</body>
+</html>
