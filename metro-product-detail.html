@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>产品详情 - IoT</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #f0f2f5; color: #333; font-size: 14px; margin: 0; }
+
+/* Sidebar */
+.sidebar {
+  width: 200px;
+  height: 100vh;
+  background: #001529;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.sidebar-logo {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+.sidebar-menu {
+  flex: 1;
+  padding: 8px 0;
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  height: 44px;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.menu-item:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+}
+.menu-item.active {
+  color: #fff;
+  background: #1890ff;
+}
+.menu-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #fff;
+}
+.menu-icon {
+  margin-right: 10px;
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+.menu-text {
+  flex: 1;
+}
+.menu-arrow {
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+.menu-arrow.open {
+  transform: rotate(90deg);
+}
+.menu-group .menu-item.has-submenu {
+  color: rgba(255,255,255,0.65);
+}
+.menu-group .menu-item.has-submenu.expanded {
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+}
+.submenu {
+  display: none;
+  background: rgba(0,0,0,0.15);
+}
+.submenu.open {
+  display: block;
+}
+.submenu-item {
+  display: block;
+  padding: 0 20px 0 50px;
+  height: 40px;
+  line-height: 40px;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.submenu-item:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+}
+.submenu-item.active {
+  color: #1890ff;
+  background: rgba(24,144,255,0.08);
+}
+
+/* Main Container */
+.main-container { padding: 20px 24px 40px; margin-left: 200px; flex: 1; min-height: 100vh; }
+
+/* Breadcrumb */
+.breadcrumb { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 13px; color: #999; }
+.breadcrumb a { color: #008B8B; text-decoration: none; }
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb .separator { color: #ccc; }
+.breadcrumb .current { color: #333; font-weight: 500; }
+
+/* Card */
+.card { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 20px 24px; margin-bottom: 20px; }
+.card-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0; }
+
+/* Product Info Card */
+.product-info-card { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+.product-info-left { display: flex; align-items: center; gap: 16px; }
+.product-icon { width: 56px; height: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #fff; flex-shrink: 0; }
+.product-name { font-size: 20px; font-weight: 600; color: #333; margin-bottom: 6px; }
+.product-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.product-type-tag { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 12px; background: #e6f7f7; color: #008B8B; border: 1px solid #b2e0e0; }
+.product-id { font-size: 12px; color: #999; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+.product-info-right { display: flex; gap: 16px; }
+.stat-card { background: #f8fffe; border: 1px solid #e0f0ef; border-radius: 8px; padding: 16px 28px; text-align: center; min-width: 120px; }
+.stat-card .stat-value { font-size: 28px; font-weight: 700; color: #008B8B; line-height: 1.2; }
+.stat-card .stat-label { font-size: 12px; color: #999; margin-top: 4px; }
+
+/* Description List Grid */
+.desc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+.desc-item { padding: 14px 16px; border-bottom: 1px solid #f5f5f5; display: flex; flex-direction: column; gap: 4px; }
+.desc-item:nth-child(4n+1) { border-left: 1px solid #f5f5f5; }
+.desc-item:nth-child(4n) { border-right: 1px solid #f5f5f5; }
+.desc-item:nth-child(-n+4) { border-top: 1px solid #f5f5f5; }
+.desc-item:nth-last-child(-n+4) { border-bottom: none; }
+.desc-label { font-size: 12px; color: #999; }
+.desc-value { font-size: 14px; color: #333; word-break: break-all; }
+
+/* Tab Navigation */
+.tab-nav { display: flex; border-bottom: 2px solid #f0f0f0; margin-bottom: 0; background: #fff; border-radius: 8px 8px 0 0; padding: 0 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.tab-btn { padding: 14px 20px; font-size: 14px; color: #666; cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.tab-btn:hover { color: #008B8B; }
+.tab-btn.active { color: #008B8B; border-bottom-color: #008B8B; font-weight: 500; }
+
+/* Tab Content */
+.tab-content { background: #fff; border-radius: 0 0 8px 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 20px 24px; margin-bottom: 20px; display: none; }
+.tab-content.active { display: block; }
+
+/* Search Bar */
+.search-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+.search-left { display: flex; align-items: center; gap: 8px; }
+.search-input { padding: 7px 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; width: 240px; outline: none; transition: border-color 0.2s; }
+.search-input:focus { border-color: #008B8B; box-shadow: 0 0 0 2px rgba(0,139,139,0.1); }
+
+/* Section Header */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.section-title { font-size: 15px; font-weight: 600; color: #333; padding-left: 10px; border-left: 3px solid #1890ff; line-height: 1; }
+.section-search { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.search-field { display: flex; align-items: center; gap: 6px; }
+.search-label { font-size: 13px; color: #666; white-space: nowrap; }
+
+/* Data Table */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table thead th { background: #fafafa; padding: 10px 12px; text-align: left; font-weight: 600; color: #333; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+.data-table tbody td { padding: 10px 12px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+.data-table tbody tr:hover { background: #fafafa; }
+.data-table .device-img { width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 18px; background: #f0f5ff; }
+.data-table .device-name { font-weight: 500; color: #333; }
+.data-table .device-sn { font-family: monospace; font-size: 12px; color: #666; }
+
+/* Status Badge */
+.badge-online { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+.badge-offline { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #fffbe6; color: #faad14; border: 1px solid #ffe58f; }
+
+/* Action Buttons */
+.action-btn { padding: 2px 8px; border-radius: 3px; border: 1px solid #d9d9d9; background: #fff; font-size: 12px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 3px; font-weight: 500; white-space: nowrap; }
+.action-btn:hover { border-color: #1890ff; color: #1890ff; }
+.action-btn.primary { color: #1890ff; border-color: #1890ff; }
+.action-btn.primary:hover { background: #1890ff; color: #fff; }
+.action-btn.danger { color: #ff4d4f; border-color: #ff4d4f; }
+.action-btn.danger:hover { background: #ff4d4f; color: #fff; }
+.action-group { display: flex; gap: 4px; align-items: center; }
+
+/* Pagination */
+.pagination { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 16px; padding-top: 12px; font-size: 13px; color: #666; }
+.pagination .page-info { margin-right: 8px; }
+.pagination .page-size { padding: 4px 8px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 12px; outline: none; }
+.pagination .page-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #d9d9d9; border-radius: 4px; background: #fff; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+.pagination .page-btn:hover { border-color: #1890ff; color: #1890ff; }
+.pagination .page-btn.active { background: #1890ff; color: #fff; border-color: #1890ff; }
+.pagination .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.pagination .page-jump { display: flex; align-items: center; gap: 4px; }
+.pagination .page-jump input { width: 48px; padding: 4px 8px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 12px; text-align: center; outline: none; }
+
+/* Thing Model Editable Table */
+.data-table .cell-input {
+  width: 100%; padding: 6px 8px; border: 1px solid #e8e8e8; border-radius: 4px;
+  font-size: 13px; outline: none; background: #fff; transition: border-color 0.2s;
+}
+.data-table .cell-input:focus { border-color: #1890ff; box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+.data-table .cell-input::placeholder { color: #bbb; }
+.data-table .cell-select {
+  width: 100%; padding: 6px 8px; border: 1px solid #e8e8e8; border-radius: 4px;
+  font-size: 13px; outline: none; background: #fff; cursor: pointer;
+}
+.data-table .cell-select:focus { border-color: #1890ff; }
+
+/* Toggle Switch */
+.toggle-switch { position: relative; width: 36px; height: 20px; cursor: pointer; display: inline-block; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: #ccc; border-radius: 20px; transition: 0.3s; }
+.toggle-slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 2px; bottom: 2px; background: #fff; border-radius: 50%; transition: 0.3s; }
+.toggle-switch input:checked + .toggle-slider { background: #ff4d4f; }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+/* Alarm Level Badges */
+.level-critical { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #fff1f0; color: #ff4d4f; border: 1px solid #ffa39e; }
+.level-major { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #fffbe6; color: #faad14; border: 1px solid #ffe58f; }
+.level-minor { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+.level-normal { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+
+/* Config Rows */
+.config-list { display: flex; flex-direction: column; gap: 0; }
+.config-row { display: flex; align-items: center; padding: 16px 24px; border-bottom: 1px solid #f0f0f0; }
+.config-row:last-child { border-bottom: none; }
+.config-row-left { min-width: 220px; flex-shrink: 0; padding-right: 24px; }
+.config-row-title { font-size: 14px; font-weight: 600; color: #333; display: flex; align-items: center; gap: 6px; }
+.config-row-title::before { content: ''; width: 3px; height: 14px; background: #1890ff; border-radius: 2px; display: inline-block; }
+.config-row-desc { font-size: 12px; color: #999; margin-top: 4px; padding-left: 9px; }
+.config-row-center { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+.config-row-right { flex-shrink: 0; display: flex; gap: 8px; margin-left: 16px; }
+.config-row-sep { color: #d9d9d9; margin: 0 4px; }
+.config-row-field { font-size: 13px; color: #666; display: flex; align-items: center; gap: 6px; }
+.toggle-label { font-size: 12px; }
+.toggle-label.on { color: #52c41a; font-weight: 500; }
+.toggle-label.off { color: #999; }
+.config-input { padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; outline: none; width: 120px; transition: border-color 0.2s; }
+.config-input:focus { border-color: #1890ff; box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+.config-select { padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; outline: none; width: 200px; cursor: pointer; }
+.config-select:focus { border-color: #1890ff; }
+
+/* Buttons */
+.btn { padding: 7px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: #333; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; }
+.btn:hover { border-color: #008B8B; color: #008B8B; }
+.btn-primary { background: #008B8B; color: #fff; border-color: #008B8B; }
+.btn-primary:hover { background: #007a7a; border-color: #007a7a; color: #fff; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+.btn-link { border: none; background: none; color: #008B8B; padding: 2px 4px; }
+.btn-link:hover { color: #006666; text-decoration: underline; }
+.btn-link.danger { color: #ff4d4f; }
+.btn-link.danger:hover { color: #d9363e; }
+
+/* Table */
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th { background: #fafafa; padding: 12px 16px; text-align: left; font-size: 13px; font-weight: 600; color: #666; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+tbody td { padding: 12px 16px; font-size: 13px; color: #333; border-bottom: 1px solid #f5f5f5; }
+tbody tr:nth-child(even) { background: #fafbfc; }
+tbody tr:hover { background: #e6f7f7; }
+tbody tr:last-child td { border-bottom: none; }
+
+/* Status Badge */
+.badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 500; }
+.badge-success { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+.badge-default { background: #f5f5f5; color: #999; border: 1px solid #d9d9d9; }
+.badge-warning { background: #fffbe6; color: #faad14; border: 1px solid #ffe58f; }
+.badge-danger { background: #fff2f0; color: #ff4d4f; border: 1px solid #ffccc7; }
+.badge-info { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+
+/* Device Info Cell */
+.device-info { display: flex; align-items: center; gap: 10px; }
+.device-icon { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; flex-shrink: 0; }
+
+/* Form */
+.form-group { margin-bottom: 18px; }
+.form-label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; font-weight: 500; }
+.form-control { padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; width: 300px; outline: none; transition: border-color 0.2s; }
+.form-control:focus { border-color: #008B8B; box-shadow: 0 0 0 2px rgba(0,139,139,0.1); }
+.form-row { display: flex; align-items: center; gap: 12px; }
+.form-switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+.form-switch input { opacity: 0; width: 0; height: 0; }
+.form-switch .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #ccc; border-radius: 22px; transition: 0.3s; }
+.form-switch .slider:before { content: ""; position: absolute; height: 18px; width: 18px; left: 2px; bottom: 2px; background: #fff; border-radius: 50%; transition: 0.3s; }
+.form-switch input:checked + .slider { background: #008B8B; }
+.form-switch input:checked + .slider:before { transform: translateX(22px); }
+
+/* Empty State */
+.empty-state { text-align: center; padding: 60px 20px; color: #999; }
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state .empty-text { font-size: 14px; }
+
+/* Not Found */
+.not-found { text-align: center; padding: 80px 20px; }
+.not-found .not-found-icon { font-size: 64px; margin-bottom: 16px; }
+.not-found h2 { font-size: 20px; color: #333; margin-bottom: 8px; }
+.not-found p { color: #999; margin-bottom: 20px; }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .desc-grid { grid-template-columns: repeat(2, 1fr); }
+  .desc-item:nth-child(4n+1) { border-left: none; }
+  .desc-item:nth-child(4n) { border-right: none; }
+  .desc-item:nth-child(odd) { border-left: 1px solid #f5f5f5; }
+  .desc-item:nth-child(even) { border-right: 1px solid #f5f5f5; }
+}
+@media (max-width: 768px) {
+  .main-container { padding: 12px; }
+  .desc-grid { grid-template-columns: 1fr; }
+  .desc-item:nth-child(odd) { border-left: none; }
+  .desc-item:nth-child(even) { border-right: none; }
+  .product-info-card { flex-direction: column; align-items: flex-start; }
+  .product-info-right { width: 100%; }
+  .stat-card { flex: 1; }
+  .tab-nav { overflow-x: auto; padding: 0 12px; }
+  .tab-btn { padding: 12px 14px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">🚇 IoT</div>
+  <nav class="sidebar-menu">
+    <div class="menu-group">
+      <div class="menu-item has-submenu expanded" onclick="toggleSubmenu(this)">
+        <span class="menu-icon">📊</span>
+        <span class="menu-text">设备管理</span>
+        <span class="menu-arrow open">▶</span>
+      </div>
+      <div class="submenu open" id="submenuDevice">
+        <a href="metro-product-management.html" class="submenu-item active">产品</a>
+        <a href="metro-device-management.html" class="submenu-item">设备</a>
+      </div>
+    </div>
+    <a href="index.html" class="menu-item">
+      <span class="menu-icon">⚙️</span>
+      <span class="menu-text">规则引擎</span>
+    </a>
+    <a href="metro-alarm-management.html" class="menu-item">
+      <span class="menu-icon">🚨</span>
+      <span class="menu-text">告警管理</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- Main Container -->
+<div class="main-container">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="#">首页</a>
+    <span class="separator">/</span>
+    <a href="metro-product-management.html">产品</a>
+    <span class="separator">/</span>
+    <span class="current">产品详情</span>
+  </div>
+
+  <!-- Product Detail Content -->
+  <div id="productDetail"></div>
+
+</div>
+
+<script>
+function toggleSubmenu(el) {
+  const submenu = el.nextElementSibling;
+  const arrow = el.querySelector('.menu-arrow');
+  el.classList.toggle('expanded');
+  arrow.classList.toggle('open');
+  submenu.classList.toggle('open');
+}
+
+// ==================== 产品数据 ====================
+const PRODUCTS = [
+  {
+    id: 'PRD-001', name: '温湿度传感器', type: '直连设备', category: 'hvac',
+    icon: '🌡️', color: '#e74c3c',
+    protocol: 'MQTT', transport: 'WiFi', manufacturer: '华为', status: '已发布',
+    createTime: '2025-01-15 10:30:00', description: '用于地铁站内环境温湿度监测，支持高精度数据采集。',
+    deviceCount: 4, onlineCount: 3,
+    things: [
+      { identifier: 'temperature', name: '温度', dataType: 'float', rw: '只读', unit: '°C', desc: '环境温度' },
+      { identifier: 'humidity', name: '湿度', dataType: 'float', rw: '只读', unit: '%', desc: '环境湿度' },
+      { identifier: 'co2', name: 'CO2浓度', dataType: 'int', rw: '只读', unit: 'ppm', desc: '二氧化碳浓度' },
+      { identifier: 'run_status', name: '运行状态', dataType: 'enum', rw: '只读', unit: '-', desc: '设备运行状态' },
+      { identifier: 'set_temp', name: '设定温度', dataType: 'float', rw: '读写', unit: '°C', desc: '目标设定温度' }
+    ],
+    commands: [
+      { name: '查询设备状态', identifier: 'query_status', input: '无', output: 'status, battery, signal', desc: '查询传感器当前运行状态' },
+      { name: '设置上报周期', identifier: 'set_interval', input: 'interval(int)', output: 'result(bool)', desc: '设置数据上报间隔时间' },
+      { name: '重启设备', identifier: 'reboot', input: '无', output: 'result(bool)', desc: '远程重启传感器设备' }
+    ],
+    alarms: [
+      { name: '温度超限告警', level: 'critical', condition: '温度 > 40°C', desc: '环境温度超过安全阈值' },
+      { name: '设备离线告警', level: 'major', condition: '离线超过5分钟', desc: '设备通信中断' },
+      { name: '电池低电量告警', level: 'minor', condition: '电池电量 < 20%', desc: '设备电池电量不足' }
+    ],
+    config: { reportInterval: 30, heartbeatInterval: 60, offlineTimeout: 300, otaEnabled: true }
+  },
+  {
+    id: 'PRD-002', name: '智能门禁控制器', type: '直连设备', category: 'door',
+    icon: '🚪', color: '#3498db',
+    protocol: 'MQTT', transport: 'TCP/IP', manufacturer: '海康威视', status: '已发布',
+    createTime: '2025-02-20 14:15:00', description: '地铁站出入口智能门禁控制，支持多种认证方式。',
+    deviceCount: 3, onlineCount: 3,
+    things: [
+      { identifier: 'door_count', name: '门数量', dataType: 'int', rw: '只读', unit: '扇', desc: '控制的门数量' },
+      { identifier: 'door_status', name: '门状态', dataType: 'string', rw: '只读', unit: '-', desc: '各门当前状态' },
+      { identifier: 'control_cmd', name: '控制指令', dataType: 'enum', rw: '读写', unit: '-', desc: '开门/关门/锁定' },
+      { identifier: 'last_maint', name: '上次维护', dataType: 'string', rw: '只读', unit: '-', desc: '最近维护时间' }
+    ],
+    commands: [
+      { name: '远程开门', identifier: 'open_door', input: 'door_id(int)', output: 'result(bool)', desc: '远程控制指定门开启' },
+      { name: '查询通行记录', identifier: 'query_log', input: 'start_time, end_time', output: 'records(array)', desc: '查询指定时间段通行记录' },
+      { name: '更新授权列表', identifier: 'update_auth', input: 'auth_list(array)', output: 'result(bool)', desc: '更新门禁授权人员列表' }
+    ],
+    alarms: [
+      { name: '非法闯入告警', level: 'critical', condition: '检测到非法开门', desc: '未经授权的门禁开启' },
+      { name: '门禁故障告警', level: 'major', condition: '设备响应超时', desc: '门禁控制器通信异常' },
+      { name: '门磁异常告警', level: 'minor', condition: '门磁状态异常持续30秒', desc: '门磁传感器检测异常' }
+    ],
+    config: { reportInterval: 10, heartbeatInterval: 30, offlineTimeout: 120, otaEnabled: true }
+  },
+  {
+    id: 'PRD-003', name: '消防烟感探测器', type: '直连设备', category: 'fire',
+    icon: '🔥', color: '#e67e22',
+    protocol: 'CoAP', transport: 'LoRa', manufacturer: '海湾安全技术', status: '已发布',
+    createTime: '2025-03-10 09:00:00', description: '地铁站内火灾烟雾探测，支持高灵敏度检测和快速报警。',
+    deviceCount: 3, onlineCount: 3,
+    things: [
+      { identifier: 'sensitivity', name: '灵敏度', dataType: 'enum', rw: '只读', unit: '-', desc: '探测器灵敏度等级' },
+      { identifier: 'smoke_density', name: '烟雾浓度', dataType: 'float', rw: '只读', unit: '%', desc: '当前烟雾浓度百分比' },
+      { identifier: 'battery', name: '电池电量', dataType: 'int', rw: '只读', unit: '%', desc: '设备电池剩余电量' },
+      { identifier: 'alarm_status', name: '报警状态', dataType: 'boolean', rw: '只读', unit: '-', desc: '是否处于报警状态' }
+    ],
+    commands: [
+      { name: '查询设备状态', identifier: 'query_status', input: '无', output: 'status, battery, sensitivity', desc: '获取探测器当前状态' },
+      { name: '自检测试', identifier: 'self_test', input: '无', output: 'result(bool)', desc: '触发设备自检程序' }
+    ],
+    alarms: [
+      { name: '火警告警', level: 'critical', condition: '烟雾浓度 > 15%', desc: '检测到火灾烟雾' },
+      { name: '设备故障告警', level: 'major', condition: '设备自检失败', desc: '探测器硬件故障' },
+      { name: '电池低电量告警', level: 'minor', condition: '电池电量 < 15%', desc: '电池电量不足需更换' }
+    ],
+    config: { reportInterval: 5, heartbeatInterval: 30, offlineTimeout: 60, otaEnabled: false }
+  },
+  {
+    id: 'PRD-004', name: '通风系统控制器', type: '直连设备', category: 'fan',
+    icon: '🌀', color: '#2ecc71',
+    protocol: 'Modbus', transport: '以太网', manufacturer: '格力', status: '已发布',
+    createTime: '2025-01-28 16:45:00', description: '地铁站通风系统智能控制，支持多档位调节和远程管理。',
+    deviceCount: 2, onlineCount: 2,
+    things: [
+      { identifier: 'speed', name: '转速', dataType: 'int', rw: '只读', unit: 'rpm', desc: '风机当前转速' },
+      { identifier: 'run_time', name: '运行时间', dataType: 'int', rw: '只读', unit: 'h', desc: '累计运行小时数' },
+      { identifier: 'power', name: '功率', dataType: 'float', rw: '只读', unit: 'kW', desc: '当前运行功率' },
+      { identifier: 'control_mode', name: '控制模式', dataType: 'enum', rw: '读写', unit: '-', desc: '手动/自动/节能模式' }
+    ],
+    commands: [
+      { name: '设置控制模式', identifier: 'set_mode', input: 'mode(enum)', output: 'result(bool)', desc: '切换风机控制模式' },
+      { name: '查询运行参数', identifier: 'query_params', input: '无', output: 'speed, power, mode, run_time', desc: '获取风机运行参数' },
+      { name: '紧急停机', identifier: 'emergency_stop', input: '无', output: 'result(bool)', desc: '紧急停止风机运行' }
+    ],
+    alarms: [
+      { name: '风机故障告警', level: 'critical', condition: '转速异常或停转', desc: '风机运行出现故障' },
+      { name: '功率异常告警', level: 'major', condition: '功率偏差 > 30%', desc: '运行功率超出正常范围' },
+      { name: '维护提醒', level: 'minor', condition: '运行时间 > 8000h', desc: '设备需要定期维护' }
+    ],
+    config: { reportInterval: 15, heartbeatInterval: 30, offlineTimeout: 180, otaEnabled: true }
+  },
+  {
+    id: 'PRD-005', name: '排水泵监控终端', type: '直连设备', category: 'pump',
+    icon: '💧', color: '#00bcd4',
+    protocol: 'MQTT', transport: '4G', manufacturer: '南方泵业', status: '已发布',
+    createTime: '2025-04-05 11:20:00', description: '地铁站排水系统监控，实时监测液位和水泵运行状态。',
+    deviceCount: 2, onlineCount: 2,
+    things: [
+      { identifier: 'liquid_level', name: '液位', dataType: 'float', rw: '只读', unit: '%', desc: '集水井液位百分比' },
+      { identifier: 'pump1_status', name: '水泵1状态', dataType: 'enum', rw: '只读', unit: '-', desc: '1号水泵运行状态' },
+      { identifier: 'pump2_status', name: '水泵2状态', dataType: 'enum', rw: '只读', unit: '-', desc: '2号水泵运行状态' },
+      { identifier: 'control_cmd', name: '控制指令', dataType: 'enum', rw: '读写', unit: '-', desc: '启动/停止/自动' }
+    ],
+    commands: [
+      { name: '控制水泵', identifier: 'control_pump', input: 'pump_id(int), cmd(enum)', output: 'result(bool)', desc: '远程控制指定水泵启停' },
+      { name: '查询液位', identifier: 'query_level', input: '无', output: 'level(float)', desc: '获取当前液位数据' }
+    ],
+    alarms: [
+      { name: '液位超高告警', level: 'critical', condition: '液位 > 85%', desc: '集水井液位超过警戒线' },
+      { name: '水泵故障告警', level: 'major', condition: '水泵启动失败', desc: '水泵无法正常启动' }
+    ],
+    config: { reportInterval: 10, heartbeatInterval: 60, offlineTimeout: 300, otaEnabled: false }
+  },
+  {
+    id: 'PRD-006', name: '自动扶梯监控器', type: '直连设备', category: 'escalator',
+    icon: '🛗', color: '#9b59b6',
+    protocol: 'Modbus', transport: '以太网', manufacturer: '三菱电机', status: '已发布',
+    createTime: '2025-02-14 08:30:00', description: '地铁站自动扶梯运行监控，实时采集运行数据和故障信息。',
+    deviceCount: 3, onlineCount: 2,
+    things: [
+      { identifier: 'speed', name: '速度', dataType: 'float', rw: '只读', unit: 'm/s', desc: '当前运行速度' },
+      { identifier: 'direction', name: '方向', dataType: 'enum', rw: '只读', unit: '-', desc: '上行/下行/停止' },
+      { identifier: 'total_runtime', name: '累计运行', dataType: 'int', rw: '只读', unit: 'h', desc: '累计运行小时数' },
+      { identifier: 'estop_status', name: '急停状态', dataType: 'boolean', rw: '只读', unit: '-', desc: '急停按钮是否触发' }
+    ],
+    commands: [
+      { name: '查询运行状态', identifier: 'query_status', input: '无', output: 'speed, direction, runtime, estop', desc: '获取扶梯运行状态' },
+      { name: '远程停机', identifier: 'remote_stop', input: 'reason(string)', output: 'result(bool)', desc: '远程控制扶梯停止运行' },
+      { name: '复位操作', identifier: 'reset', input: '无', output: 'result(bool)', desc: '远程复位扶梯故障状态' }
+    ],
+    alarms: [
+      { name: '急停触发告警', level: 'critical', condition: '急停按钮触发', desc: '扶梯紧急停止' },
+      { name: '速度异常告警', level: 'major', condition: '速度偏差 > 10%', desc: '运行速度超出正常范围' },
+      { name: '维护提醒', level: 'minor', condition: '累计运行 > 10000h', desc: '扶梯需要定期保养' }
+    ],
+    config: { reportInterval: 10, heartbeatInterval: 20, offlineTimeout: 60, otaEnabled: true }
+  },
+  {
+    id: 'PRD-007', name: '电力监测仪表', type: '直连设备', category: 'power',
+    icon: '⚡', color: '#f39c12',
+    protocol: 'Modbus', transport: '以太网', manufacturer: '施耐德电气', status: '已发布',
+    createTime: '2025-03-22 13:10:00', description: '地铁站配电系统电力参数监测，支持电压、电流、功率等全面采集。',
+    deviceCount: 2, onlineCount: 2,
+    things: [
+      { identifier: 'voltage', name: '电压', dataType: 'float', rw: '只读', unit: 'V', desc: '三相电压' },
+      { identifier: 'current', name: '电流', dataType: 'float', rw: '只读', unit: 'A', desc: '三相电流' },
+      { identifier: 'active_power', name: '功率', dataType: 'float', rw: '只读', unit: 'kW', desc: '有功功率' },
+      { identifier: 'load_rate', name: '负载率', dataType: 'float', rw: '只读', unit: '%', desc: '当前负载百分比' },
+      { identifier: 'backup_time', name: '备用时间', dataType: 'int', rw: '只读', unit: 'min', desc: 'UPS备用供电时间' }
+    ],
+    commands: [
+      { name: '查询电力参数', identifier: 'query_power', input: '无', output: 'voltage, current, power, load_rate', desc: '获取实时电力参数' },
+      { name: '设置阈值', identifier: 'set_threshold', input: 'param(string), value(float)', output: 'result(bool)', desc: '设置告警阈值参数' },
+      { name: '历史数据查询', identifier: 'query_history', input: 'start, end, interval', output: 'data(array)', desc: '查询历史电力数据' }
+    ],
+    alarms: [
+      { name: '电压异常告警', level: 'critical', condition: '电压偏差 > 15%', desc: '供电电压超出安全范围' },
+      { name: '过载告警', level: 'major', condition: '负载率 > 90%', desc: '电力负载过高' },
+      { name: 'UPS电量低告警', level: 'minor', condition: '备用时间 < 30min', desc: 'UPS备用电量不足' }
+    ],
+    config: { reportInterval: 5, heartbeatInterval: 15, offlineTimeout: 60, otaEnabled: true }
+  },
+  {
+    id: 'PRD-008', name: '视频监控网关', type: '网关设备', category: 'door',
+    icon: '📹', color: '#1abc9c',
+    protocol: 'RTSP', transport: '光纤', manufacturer: '大华股份', status: '已发布',
+    createTime: '2025-05-08 15:30:00', description: '地铁站视频监控汇聚网关，支持多路视频流转发和存储管理。',
+    deviceCount: 2, onlineCount: 2,
+    things: [
+      { identifier: 'channel_count', name: '通道数量', dataType: 'int', rw: '只读', unit: '路', desc: '接入摄像头路数' },
+      { identifier: 'storage_usage', name: '存储使用率', dataType: 'float', rw: '只读', unit: '%', desc: '存储空间使用百分比' },
+      { identifier: 'bandwidth', name: '带宽占用', dataType: 'float', rw: '只读', unit: 'Mbps', desc: '当前网络带宽占用' },
+      { identifier: 'control_cmd', name: '控制指令', dataType: 'enum', rw: '读写', unit: '-', desc: '重启/格式化/配置同步' }
+    ],
+    commands: [
+      { name: '查询通道状态', identifier: 'query_channels', input: '无', output: 'channels(array)', desc: '获取所有通道连接状态' },
+      { name: '配置同步', identifier: 'sync_config', input: 'config(object)', output: 'result(bool)', desc: '同步网关配置参数' }
+    ],
+    alarms: [
+      { name: '存储空间告警', level: 'major', condition: '存储使用率 > 90%', desc: '存储空间即将耗尽' },
+      { name: '通道离线告警', level: 'minor', condition: '通道掉线超过3分钟', desc: '摄像头连接中断' }
+    ],
+    config: { reportInterval: 30, heartbeatInterval: 60, offlineTimeout: 180, otaEnabled: true }
+  },
+  {
+    id: 'PRD-009', name: '环境空气质量检测仪', type: '直连设备', category: 'hvac',
+    icon: '🌬️', color: '#27ae60',
+    protocol: 'MQTT', transport: 'WiFi', manufacturer: '汉威科技', status: '开发中',
+    createTime: '2025-06-12 10:00:00', description: '地铁站空气质量综合监测，支持PM2.5、TVOC、甲醛等多参数采集。',
+    deviceCount: 2, onlineCount: 1,
+    things: [
+      { identifier: 'pm25', name: 'PM2.5', dataType: 'float', rw: '只读', unit: 'μg/m³', desc: '细颗粒物浓度' },
+      { identifier: 'tvoc', name: 'TVOC', dataType: 'float', rw: '只读', unit: 'mg/m³', desc: '挥发性有机物浓度' },
+      { identifier: 'hcho', name: '甲醛', dataType: 'float', rw: '只读', unit: 'mg/m³', desc: '甲醛浓度' },
+      { identifier: 'run_status', name: '运行状态', dataType: 'enum', rw: '只读', unit: '-', desc: '设备运行状态' }
+    ],
+    commands: [
+      { name: '查询空气质量', identifier: 'query_aqi', input: '无', output: 'pm25, tvoc, hcho, aqi', desc: '获取实时空气质量数据' },
+      { name: '校准传感器', identifier: 'calibrate', input: 'sensor_id(string)', output: 'result(bool)', desc: '远程校准指定传感器' },
+      { name: '设置上报周期', identifier: 'set_interval', input: 'interval(int)', output: 'result(bool)', desc: '设置数据上报间隔' }
+    ],
+    alarms: [
+      { name: '空气质量告警', level: 'major', condition: 'PM2.5 > 75μg/m³', desc: '空气质量指数超标' },
+      { name: 'TVOC超标告警', level: 'minor', condition: 'TVOC > 0.6mg/m³', desc: '挥发性有机物超标' }
+    ],
+    config: { reportInterval: 60, heartbeatInterval: 120, offlineTimeout: 600, otaEnabled: true }
+  },
+  {
+    id: 'PRD-010', name: '照明控制模块', type: '直连设备', category: 'power',
+    icon: '💡', color: '#f1c40f',
+    protocol: 'Zigbee', transport: '无线', manufacturer: '欧普照明', status: '开发中',
+    createTime: '2025-07-01 09:15:00', description: '地铁站智能照明控制，支持分区调光和定时策略管理。',
+    deviceCount: 1, onlineCount: 1,
+    things: [
+      { identifier: 'brightness', name: '亮度', dataType: 'int', rw: '读写', unit: '%', desc: '当前亮度百分比' },
+      { identifier: 'power', name: '功率', dataType: 'float', rw: '只读', unit: 'kW', desc: '当前照明总功率' },
+      { identifier: 'light_count', name: '灯具数量', dataType: 'int', rw: '只读', unit: '盏', desc: '受控灯具总数' },
+      { identifier: 'control_mode', name: '控制模式', dataType: 'enum', rw: '读写', unit: '-', desc: '手动/自动/定时模式' }
+    ],
+    commands: [
+      { name: '设置亮度', identifier: 'set_brightness', input: 'zone(string), level(int)', output: 'result(bool)', desc: '设置指定区域亮度等级' },
+      { name: '查询照明状态', identifier: 'query_light', input: 'zone(string)', output: 'brightness, power, count', desc: '获取区域照明状态' },
+      { name: '切换控制模式', identifier: 'set_mode', input: 'mode(enum)', output: 'result(bool)', desc: '切换照明控制模式' }
+    ],
+    alarms: [
+      { name: '灯具故障告警', level: 'major', condition: '灯具离线率 > 10%', desc: '大面积灯具故障' },
+      { name: '功率异常告警', level: 'minor', condition: '功率偏差 > 25%', desc: '照明功率超出正常范围' }
+    ],
+    config: { reportInterval: 30, heartbeatInterval: 60, offlineTimeout: 300, otaEnabled: true }
+  }
+];
+
+// ==================== 模拟设备数据 ====================
+function generateDevices(product) {
+  const count = product.deviceCount || 1;
+  const onlineCount = product.onlineCount || 0;
+  const devices = [];
+  const dates = ['2025-06-01', '2025-06-05', '2025-06-10', '2025-06-15', '2025-07-01', '2025-07-10', '2025-07-20', '2025-08-01', '2025-08-10', '2025-09-01'];
+  for (let i = 0; i < count; i++) {
+    devices.push({
+      name: product.name + '-' + String(i + 1).padStart(3, '0'),
+      sn: product.id.replace('PRD', 'DEV') + '-' + String(i + 1).padStart(4, '0'),
+      status: i < onlineCount ? '在线' : '离线',
+      accessTime: dates[i % dates.length] + ' ' + String(8 + (i % 12)).padStart(2, '0') + ':' + String(i * 7 % 60).padStart(2, '0') + ':00'
+    });
+  }
+  return devices;
+}
+
+// ==================== 获取URL参数 ====================
+function getQueryParam(name) {
+  const params = new URLSearchParams(window.location.search);
+  return params.get(name);
+}
+
+// ==================== 渲染页面 ====================
+function renderPage() {
+  const productId = getQueryParam('id');
+  const product = PRODUCTS.find(p => p.id === productId);
+  const container = document.getElementById('productDetail');
+
+  if (!product) {
+    container.innerHTML = `
+      <div class="card not-found">
+        <div class="not-found-icon">🔍</div>
+        <h2>产品未找到</h2>
+        <p>未找到ID为 "${productId || '空'}" 的产品，请检查产品ID是否正确。</p>
+        <a href="metro-product-management.html" class="btn btn-primary">返回产品</a>
+      </div>`;
+    return;
+  }
+
+  const devices = generateDevices(product);
+  allDevices = devices;
+  const statusBadge = product.status === '已发布'
+    ? '<span class="badge badge-success">已发布</span>'
+    : '<span class="badge badge-warning">开发中</span>';
+
+  container.innerHTML = `
+    <!-- 产品信息卡片 -->
+    <div class="card">
+      <div class="product-info-card">
+        <div class="product-info-left">
+          <div class="product-icon" style="background:${product.color}">${product.icon}</div>
+          <div>
+            <div class="product-name">${product.name}</div>
+            <div class="product-meta">
+              <span class="product-type-tag">${product.type}</span>
+              <span class="product-id">${product.id}</span>
+              ${statusBadge}
+            </div>
+          </div>
+        </div>
+        <div class="product-info-right">
+          <div class="stat-card">
+            <div class="stat-value" style="color:#333">${product.deviceCount}</div>
+            <div class="stat-label">设备总数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" style="color:#52c41a">${product.onlineCount}</div>
+            <div class="stat-label">在线设备</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 产品属性网格 -->
+    <div class="card">
+      <div class="card-title">产品属性</div>
+      <div class="desc-grid">
+        <div class="desc-item">
+          <span class="desc-label">产品编码</span>
+          <span class="desc-value">${product.id}</span>
+        </div>
+        <div class="desc-item">
+          <span class="desc-label">创建时间</span>
+          <span class="desc-value">${product.createTime}</span>
+        </div>
+        <div class="desc-item">
+          <span class="desc-label">协议</span>
+          <span class="desc-value">${product.protocol}</span>
+        </div>
+        <div class="desc-item">
+          <span class="desc-label">传输方式</span>
+          <span class="desc-value">${product.transport}</span>
+        </div>
+        <div class="desc-item">
+          <span class="desc-label">厂商</span>
+          <span class="desc-value">${product.manufacturer}</span>
+        </div>
+        <div class="desc-item">
+          <span class="desc-label">分类</span>
+          <span class="desc-value">${product.category}</span>
+        </div>
+        <div class="desc-item">
+          <span class="desc-label">状态</span>
+          <span class="desc-value">${statusBadge}</span>
+        </div>
+        <div class="desc-item">
+          <span class="desc-label">描述</span>
+          <span class="desc-value">${product.description}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab导航 -->
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('devices', this)">📋 设备列表</button>
+      <button class="tab-btn" onclick="switchTab('things', this)">🔧 物模型</button>
+      <button class="tab-btn" onclick="switchTab('commands', this)">📡 指令配置</button>
+      <button class="tab-btn" onclick="switchTab('alarms', this)">🚨 告警配置</button>
+      <button class="tab-btn" onclick="switchTab('config', this)">⚙️ 其他配置</button>
+    </div>
+
+    <!-- Tab1: 设备列表 -->
+    <div class="tab-content active" id="tab-devices">
+      <div class="section-header">
+        <div class="section-title">设备列表</div>
+        <button class="btn btn-primary" onclick="showToast('添加设备功能开发中','info')">+ 添加设备</button>
+      </div>
+      <div class="section-search">
+        <div class="search-field">
+          <label class="search-label">设备名称</label>
+          <input type="text" class="search-input" id="deviceSearch" placeholder="请输入设备名称" oninput="filterDevices()">
+        </div>
+        <button class="btn btn-primary" onclick="filterDevices()">查询</button>
+        <button class="btn btn-default" onclick="document.getElementById('deviceSearch').value='';filterDevices()">重置</button>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:30%">设备名称</th>
+              <th style="width:20%">设备SN</th>
+              <th style="width:80px">状态</th>
+              <th style="width:160px">接入时间</th>
+              <th style="width:auto">操作</th>
+            </tr>
+          </thead>
+          <tbody id="deviceTableBody">
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" id="devicePagination"></div>
+    </div>
+
+    <!-- Tab2: 物模型 -->
+    <div class="tab-content" id="tab-things">
+      <div class="section-header">
+        <div class="section-title">物模型管理</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="addThingRow()">+ 添加属性</button>
+          <button class="btn btn-primary" onclick="showToast('已保存','success')">全部保存</button>
+          <button class="btn btn-primary" onclick="showToast('已同步到设备','success')">同步到设备</button>
+          <button class="btn" style="color:#52c41a;border-color:#52c41a" onclick="showToast('导出成功','success')">导出</button>
+          <button class="btn" style="color:#faad14;border-color:#faad14" onclick="showToast('导入功能开发中','info')">导入</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:14%">属性名称</th>
+              <th style="width:14%">标识符</th>
+              <th style="width:12%">数据类型</th>
+              <th style="width:10%">单位</th>
+              <th style="width:25%">描述</th>
+              <th style="width:70px">操作</th>
+            </tr>
+          </thead>
+          <tbody id="thingsTableBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab3: 指令配置 -->
+    <div class="tab-content" id="tab-commands">
+      <div class="section-header">
+        <div class="section-title">指令下发配置</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="addCommandRow()">+ 添加指令</button>
+          <button class="btn" style="color:#1890ff;border-color:#1890ff" onclick="showToast('已同步到所有设备','success')">同步到所有设备</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:18%">指令名称</th>
+              <th style="width:18%">指令编码</th>
+              <th style="width:18%">自定义参数</th>
+              <th style="width:22%">创建时间</th>
+              <th style="width:120px">操作</th>
+            </tr>
+          </thead>
+          <tbody id="commandsTableBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab4: 告警配置 -->
+    <div class="tab-content" id="tab-alarms">
+      <div class="section-header">
+        <div class="section-title">告警规则配置</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="addAlarmRow()">+ 添加告警规则</button>
+          <button class="btn" style="color:#1890ff;border-color:#1890ff" onclick="showToast('已同步到所有设备','success')">同步到所有设备</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:16%">规则名称</th>
+              <th style="width:30%">触发条件</th>
+              <th style="width:12%">告警级别</th>
+              <th style="width:10%">状态</th>
+              <th style="width:auto">操作</th>
+            </tr>
+          </thead>
+          <tbody id="alarmsTableBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab5: 其他配置 -->
+    <div class="tab-content" id="tab-config">
+      <div class="section-header">
+        <div class="section-title">其他配置</div>
+      </div>
+      <div class="config-list">
+        <!-- 数据定期删除 -->
+        <div class="config-row">
+          <div class="config-row-left">
+            <span class="config-row-title">数据定期删除</span>
+            <span class="config-row-desc">定期清理过期数据，优化系统性能</span>
+          </div>
+          <div class="config-row-center">
+            <span class="toggle-label off">关闭</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="dataCleanToggle" onchange="toggleDataClean(this.checked)">
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label on">开启</span>
+            <span class="config-row-sep" id="dataCleanSep" style="display:none">|</span>
+            <span class="config-row-field" id="dataCleanField" style="display:none">保留时间 <input type="number" class="config-input" value="3" min="1" style="width:60px"> 天</span>
+          </div>
+          <div class="config-row-right">
+            <button class="btn btn-primary" onclick="showToast('配置已保存','success')">保存</button>
+            <button class="btn" style="color:#52c41a;border-color:#52c41a" onclick="showToast('已保存并同步到设备','success')">保存并同步到设备</button>
+          </div>
+        </div>
+        <!-- 自定义配置 -->
+        <div class="config-row">
+          <div class="config-row-left">
+            <span class="config-row-title">自定义配置</span>
+            <span class="config-row-desc">自定义配置，作为协议参数传递或解析方法</span>
+          </div>
+          <div class="config-row-center">
+            <input type="text" class="config-input" style="width:260px" placeholder="如IP、端口、设备特殊配置等">
+          </div>
+          <div class="config-row-right">
+            <button class="btn btn-primary" onclick="showToast('配置已保存','success')">保存</button>
+            <button class="btn" style="color:#52c41a;border-color:#52c41a" onclick="showToast('已保存并同步到设备','success')">保存并同步到设备</button>
+          </div>
+        </div>
+        <!-- 属性修改指令 -->
+        <div class="config-row">
+          <div class="config-row-left">
+            <span class="config-row-title">属性修改指令</span>
+            <span class="config-row-desc">修改属性时默认调用的指令</span>
+          </div>
+          <div class="config-row-center">
+            <select class="config-select" id="propModifyCmd">
+              <option value="">请选择指令</option>
+            </select>
+          </div>
+          <div class="config-row-right">
+            <button class="btn btn-primary" onclick="showToast('配置已保存','success')">保存</button>
+            <button class="btn" style="color:#52c41a;border-color:#52c41a" onclick="showToast('已保存并同步到设备','success')">保存并同步到设备</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  renderDeviceTable(allDevices);
+  renderThingsTable(product.things);
+  renderCommandsTable(product.commands);
+  renderAlarmsTable(product.alarms);
+  initConfigTab(product);
+}
+
+// ==================== Tab切换 ====================
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ==================== 设备列表渲染与分页 ====================
+let allDevices = [];
+let devicePage = 1;
+const devicePageSize = 10;
+
+function renderDeviceTable(data) {
+  const product = PRODUCTS.find(p => p.id === getQueryParam('id'));
+  if (!product) return;
+  const tbody = document.getElementById('deviceTableBody');
+  const start = (devicePage - 1) * devicePageSize;
+  const pageData = data.slice(start, start + devicePageSize);
+
+  tbody.innerHTML = pageData.map(d => '<tr>' +
+    '<td><div class="device-info"><div class="device-img">' + product.icon + '</div><span class="device-name">' + d.name + '</span></div></td>' +
+    '<td class="device-sn">' + d.sn + '</td>' +
+    '<td><span class="' + (d.status === '在线' ? 'badge-online' : 'badge-offline') + '">' + d.status + '</span></td>' +
+    '<td>' + d.accessTime + '</td>' +
+    '<td><div class="action-group">' +
+      '<button class="action-btn" style="background:#1890ff;color:#fff" onclick="showToast(\'查看设备详情: ' + d.name + '\',\'info\')">详情</button>' +
+      '<button class="action-btn" style="background:#1890ff;color:#fff" onclick="showToast(\'编辑设备: ' + d.name + '\',\'info\')">编辑</button>' +
+      '<button class="action-btn" style="background:#ff4d4f;color:#fff" onclick="confirmDelete(\'' + d.name + '\')">删除</button>' +
+    '</div></td>' +
+  '</tr>').join('');
+
+  renderPagination(data.length);
+}
+
+function renderPagination(total) {
+  const totalPages = Math.max(1, Math.ceil(total / devicePageSize));
+  const el = document.getElementById('devicePagination');
+  el.innerHTML =
+    '<span class="page-info">共 ' + total + ' 条</span>' +
+    '<select class="page-size" onchange="devicePageSize=parseInt(this.value);devicePage=1;renderDeviceTable(getFilteredDevices())">' +
+      '<option value="10"' + (devicePageSize===10?' selected':'') + '>10条/页</option>' +
+      '<option value="20"' + (devicePageSize===20?' selected':'') + '>20条/页</option>' +
+      '<option value="50"' + (devicePageSize===50?' selected':'') + '>50条/页</option>' +
+    '</select>' +
+    '<button class="page-btn" onclick="goDevicePage(' + (devicePage-1) + ')"' + (devicePage<=1?' disabled':'') + '>&lt;</button>' +
+    '<button class="page-btn active">' + devicePage + '</button>' +
+    '<button class="page-btn" onclick="goDevicePage(' + (devicePage+1) + ')"' + (devicePage>=totalPages?' disabled':'') + '>&gt;</button>' +
+    '<div class="page-jump">前往 <input type="number" min="1" max="' + totalPages + '" value="' + devicePage + '" onkeydown="if(event.key===\'Enter\')goDevicePage(parseInt(this.value))"> 页</div>';
+}
+
+function goDevicePage(p) {
+  const total = Math.ceil(getFilteredDevices().length / devicePageSize);
+  if (p < 1 || p > total) return;
+  devicePage = p;
+  renderDeviceTable(getFilteredDevices());
+}
+
+function getFilteredDevices() {
+  const keyword = (document.getElementById('deviceSearch').value || '').toLowerCase();
+  return allDevices.filter(d => d.name.toLowerCase().includes(keyword) || d.sn.toLowerCase().includes(keyword));
+}
+
+function filterDevices() {
+  devicePage = 1;
+  renderDeviceTable(getFilteredDevices());
+}
+
+// ==================== 删除确认 ====================
+function confirmDelete(name) {
+  if (confirm('确定要删除设备 "' + name + '" 吗？此操作不可恢复。')) {
+    allDevices = allDevices.filter(d => d.name !== name);
+    renderDeviceTable(getFilteredDevices());
+    showToast('设备 "' + name + '" 已删除', 'success');
+  }
+}
+
+// ==================== 物模型管理 ====================
+let thingsData = [];
+
+const dataTypeMap = {
+  'float': '浮点数', 'int': '整数', 'string': '字符串',
+  'boolean': '布尔值', 'enum': '枚举', 'date': '日期'
+};
+
+function renderThingsTable(things) {
+  thingsData = JSON.parse(JSON.stringify(things));
+  const tbody = document.getElementById('thingsTableBody');
+  tbody.innerHTML = thingsData.map(function(t, i) {
+    return '<tr data-idx="' + i + '">' +
+      '<td><input class="cell-input" value="' + t.name + '" placeholder="请输入属性名称" onchange="thingsData[' + i + '].name=this.value"></td>' +
+      '<td><input class="cell-input" value="' + t.identifier + '" placeholder="请输入标识符" onchange="thingsData[' + i + '].identifier=this.value" style="font-family:monospace"></td>' +
+      '<td><select class="cell-select" onchange="thingsData[' + i + '].dataType=this.value">' +
+        Object.keys(dataTypeMap).map(function(k) { return '<option value="' + k + '"' + (t.dataType === k ? ' selected' : '') + '>' + dataTypeMap[k] + '</option>'; }).join('') +
+      '</select></td>' +
+      '<td><input class="cell-input" value="' + (t.unit || '') + '" placeholder="请输入单位" onchange="thingsData[' + i + '].unit=this.value"></td>' +
+      '<td><input class="cell-input" value="' + (t.desc || '') + '" placeholder="请输入描述" onchange="thingsData[' + i + '].desc=this.value"></td>' +
+      '<td><button class="action-btn danger" style="background:#ff4d4f;color:#fff" onclick="deleteThingRow(' + i + ')">删除</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function addThingRow() {
+  thingsData.push({ identifier: '', name: '', dataType: 'float', rw: '只读', unit: '', desc: '' });
+  renderThingsTable(thingsData);
+  showToast('已添加新属性行', 'info');
+}
+
+function deleteThingRow(idx) {
+  thingsData.splice(idx, 1);
+  renderThingsTable(thingsData);
+  showToast('属性已删除', 'success');
+}
+
+// ==================== 指令配置管理 ====================
+let commandsData = [];
+
+function renderCommandsTable(commands) {
+  commandsData = JSON.parse(JSON.stringify(commands));
+  const tbody = document.getElementById('commandsTableBody');
+  tbody.innerHTML = commandsData.map(function(c, i) {
+    return '<tr>' +
+      '<td><input class="cell-input" value="' + c.name + '" placeholder="请输入指令名称" onchange="commandsData[' + i + '].name=this.value"></td>' +
+      '<td><input class="cell-input" value="' + c.identifier + '" placeholder="请输入指令编码" onchange="commandsData[' + i + '].identifier=this.value" style="font-family:monospace"></td>' +
+      '<td><input class="cell-input" value="' + (c.input || '') + '" placeholder="请输入自定义参数" onchange="commandsData[' + i + '].input=this.value"></td>' +
+      '<td style="color:#999;font-size:12px">' + (c.createTime || '2026-04-' + String(10 + i).padStart(2,'0') + ' 10:30:00') + '</td>' +
+      '<td><div class="action-group">' +
+        '<button class="action-btn" style="background:#1890ff;color:#fff" onclick="showToast(\'编辑指令: ' + c.name + '\',\'info\')">编辑</button>' +
+        '<button class="action-btn" style="background:#ff4d4f;color:#fff" onclick="deleteCommandRow(' + i + ')">删除</button>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function addCommandRow() {
+  commandsData.push({ name: '', identifier: '', input: '', createTime: new Date().toISOString().slice(0,19).replace('T',' ') });
+  renderCommandsTable(commandsData);
+  showToast('已添加新指令', 'info');
+}
+
+function deleteCommandRow(idx) {
+  commandsData.splice(idx, 1);
+  renderCommandsTable(commandsData);
+  showToast('指令已删除', 'success');
+}
+
+// ==================== 告警配置管理 ====================
+let alarmsData = [];
+
+const alarmLevelMap = {
+  critical: { label: '紧急', cls: 'level-critical' },
+  major: { label: '严重', cls: 'level-major' },
+  minor: { label: '警告', cls: 'level-minor' },
+  normal: { label: '正常', cls: 'level-normal' }
+};
+
+function renderAlarmsTable(alarms) {
+  alarmsData = JSON.parse(JSON.stringify(alarms));
+  const tbody = document.getElementById('alarmsTableBody');
+  tbody.innerHTML = alarmsData.map(function(a, i) {
+    var lv = alarmLevelMap[a.level] || alarmLevelMap.normal;
+    return '<tr>' +
+      '<td style="font-weight:500">' + a.name + '</td>' +
+      '<td style="color:#666;font-size:12px">' + a.condition + '</td>' +
+      '<td><span class="' + lv.cls + '">' + lv.label + '</span></td>' +
+      '<td><label class="toggle-switch"><input type="checkbox" ' + (a.enabled !== false ? 'checked' : '') + ' onchange="alarmsData[' + i + '].enabled=this.checked"><span class="toggle-slider"></span></label></td>' +
+      '<td><div class="action-group">' +
+        '<button class="action-btn" style="background:#1890ff;color:#fff" onclick="showToast(\'编辑告警规则: ' + a.name + '\',\'info\')">编辑</button>' +
+        '<button class="action-btn" style="background:#ff4d4f;color:#fff" onclick="deleteAlarmRow(' + i + ')">删除</button>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function addAlarmRow() {
+  alarmsData.push({ name: '', level: 'critical', condition: '', desc: '', enabled: true });
+  renderAlarmsTable(alarmsData);
+  showToast('已添加新告警规则', 'info');
+}
+
+function deleteAlarmRow(idx) {
+  alarmsData.splice(idx, 1);
+  renderAlarmsTable(alarmsData);
+  showToast('告警规则已删除', 'success');
+}
+
+// ==================== 其他配置 ====================
+function toggleDataClean(checked) {
+  document.getElementById('dataCleanSep').style.display = checked ? 'inline' : 'none';
+  document.getElementById('dataCleanField').style.display = checked ? 'inline-flex' : 'none';
+}
+
+function initConfigTab(product) {
+  var sel = document.getElementById('propModifyCmd');
+  if (sel && product.commands) {
+    sel.innerHTML = '<option value="">请选择指令</option>' +
+      product.commands.map(function(c) { return '<option value="' + c.identifier + '">' + c.name + '</option>'; }).join('');
+  }
+}
+
+// ==================== Toast提示 ====================
+function showToast(msg, type) {
+  const colors = { success: '#52c41a', error: '#ff4d4f', info: '#1890ff', warning: '#faad14' };
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;top:20px;right:20px;padding:10px 20px;background:#fff;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-size:13px;z-index:9999;border-left:4px solid ' + (colors[type] || colors.info) + ';transition:opacity 0.3s';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(function() { el.style.opacity = '0'; setTimeout(function() { el.remove(); }, 300); }, 2500);
+}
+
+// ==================== 初始化 ====================
+document.addEventListener('DOMContentLoaded', renderPage);
+</script>
+
+</body>
+</html>
