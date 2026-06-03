@@ -1,0 +1,2599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAT 规则链编辑器</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  @font-face { font-family: 'NotoSansSC'; src: local('Noto Sans SC'), local('Microsoft YaHei'), local('PingFang SC'), local('sans-serif'); }
+  body { font-family: 'NotoSansSC', 'Microsoft YaHei', 'PingFang SC', sans-serif; overflow: hidden; height: 100vh; background: #f0f2f5; margin: 0; }
+
+  /* ===== NAV SIDEBAR ===== */
+  .nav-sidebar {
+    width: 200px; height: 100vh; background: #001529;
+    position: fixed; left: 0; top: 0; z-index: 100;
+    display: flex; flex-direction: column; overflow-y: auto;
+  }
+  .nav-sidebar-logo {
+    height: 56px; display: flex; align-items: center; padding: 0 20px;
+    font-size: 18px; font-weight: 700; color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+  }
+  .nav-sidebar-menu { flex: 1; padding: 8px 0; }
+  .nav-menu-item {
+    display: flex; align-items: center; padding: 0 20px; height: 44px;
+    color: rgba(255,255,255,0.65); text-decoration: none; font-size: 14px;
+    cursor: pointer; transition: all 0.2s; position: relative;
+  }
+  .nav-menu-item:hover { color: #fff; background: rgba(255,255,255,0.06); }
+  .nav-menu-item.active { color: #fff; background: #1890ff; }
+  .nav-menu-item.active::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #fff;
+  }
+  .nav-menu-icon { margin-right: 10px; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .nav-menu-icon svg { display: block; }
+  .nav-menu-text { flex: 1; }
+  .nav-menu-arrow { font-size: 10px; transition: transform 0.2s; }
+  .nav-menu-arrow.open { transform: rotate(90deg); }
+  .nav-menu-group .nav-menu-item.has-submenu.expanded { color: #fff; background: rgba(255,255,255,0.06); }
+  .nav-submenu { display: none; background: rgba(0,0,0,0.15); }
+  .nav-submenu.open { display: block; }
+  .nav-submenu-item {
+    display: block; padding: 0 20px 0 50px; height: 40px; line-height: 40px;
+    color: rgba(255,255,255,0.65); text-decoration: none; font-size: 14px; transition: all 0.2s;
+  }
+  .nav-submenu-item:hover { color: #fff; background: rgba(255,255,255,0.06); }
+  .nav-submenu-item.active { color: #1890ff; background: rgba(24,144,255,0.08); }
+
+  /* ===== CANVAS TOOLBAR (migrated from header) ===== */
+  .canvas-toolbar {
+    position: absolute; top: 56px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; align-items: center; z-index: 50;
+    background: #fff; padding: 6px 12px; border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #e0e0e0;
+  }
+  .canvas-toolbar .toolbar-btn {
+    padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px;
+    transition: all 0.2s;
+  }
+  .canvas-toolbar .btn-test { background: #7C4DFF; color: #fff; }
+  .canvas-toolbar .btn-test:hover { background: #651FFF; transform: translateY(-1px); }
+  .canvas-toolbar .btn-save { background: #fff; color: #333; border: 1px solid #d9d9d9; }
+  .canvas-toolbar .btn-save:hover { border-color: #1890ff; color: #1890ff; }
+  .canvas-toolbar .btn-undo, .canvas-toolbar .btn-redo {
+    background: #fff; color: #333; border: 1px solid #d9d9d9; padding: 6px 10px;
+    border-radius: 6px; cursor: pointer; font-size: 16px;
+  }
+  .canvas-toolbar .btn-undo:hover, .canvas-toolbar .btn-redo:hover { border-color: #1890ff; color: #1890ff; }
+  .canvas-toolbar .btn-undo:disabled, .canvas-toolbar .btn-redo:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ===== CHAIN TITLE BAR ===== */
+  .chain-title-bar {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 44px; background: #fff; border-bottom: 1px solid #e0e0e0;
+    display: flex; align-items: center; padding: 0 16px;
+    z-index: 40;
+  }
+  .chain-breadcrumb {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px;
+  }
+  .breadcrumb-link {
+    color: #1890ff; text-decoration: none; font-weight: 500;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .breadcrumb-link:hover { text-decoration: underline; }
+  .breadcrumb-separator {
+    color: #999; font-size: 16px; margin: 0 4px;
+  }
+  .chain-name {
+    font-weight: 600; color: #333; font-size: 14px;
+  }
+
+  /* ===== MAIN LAYOUT ===== */
+  .main { display: flex; height: 100vh; margin-left: 200px; }
+
+  /* ===== LEFT SIDEBAR ===== */
+  .sidebar {
+    width: 240px; min-width: 240px; background: #fff; border-right: 1px solid #e0e0e0;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .sidebar-header {
+    padding: 14px 16px; background: linear-gradient(135deg, #008B8B, #009999);
+    color: #fff;
+  }
+  .sidebar-header h3 { font-size: 15px; font-weight: 600; }
+  .sidebar-header p { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+  .sidebar-content { flex: 1; overflow-y: auto; padding: 8px; }
+  .sidebar-content::-webkit-scrollbar { width: 4px; }
+  .sidebar-content::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+
+  .node-category { margin-bottom: 6px; }
+  .category-header {
+    display: flex; align-items: center; gap: 6px; padding: 8px 10px;
+    border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
+    user-select: none; transition: background 0.2s;
+  }
+  .category-header:hover { filter: brightness(0.95); }
+  .category-header .arrow { transition: transform 0.2s; font-size: 10px; }
+  .category-header.collapsed .arrow { transform: rotate(-90deg); }
+  .category-items { overflow: hidden; transition: max-height 0.3s ease; }
+  .category-items.collapsed { max-height: 0 !important; }
+
+  .cat-input .category-header { background: linear-gradient(90deg, #E3F2FD 0%, transparent 100%); color: #1565C0; }
+  .cat-transform .category-header { background: linear-gradient(90deg, #F3E5F5 0%, transparent 100%); color: #7B1FA2; }
+  .cat-rule .category-header { background: linear-gradient(90deg, #FFF3E0 0%, transparent 100%); color: #E65100; }
+  .cat-action .category-header { background: linear-gradient(90deg, #E8F5E9 0%, transparent 100%); color: #2E7D32; }
+
+  .node-item {
+    display: flex; align-items: center; gap: 8px; padding: 8px 10px; margin: 3px 0;
+    border-radius: 8px; cursor: grab; font-size: 12px; color: #333;
+    transition: all 0.2s; border: 1px solid transparent; position: relative;
+  }
+  .node-item:hover { transform: translateX(3px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .node-item:active { cursor: grabbing; }
+  .node-item .node-icon { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+  .node-item .node-info { flex: 1; min-width: 0; }
+  .node-item .node-name { font-weight: 500; font-size: 12px; }
+  .node-item .node-cond { font-size: 10px; color: #888; font-family: 'Courier New', monospace; }
+
+  .input-item { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); border-color: #90CAF9; }
+  .transform-item { background: linear-gradient(135deg, #F3E5F5, #E1BEE7); border-color: #CE93D8; }
+  .rule-item { background: linear-gradient(135deg, #FFF3E0, #FFE0B2); border-color: #FFCC80; }
+  .action-item { background: linear-gradient(135deg, #E8F5E9, #C8E6C9); border-color: #A5D6A7; }
+
+  .node-item .drag-handle {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    width: 8px; height: 8px; border-radius: 50%; opacity: 0.4;
+  }
+  .input-item .drag-handle { background: #1565C0; }
+  .transform-item .drag-handle { background: #9C27B0; }
+  .rule-item .drag-handle { background: #FF9800; }
+  .action-item .drag-handle { background: #2E7D32; }
+
+  /* ===== CANVAS AREA ===== */
+  .canvas-wrapper {
+    flex: 1; position: relative; overflow: hidden; background: #fafbfc;
+  }
+  .canvas-container {
+    width: 100%; height: 100%; position: relative;
+    background-image: radial-gradient(circle, #d0d0d0 1px, transparent 1px);
+    background-size: 20px 20px;
+    cursor: default;
+  }
+  .canvas-container.drag-over { background-color: #f0f7ff; }
+
+  /* SVG for connections */
+  .connections-svg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 5;
+  }
+  .connection-path {
+    fill: none; stroke: #999; stroke-width: 2; pointer-events: stroke;
+    cursor: pointer; transition: stroke 0.2s;
+  }
+  .connection-path:hover { stroke: #f44336; stroke-width: 3; }
+  .connection-path.temp { stroke: #7C4DFF; stroke-width: 2; stroke-dasharray: 8 4; }
+  .connection-path.input-line { stroke: #42A5F5; }
+  .connection-path.transform-line { stroke: #AB47BC; }
+  .connection-path.rule-line { stroke: #FFA726; }
+  .connection-path.action-line { stroke: #66BB6A; }
+
+  /* Canvas Nodes */
+  .canvas-node {
+    position: absolute; min-width: 200px; max-width: 280px; border-radius: 10px; padding: 14px 18px;
+    cursor: move; user-select: none; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    transition: box-shadow 0.2s;
+  }
+  .canvas-node:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+  .canvas-node.selected { box-shadow: 0 0 0 3px #7C4DFF, 0 4px 16px rgba(0,0,0,0.2); }
+  .canvas-node .node-header { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; }
+  .canvas-node .node-header .node-icon { font-size: 20px; }
+  .canvas-node .node-cond { font-size: 12px; margin-top: 6px; font-family: 'Courier New', monospace; opacity: 0.9; }
+  .canvas-node .node-device-badge {
+    position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+    background: #fff; color: #333; font-size: 9px; padding: 1px 6px; border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15); white-space: nowrap; max-width: 140px;
+    overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 3px;
+    border: 1px solid #e0e0e0; z-index: 15;
+  }
+  .canvas-node .node-device-badge .badge-dot {
+    width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+  }
+  .canvas-node .node-device-badge .badge-dot.online { background: #4CAF50; }
+  .canvas-node .node-device-badge .badge-dot.alarm { background: #f44336; }
+  .canvas-node .node-device-badge .badge-dot.offline { background: #9E9E9E; }
+  .canvas-node .node-device-badge .badge-dot.warning { background: #FF9800; }
+
+  .canvas-node.input-node { background: linear-gradient(135deg, #42A5F5, #1E88E5); color: #fff; }
+  .canvas-node.transform-node { background: linear-gradient(135deg, #AB47BC, #8E24AA); color: #fff; }
+  .canvas-node.rule-node { background: linear-gradient(135deg, #FFA726, #FB8C00); color: #fff; }
+  .canvas-node.action-node { background: linear-gradient(135deg, #66BB6A, #81C784); color: #fff; }
+
+  /* Connection Ports */
+  .port {
+    position: absolute; width: 16px; height: 16px; border-radius: 50%;
+    border: 2.5px solid #fff; cursor: crosshair; z-index: 20;
+    transition: all 0.2s; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .port:hover { transform: scale(1.6); box-shadow: 0 0 10px rgba(0,0,0,0.3); }
+  .port.active { transform: scale(1.8); animation: portPulse 1s infinite; }
+  .port-in { left: -8px; top: 50%; margin-top: -8px; }
+  .port-out { right: -8px; top: 50%; margin-top: -8px; }
+  .input-node .port { border-color: #1565C0; }
+  .input-node .port-out:hover, .input-node .port.active { background: #1565C0; }
+  .canvas-node.transform-node { background: linear-gradient(135deg, #AB47BC, #8E24AA); color: #fff; }
+  .transform-node .port { border-color: #7B1FA2; }
+  .transform-node .port-out:hover, .transform-node .port.active { background: #7B1FA2; }
+  .rule-node .port { border-color: #E65100; }
+  .rule-node .port-out:hover, .rule-node .port.active { background: #E65100; }
+
+  .action-node .port { border-color: #2E7D32; }
+  .action-node .port-in:hover, .action-node .port.active { background: #2E7D32; }
+  @keyframes portPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(124, 77, 255, 0.5); }
+    50% { box-shadow: 0 0 0 10px rgba(124, 77, 255, 0); }
+  }
+
+  /* Connection hint */
+  .connection-hint {
+    position: fixed; background: rgba(0,0,0,0.75); color: #fff; padding: 8px 14px;
+    border-radius: 6px; font-size: 12px; z-index: 1000; pointer-events: none;
+    display: none; align-items: center; gap: 6px;
+  }
+  .connection-hint.show { display: flex; }
+
+  /* Delete button on node */
+  .node-delete {
+    position: absolute; top: -8px; right: -8px; width: 20px; height: 20px;
+    border-radius: 50%; background: #f44336; color: #fff; border: 2px solid #fff;
+    font-size: 11px; cursor: pointer; display: none; align-items: center;
+    justify-content: center; line-height: 1; z-index: 30;
+  }
+  .canvas-node:hover .node-delete, .canvas-node.selected .node-delete { display: flex; }
+
+  /* ===== ZOOM CONTROLS ===== */
+  .zoom-controls {
+    position: absolute; bottom: 16px; right: 16px; display: flex; flex-direction: column;
+    gap: 4px; z-index: 50;
+  }
+  .zoom-btn {
+    width: 36px; height: 36px; border-radius: 8px; border: 1px solid #ddd;
+    background: #fff; cursor: pointer; font-size: 18px; display: flex;
+    align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+  }
+  .zoom-btn:hover { background: #f5f5f5; }
+  .zoom-label { text-align: center; font-size: 11px; color: #666; padding: 2px 0; }
+
+  /* ===== MINIMAP ===== */
+  .minimap {
+    position: absolute; bottom: 16px; left: 16px; width: 160px; height: 100px;
+    background: #fff; border: 1px solid #ddd; border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 50; overflow: hidden;
+  }
+  .minimap-title { font-size: 10px; color: #999; padding: 4px 8px; background: #f5f5f5; border-bottom: 1px solid #eee; }
+  .minimap-canvas { width: 100%; height: calc(100% - 22px); position: relative; }
+  .minimap-node { position: absolute; border-radius: 2px; opacity: 0.7; }
+  .minimap-viewport { position: absolute; border: 1.5px solid #7C4DFF; background: rgba(124,77,255,0.08); border-radius: 2px; }
+
+  /* ===== CONFIG PANEL ===== */
+  .config-panel {
+    position: absolute; top: 0; right: 0; width: 300px; height: 100%;
+    background: #fff; border-left: 1px solid #e0e0e0; z-index: 60;
+    transform: translateX(100%); transition: transform 0.3s ease;
+    box-shadow: -4px 0 16px rgba(0,0,0,0.1); display: flex; flex-direction: column;
+  }
+  .config-panel.open { transform: translateX(0); }
+  .config-header {
+    padding: 14px 16px; background: #f5f5f5; border-bottom: 1px solid #e0e0e0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .config-header h4 { font-size: 14px; font-weight: 600; }
+  .config-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #666; padding: 0 4px; }
+  .config-close:hover { color: #333; }
+  .config-body { flex: 1; overflow-y: auto; padding: 16px; }
+  .config-field { margin-bottom: 14px; }
+  .config-label { font-size: 12px; color: #666; margin-bottom: 4px; font-weight: 500; }
+  .config-input, .config-select, .config-textarea {
+    width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px;
+    font-size: 13px; outline: none; background: #fff; transition: border-color 0.2s;
+  }
+  .config-input:focus, .config-select:focus, .config-textarea:focus { border-color: #7C4DFF; }
+  .config-input[readonly], .config-input:disabled { background: #f5f5f5; color: #666; }
+  .config-input[type="number"] { -moz-appearance: textfield; }
+  .config-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .config-select { cursor: pointer; }
+  .config-textarea { resize: vertical; min-height: 60px; font-family: 'Courier New', monospace; font-size: 12px; }
+  .config-alert { border-radius: 6px; padding: 12px; margin-bottom: 14px; font-size: 12px; line-height: 1.5; }
+  .config-alert-info { background: #e3f2fd; border: 1px solid #90caf9; color: #1565c0; }
+  .config-alert-warning { background: #fff8e1; border: 1px solid #ffe082; color: #f57f17; }
+  .config-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500;
+  }
+  .badge-input { background: #E3F2FD; color: #1565C0; }
+  .badge-transform { background: #F3E5F5; color: #7B1FA2; }
+  .badge-rule { background: #FFF3E0; color: #E65100; }
+  .badge-action { background: #E8F5E9; color: #2E7D32; }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    height: 36px; background: #fff; border-top: 1px solid #e0e0e0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; font-size: 12px; color: #888;
+  }
+  .footer-stats { display: flex; gap: 16px; }
+  .footer-stats span { display: flex; align-items: center; gap: 4px; }
+  .footer-hint { display: flex; align-items: center; gap: 6px; }
+  .footer-help { background: none; border: 1px solid #ddd; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; color: #999; display: flex; align-items: center; justify-content: center; }
+
+  /* ===== CONTEXT MENU ===== */
+  .context-menu {
+    position: absolute; background: #fff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border: 1px solid #e0e0e0; z-index: 200; min-width: 160px; padding: 6px 0; display: none;
+  }
+  .context-menu-item {
+    padding: 8px 16px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+    transition: background 0.15s;
+  }
+  .context-menu-item:hover { background: #f5f5f5; }
+  .context-menu-item.danger { color: #f44336; }
+  .context-menu-divider { height: 1px; background: #eee; margin: 4px 0; }
+
+  /* ===== TOAST ===== */
+  .toast-container { position: fixed; top: 70px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    padding: 10px 20px; border-radius: 8px; color: #fff; font-size: 13px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast-success { background: #4CAF50; }
+  .toast-info { background: #2196F3; }
+  .toast-warning { background: #FF9800; }
+  .toast-error { background: #f44336; }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(40px); } }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4); z-index: 500; display: none;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 12px; padding: 24px; min-width: 400px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2); max-width: 90vw;
+  }
+  .modal h3 { font-size: 16px; margin-bottom: 16px; }
+  .modal-body { margin-bottom: 20px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .modal-btn {
+    padding: 8px 20px; border-radius: 6px; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 500;
+  }
+  .modal-btn-primary { background: #008B8B; color: #fff; }
+  .modal-btn-primary:hover { background: #007070; }
+  .modal-btn-secondary { background: #f5f5f5; color: #333; border: 1px solid #ddd; }
+  .modal-btn-secondary:hover { background: #eee; }
+
+  /* Test result */
+  .test-result { padding: 12px; border-radius: 8px; font-size: 13px; line-height: 1.6; }
+  .test-pass { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+  .test-fail { background: #FFEBEE; color: #C62828; border: 1px solid #EF9A9A; }
+  .test-log { font-family: 'Courier New', monospace; font-size: 12px; margin-top: 8px; padding: 8px; background: #263238; color: #80CBC4; border-radius: 6px; white-space: pre-wrap; }
+
+  /* Animations */
+  .canvas-node { animation: nodeAppear 0.3s ease; }
+  @keyframes nodeAppear { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
+  /* Header nav */
+  .header-nav { margin-left: 30px; display: flex; gap: 4px; }
+  .header-nav a {
+    padding: 5px 14px; border-radius: 6px; color: rgba(255,255,255,0.7);
+    text-decoration: none; font-size: 12px; transition: all 0.2s; cursor: pointer;
+  }
+  .header-nav a:hover { background: rgba(255,255,255,0.15); color: #fff; }
+  .header-nav a.active { background: rgba(255,255,255,0.2); color: #fff; font-weight: 500; }
+
+  /* Device select modal */
+  .device-select-list { display: flex; flex-direction: column; gap: 6px; max-height: 350px; overflow-y: auto; }
+  .device-select-list::-webkit-scrollbar { width: 4px; }
+  .device-select-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+  .device-select-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    border: 1px solid #e8e8e8; border-radius: 8px; cursor: pointer; transition: all 0.15s;
+  }
+  .device-select-item:hover { border-color: #008B8B; background: #f0fffe; }
+  .device-select-item.selected { border-color: #008B8B; background: #E0F2F1; }
+  .device-select-item .ds-check {
+    width: 20px; height: 20px; border-radius: 4px; border: 2px solid #ddd;
+    display: flex; align-items: center; justify-content: center; font-size: 12px;
+    color: transparent; transition: all 0.15s; flex-shrink: 0;
+  }
+  .device-select-item.selected .ds-check { background: #008B8B; border-color: #008B8B; color: #fff; }
+  .device-select-item .ds-icon { font-size: 18px; width: 32px; text-align: center; }
+  .device-select-item .ds-info { flex: 1; }
+  .device-select-item .ds-name { font-size: 13px; font-weight: 500; color: #333; }
+  .device-select-item .ds-meta { font-size: 11px; color: #999; }
+  .device-select-item .ds-status { font-size: 11px; }
+  .ds-status-badge {
+    display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px;
+    border-radius: 10px; font-size: 10px; font-weight: 500;
+  }
+  .ds-status-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
+  .ds-status-badge.online { background: #E8F5E9; color: #2E7D32; }
+  .ds-status-badge.online::before { background: #4CAF50; }
+  .ds-status-badge.alarm { background: #FFEBEE; color: #C62828; }
+  .ds-status-badge.alarm::before { background: #f44336; }
+  .ds-status-badge.offline { background: #F5F5F5; color: #9E9E9E; }
+  .ds-status-badge.offline::before { background: #9E9E9E; }
+  .ds-status-badge.warning { background: #FFF3E0; color: #E65100; }
+  .ds-status-badge.warning::before { background: #FF9800; }
+</style>
+</head>
+<body>
+
+<!-- Nav Sidebar -->
+<aside class="nav-sidebar">
+  <div class="nav-sidebar-logo">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/></svg>
+    CAT
+  </div>
+  <nav class="nav-sidebar-menu">
+    <div class="nav-menu-group">
+      <div class="nav-menu-item has-submenu" onclick="toggleNavSubmenu(this)">
+        <span class="nav-menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+        <span class="nav-menu-text">设备管理</span>
+        <span class="nav-menu-arrow"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg></span>
+      </div>
+      <div class="nav-submenu">
+        <a href="product-management.html" class="nav-submenu-item">产品</a>
+        <a href="device-management.html" class="nav-submenu-item">设备</a>
+      </div>
+    </div>
+    <a href="rule-chain-list.html" class="nav-menu-item">
+      <span class="nav-menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>
+      <span class="nav-menu-text">规则链</span>
+    </a>
+    <a href="alarm-management.html" class="nav-menu-item">
+      <span class="nav-menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+      <span class="nav-menu-text">告警管理</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h3>规则链</h3>
+      <p>拖拽节点到画布创建规则</p>
+    </div>
+    <div class="sidebar-content" id="sidebarContent">
+      <!-- Input Nodes -->
+      <div class="node-category cat-input">
+        <div class="category-header" onclick="toggleCategory(this)">
+          <span class="arrow">▼</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>数据输入
+        </div>
+        <div class="category-items" style="max-height:500px">
+          <div class="node-item input-item" draggable="true" data-type="input" data-id="modbus_client">
+            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+            <div class="node-info"><div class="node-name">Modbus Client</div><div class="node-cond">Modbus TCP/RTU</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item input-item" draggable="true" data-type="input" data-id="opcua_client">
+            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span>
+            <div class="node-info"><div class="node-name">OPC UA Client</div><div class="node-cond">OPC UA Server</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item input-item" draggable="true" data-type="input" data-id="mqtt_subscriber">
+            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg></span>
+            <div class="node-info"><div class="node-name">MQTT Subscriber</div><div class="node-cond">MQTT Broker</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item input-item" draggable="true" data-type="input" data-id="kafka_consumer">
+            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 9h16"/><path d="M9 4v16"/></svg></span>
+            <div class="node-info"><div class="node-name">Kafka Consumer</div><div class="node-cond">Kafka Topic</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item input-item" draggable="true" data-type="input" data-id="http_receiver">
+            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+            <div class="node-info"><div class="node-name">HTTP/WebSocket</div><div class="node-cond">REST API / WS</div></div>
+            <span class="drag-handle"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transform Nodes -->
+      <div class="node-category cat-transform">
+        <div class="category-header" onclick="toggleCategory(this)">
+          <span class="arrow">▼</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>数据处理
+        </div>
+        <div class="category-items" style="max-height:500px">
+          <div class="node-item transform-item" draggable="true" data-type="transform" data-id="script_transform">
+            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
+            <div class="node-info"><div class="node-name">Script</div><div class="node-cond">JS/Python 脚本</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item transform-item" draggable="true" data-type="transform" data-id="data_filter">
+            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></span>
+            <div class="node-info"><div class="node-name">Data Filter/Switch</div><div class="node-cond">数据分流路由</div></div>
+            <span class="drag-handle"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rule Nodes -->
+      <div class="node-category cat-rule">
+        <div class="category-header" onclick="toggleCategory(this)">
+          <span class="arrow">▼</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>规则引擎
+        </div>
+        <div class="category-items" style="max-height:500px">
+          <div class="node-item rule-item" draggable="true" data-type="rule" data-id="condition">
+            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22V8"/><path d="M12 8a4 4 0 0 1 8 0"/><path d="M12 8a4 4 0 0 0-8 0"/></svg></span>
+            <div class="node-info"><div class="node-name">Condition 判断</div><div class="node-cond">IF-AND-OR 逻辑</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item rule-item" draggable="true" data-type="rule" data-id="time_window">
+            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+            <div class="node-info"><div class="node-name">Time Window</div><div class="node-cond">滚动/滑动窗口聚合</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item rule-item" draggable="true" data-type="rule" data-id="debounce_delay">
+            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
+            <div class="node-info"><div class="node-name">Debounce & Delay</div><div class="node-cond">去抖与延时</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item rule-item" draggable="true" data-type="rule" data-id="cep_state_machine">
+            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
+            <div class="node-info"><div class="node-name">CEP / 状态机</div><div class="node-cond">复杂事件处理</div></div>
+            <span class="drag-handle"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Nodes -->
+      <div class="node-category cat-action">
+        <div class="category-header" onclick="toggleCategory(this)">
+          <span class="arrow">▼</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>动作执行
+        </div>
+        <div class="category-items" style="max-height:500px">
+          <div class="node-item action-item" draggable="true" data-type="action" data-id="alarm">
+            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+            <div class="node-info"><div class="node-name">Alarm 系统告警</div><div class="node-cond">生成告警记录</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item action-item" draggable="true" data-type="action" data-id="notification">
+            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg></span>
+            <div class="node-info"><div class="node-name">Notification</div><div class="node-cond">钉钉/企微/短信/邮件</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item action-item" draggable="true" data-type="action" data-id="rpc_control">
+            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+            <div class="node-info"><div class="node-name">RPC Control</div><div class="node-cond">设备反向控制</div></div>
+            <span class="drag-handle"></span>
+          </div>
+          <div class="node-item action-item" draggable="true" data-type="action" data-id="sql_executor">
+            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></span>
+            <div class="node-info"><div class="node-name">SQL Executor</div><div class="node-cond">数据持久化</div></div>
+            <span class="drag-handle"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-wrapper" id="canvasWrapper">
+    <!-- Rule Chain Title Bar -->
+    <div class="chain-title-bar">
+      <div class="chain-breadcrumb">
+        <a href="rule-chain-list.html" class="breadcrumb-link" id="breadcrumbBack"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><polyline points="15 18 9 12 15 6"/></svg>返回上一页</a>
+        <span class="breadcrumb-separator">›</span>
+        <span class="chain-name" id="chainNameDisplay">新建规则链</span>
+      </div>
+      <div id="bindingInfo" style="display:none;margin-left:auto;font-size:12px;color:#666;"></div>
+    </div>
+    <!-- Canvas Toolbar (migrated from header) -->
+    <div class="canvas-toolbar">
+      <button class="btn-undo" id="btnUndo" title="撤销 (Ctrl+Z)" disabled>↩</button>
+      <button class="btn-redo" id="btnRedo" title="重做 (Ctrl+Y)" disabled>↪</button>
+      <button class="toolbar-btn btn-test" id="btnTest"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px"><polygon points="5 3 19 12 5 21 5 3"/></svg>测试</button>
+      <button class="toolbar-btn btn-save" id="btnSave"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>保存规则</button>
+    </div>
+    <div class="canvas-container" id="canvasContainer">
+      <svg class="connections-svg" id="connectionsSvg"></svg>
+    </div>
+
+    <!-- Zoom Controls -->
+    <div class="zoom-controls">
+      <button class="zoom-btn" onclick="zoomIn()" title="放大">+</button>
+      <div class="zoom-label" id="zoomLabel">100%</div>
+      <button class="zoom-btn" onclick="zoomOut()" title="缩小">−</button>
+      <button class="zoom-btn" onclick="zoomReset()" title="重置" style="font-size:12px">⌂</button>
+    </div>
+
+    <!-- Minimap -->
+    <div class="minimap" id="minimap">
+      <div class="minimap-title">小地图</div>
+      <div class="minimap-canvas" id="minimapCanvas"></div>
+    </div>
+
+    <!-- Config Panel -->
+    <div class="config-panel" id="configPanel">
+      <div class="config-header">
+        <h4 id="configTitle">节点配置</h4>
+        <button class="config-close" onclick="closeConfig()">✕</button>
+      </div>
+      <div class="config-body" id="configBody"></div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+      <div class="context-menu-item" onclick="duplicateNode()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制节点</div>
+      <div class="context-menu-divider"></div>
+      <div class="context-menu-item danger" onclick="deleteSelectedNode()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>删除节点</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-stats">
+    <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/></svg>节点数: <b id="nodeCount">0</b></span>
+    <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>连接数: <b id="connCount">0</b></span>
+  </div>
+  <div class="footer-hint">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>从左侧拖拽节点到画布，点击节点圆点创建连接
+    <button class="footer-help" title="帮助">?</button>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Connection Hint -->
+<div class="connection-hint" id="connectionHint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>拖动到目标节点的输入端口完成连接</div>
+
+<!-- Test Modal -->
+<div class="modal-overlay" id="testModal">
+  <div class="modal">
+    <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>规则链测试结果</h3>
+    <div class="modal-body" id="testResult"></div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-secondary" onclick="closeTestModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- Save Modal -->
+<div class="modal-overlay" id="saveModal">
+  <div class="modal">
+    <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>保存规则链</h3>
+    <div class="modal-body">
+      <div class="config-field">
+        <div class="config-label">规则链名称</div>
+        <input class="config-input" id="ruleName" value="地铁告警联动规则-01" />
+      </div>
+      <div class="config-field">
+        <div class="config-label">描述</div>
+        <textarea class="config-textarea" id="ruleDesc" rows="3">站台环境监测与设备联动告警规则</textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-secondary" onclick="closeSaveModal()">取消</button>
+      <button class="modal-btn modal-btn-primary" onclick="confirmSave()">确认保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Device Select Modal -->
+<div class="modal-overlay" id="deviceModal">
+  <div class="modal" style="width:560px">
+    <div class="modal-header" style="padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between">
+      <h3 style="margin:0;font-size:15px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>关联设备</h3>
+      <button class="config-close" onclick="closeDeviceModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px">
+      <p style="font-size:12px;color:#888;margin-bottom:10px">选择要关联到此触发器的设备（可多选）：</p>
+      <div style="margin-bottom:10px">
+        <input class="config-input" placeholder="搜索设备名称/编码..." id="deviceSearchInput" oninput="filterModalDeviceList(this.value)" style="padding-left:30px;background:#fafafa url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E&quot;) 8px center no-repeat" />
+      </div>
+      <div class="device-select-list" id="deviceSelectList"></div>
+    </div>
+    <div class="modal-actions" style="padding:14px 20px;border-top:1px solid #f0f0f0">
+      <button class="modal-btn modal-btn-secondary" onclick="closeDeviceModal()">取消</button>
+      <button class="modal-btn modal-btn-primary" onclick="confirmDeviceAssociation()">确认关联</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== NAV SIDEBAR =====
+function toggleNavSubmenu(el) {
+  const submenu = el.nextElementSibling;
+  const arrow = el.querySelector('.nav-menu-arrow');
+  el.classList.toggle('expanded');
+  arrow.classList.toggle('open');
+  submenu.classList.toggle('open');
+}
+
+// ===== STATE =====
+const state = {
+  nodes: [],
+  connections: [],
+  nextId: 1,
+  selectedNode: null,
+  draggingNode: null,
+  dragOffset: { x: 0, y: 0 },
+  connecting: null, // { nodeId, portType }
+  tempLine: null,
+  zoom: 1,
+  pan: { x: 0, y: 0 },
+  history: [],
+  historyIndex: -1,
+  maxHistory: 50,
+};
+
+const NODE_DEFS = {
+    // Input Nodes
+    modbus_client:    { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', name: 'Modbus Client', cond: 'Modbus TCP/RTU', type: 'input' },
+    opcua_client:     { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>', name: 'OPC UA Client', cond: 'OPC UA Server', type: 'input' },
+    mqtt_subscriber:  { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>', name: 'MQTT Subscriber', cond: 'MQTT Broker', type: 'input' },
+    kafka_consumer:   { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 9h16"/><path d="M9 4v16"/></svg>', name: 'Kafka Consumer', cond: 'Kafka Topic', type: 'input' },
+    http_receiver:    { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>', name: 'HTTP/WebSocket', cond: 'REST API / WS', type: 'input' },
+    // Transform Nodes
+    script_transform: { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>', name: 'Script', cond: 'JS/Python 脚本', type: 'transform' },
+    data_filter:      { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>', name: 'Data Filter/Switch', cond: '数据分流路由', type: 'transform' },
+    // Rule Nodes
+    condition:        { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22V8"/><path d="M12 8a4 4 0 0 1 8 0"/><path d="M12 8a4 4 0 0 0-8 0"/></svg>', name: 'Condition 判断', cond: 'IF-AND-OR 逻辑', type: 'rule' },
+    time_window:      { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', name: 'Time Window', cond: '滚动/滑动窗口聚合', type: 'rule' },
+    debounce_delay:   { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>', name: 'Debounce & Delay', cond: '去抖与延时', type: 'rule' },
+    cep_state_machine:{ icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>', name: 'CEP / 状态机', cond: '复杂事件处理', type: 'rule' },
+    // Action Nodes
+    alarm:            { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>', name: 'Alarm 系统告警', cond: '生成告警记录', type: 'action' },
+    notification:     { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>', name: 'Notification', cond: '钉钉/企微/短信/邮件', type: 'action' },
+    rpc_control:      { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>', name: 'RPC Control', cond: '设备反向控制', type: 'action' },
+    sql_executor:     { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>', name: 'SQL Executor', cond: '数据持久化', type: 'action' },
+  };
+
+// ===== DEVICE DATA (shared with device management page) =====
+const DEVICES = [
+  { id: 'DEV-001', name: '1号站台温度传感器', type: 'hvac', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-002', name: '2号站台温度传感器', type: 'hvac', station: '1号线-人民广场', status: 'alarm' },
+  { id: 'DEV-003', name: 'A出口CO₂传感器', type: 'hvac', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-004', name: '1号通风机组', type: 'fan', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-005', name: '2号通风机组', type: 'fan', station: '1号线-南京东路', status: 'alarm' },
+  { id: 'DEV-006', name: '3号通风机组', type: 'fan', station: '2号线-中山公园', status: 'online' },
+  { id: 'DEV-007', name: '1号集水池', type: 'pump', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-008', name: '2号集水池', type: 'pump', station: '1号线-南京东路', status: 'warning' },
+  { id: 'DEV-009', name: '3号集水池', type: 'pump', station: '2号线-静安寺', status: 'online' },
+  { id: 'DEV-010', name: '1号站台屏蔽门-上行', type: 'door', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-011', name: '1号站台屏蔽门-下行', type: 'door', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-012', name: '2号站台屏蔽门', type: 'door', station: '1号线-南京东路', status: 'alarm' },
+  { id: 'DEV-013', name: 'A出口电扶梯-上行', type: 'escalator', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-014', name: 'B出口电扶梯-下行', type: 'escalator', station: '1号线-人民广场', status: 'offline' },
+  { id: 'DEV-015', name: 'C出口电扶梯', type: 'escalator', station: '2号线-中山公园', status: 'online' },
+  { id: 'DEV-016', name: '1号烟感探测器', type: 'fire', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-017', name: '2号烟感探测器', type: 'fire', station: '1号线-南京东路', status: 'online' },
+  { id: 'DEV-018', name: '3号烟感探测器', type: 'fire', station: '2号线-静安寺', status: 'online' },
+  { id: 'DEV-019', name: '1号配电柜', type: 'power', station: '1号线-人民广场', status: 'online' },
+  { id: 'DEV-020', name: '2号配电柜', type: 'power', station: '1号线-南京东路', status: 'online' },
+  { id: 'DEV-021', name: 'UPS不间断电源', type: 'power', station: '2号线-中山公园', status: 'online' },
+  { id: 'DEV-022', name: '4号通风机组', type: 'fan', station: '2号线-静安寺', status: 'online' },
+  { id: 'DEV-023', name: '4号站台温度传感器', type: 'hvac', station: '2号线-静安寺', status: 'online' },
+  { id: 'DEV-024', name: 'D出口电扶梯', type: 'escalator', station: '2号线-静安寺', status: 'online' },
+];
+
+let deviceModalTargetNodeId = null;
+let selectedDeviceIds = [];
+
+// ===== DOM REFS =====
+const canvasContainer = document.getElementById('canvasContainer');
+const connectionsSvg = document.getElementById('connectionsSvg');
+const configPanel = document.getElementById('configPanel');
+const configBody = document.getElementById('configBody');
+const configTitle = document.getElementById('configTitle');
+const contextMenu = document.getElementById('contextMenu');
+
+// ===== CATEGORY TOGGLE =====
+function toggleCategory(header) {
+  header.classList.toggle('collapsed');
+  const items = header.nextElementSibling;
+  items.classList.toggle('collapsed');
+}
+
+// ===== DRAG FROM SIDEBAR =====
+document.querySelectorAll('.node-item[draggable]').forEach(item => {
+  item.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text/plain', JSON.stringify({
+      type: item.dataset.type,
+      id: item.dataset.id,
+    }));
+    e.dataTransfer.effectAllowed = 'copy';
+  });
+});
+
+canvasContainer.addEventListener('dragover', e => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+  canvasContainer.classList.add('drag-over');
+});
+canvasContainer.addEventListener('dragleave', () => canvasContainer.classList.remove('drag-over'));
+canvasContainer.addEventListener('drop', e => {
+  e.preventDefault();
+  canvasContainer.classList.remove('drag-over');
+  try {
+    const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+    const rect = canvasContainer.getBoundingClientRect();
+    const x = (e.clientX - rect.left - state.pan.x) / state.zoom;
+    const y = (e.clientY - rect.top - state.pan.y) / state.zoom;
+    addNode(data.id, data.type, x, y);
+  } catch (err) {}
+});
+
+// ===== NODE MANAGEMENT =====
+function addNode(defId, type, x, y) {
+  const def = NODE_DEFS[defId];
+  if (!def) return;
+  const node = {
+    id: state.nextId++,
+    defId,
+    type,
+    icon: def.icon,
+    name: def.name,
+    cond: def.cond,
+    x: x - 80,
+    y: y - 25,
+    config: { threshold: '', enabled: true, priority: 'medium', description: '' },
+    deviceIds: [], // associated device IDs for triggers
+  };
+  state.nodes.push(node);
+  renderNode(node);
+  saveHistory();
+  updateStats();
+  showToast(`已添加节点: ${node.name}`, 'success');
+}
+
+function renderNode(node) {
+  const el = document.createElement('div');
+  el.className = 'canvas-node ' + node.type + '-node';
+  el.id = `node-${node.id}`;
+  el.style.left = node.x + 'px';
+  el.style.top = node.y + 'px';
+
+  // Build node inner content
+  let nodeContent = `
+    <div class="port port-in" data-node="${node.id}" data-port="in"></div>
+    <div class="node-header"><span class="node-icon">${node.icon}</span>${node.name}</div>
+    <div class="node-cond">${node.cond}</div>
+    <div class="port port-out" data-node="${node.id}" data-port="out"></div>
+    <div class="node-delete" data-node="${node.id}">✕</div>
+  `;
+
+  el.innerHTML = nodeContent;
+  canvasContainer.appendChild(el);
+
+  // Node drag & click
+  let mouseDownPos = null;
+  let isDragging = false;
+
+  el.addEventListener('mousedown', e => {
+    // If clicking on port or delete button, do NOT start node drag
+    if (e.target.classList.contains('port') || e.target.classList.contains('node-delete')) return;
+    e.preventDefault();
+    selectNode(node.id);
+    mouseDownPos = { x: e.clientX, y: e.clientY };
+    isDragging = false;
+    state.draggingNode = node;
+    const rect = canvasContainer.getBoundingClientRect();
+    state.dragOffset.x = (e.clientX - rect.left) / state.zoom - node.x;
+    state.dragOffset.y = (e.clientY - rect.top) / state.zoom - node.y;
+  });
+
+  el.addEventListener('click', e => {
+    if (e.target.classList.contains('port') || e.target.classList.contains('node-delete')) return;
+    e.stopPropagation();
+    // Only open config if it was a click (not a drag)
+    if (!isDragging) {
+      openConfig(node.id);
+    }
+  });
+
+  // Port interaction for connecting (use mousedown + mouseup on the port itself)
+  el.querySelectorAll('.port').forEach(port => {
+    port.addEventListener('mousedown', e => {
+      e.stopPropagation();
+      e.preventDefault();
+      const portType = port.dataset.port;
+      const nodeId = parseInt(port.dataset.node);
+
+      if (portType === 'out') {
+        // Start connecting from output port
+        state.connecting = { nodeId, portType: 'out' };
+        port.classList.add('active');
+        // Show connection hint
+        const hint = document.getElementById('connectionHint');
+        hint.classList.add('show');
+        hint.style.left = (e.clientX + 15) + 'px';
+        hint.style.top = (e.clientY + 15) + 'px';
+        // Create temp line
+        const svgRect = connectionsSvg.getBoundingClientRect();
+        const portRect = port.getBoundingClientRect();
+        state.tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        state.tempLine.classList.add('connection-path', 'temp');
+        connectionsSvg.appendChild(state.tempLine);
+        state.tempLineStart = {
+          x: portRect.left + 8 - svgRect.left,
+          y: portRect.top + 8 - svgRect.top
+        };
+      }
+      // Connection completion is handled in global mouseup handler
+    });
+
+    // Highlight ports on hover during connecting
+    port.addEventListener('mouseenter', () => {
+      if (state.connecting && port.dataset.port === 'in') {
+        port.classList.add('active');
+      }
+    });
+    port.addEventListener('mouseleave', () => {
+      port.classList.remove('active');
+    });
+  });
+
+  // Track dragging state for click vs drag distinction
+  el._nodeDragHandler = (e) => {
+    if (state.draggingNode && state.draggingNode.id === node.id && mouseDownPos) {
+      const dx = e.clientX - mouseDownPos.x;
+      const dy = e.clientY - mouseDownPos.y;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        isDragging = true;
+      }
+    }
+  };
+  document.addEventListener('mousemove', el._nodeDragHandler);
+
+  // Delete button
+  el.querySelector('.node-delete').addEventListener('click', e => {
+    e.stopPropagation();
+    removeNode(node.id);
+  });
+
+  // Right-click context menu
+  el.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    selectNode(node.id);
+    contextMenu.style.display = 'block';
+    contextMenu.style.left = e.clientX + 'px';
+    contextMenu.style.top = e.clientY + 'px';
+  });
+}
+
+function removeNode(id) {
+  state.nodes = state.nodes.filter(n => n.id !== id);
+  state.connections = state.connections.filter(c => c.from !== id && c.to !== id);
+  const el = document.getElementById(`node-${id}`);
+  if (el) el.remove();
+  if (state.selectedNode === id) { state.selectedNode = null; closeConfig(); }
+  saveHistory();
+  updateStats();
+  renderConnections();
+  updateMinimap();
+  showToast('节点已删除', 'warning');
+}
+
+function selectNode(id) {
+  document.querySelectorAll('.canvas-node.selected').forEach(el => el.classList.remove('selected'));
+  state.selectedNode = id;
+  const el = document.getElementById(`node-${id}`);
+  if (el) el.classList.add('selected');
+}
+
+function connectionExists(from, to) {
+  return state.connections.some(c => c.from === from && c.to === to);
+}
+
+// ===== MOUSE MOVE/UP FOR DRAGGING & CONNECTING =====
+document.addEventListener('mousemove', e => {
+  // Node dragging
+  if (state.draggingNode) {
+    const rect = canvasContainer.getBoundingClientRect();
+    const node = state.draggingNode;
+    node.x = (e.clientX - rect.left) / state.zoom - state.dragOffset.x;
+    node.y = (e.clientY - rect.top) / state.zoom - state.dragOffset.y;
+    const el = document.getElementById(`node-${node.id}`);
+    if (el) {
+      el.style.left = node.x + 'px';
+      el.style.top = node.y + 'px';
+    }
+    renderConnections();
+    updateMinimap();
+  }
+  // Connection line drawing
+  if (state.connecting && state.tempLine) {
+    const svgRect = connectionsSvg.getBoundingClientRect();
+    const mx = e.clientX - svgRect.left;
+    const my = e.clientY - svgRect.top;
+    const sx = state.tempLineStart.x;
+    const sy = state.tempLineStart.y;
+    const cx = (sx + mx) / 2;
+    state.tempLine.setAttribute('d', `M${sx},${sy} C${cx},${sy} ${cx},${my} ${mx},${my}`);
+    // Move hint near cursor
+    const hint = document.getElementById('connectionHint');
+    hint.style.left = (e.clientX + 15) + 'px';
+    hint.style.top = (e.clientY + 15) + 'px';
+  }
+});
+
+document.addEventListener('mouseup', e => {
+  // Finish node dragging
+  if (state.draggingNode) {
+    saveHistory();
+    state.draggingNode = null;
+  }
+  // Cancel connecting (if mouse released NOT on an input port)
+  if (state.connecting) {
+    // Use elementFromPoint to get the actual element under cursor
+    const elem = document.elementFromPoint(e.clientX, e.clientY);
+    const target = elem ? (elem.classList.contains('port') ? elem : (elem.closest && elem.closest('.port') ? elem.closest('.port') : null)) : null;
+    if (target && target.dataset && target.dataset.port === 'in') {
+      const toId = parseInt(target.dataset.node);
+      completeConnection(toId);
+    } else {
+      // Also check if we ended up over any input port by traversing up
+      if (elem) {
+        const port = elem.classList.contains('port') ? elem : elem.closest ? elem.closest('.port') : null;
+        if (port && port.dataset && port.dataset.port === 'in') {
+          const toId = parseInt(port.dataset.node);
+          completeConnection(toId);
+          return;
+        }
+      }
+      cancelConnection();
+    }
+  }
+});
+
+// ===== CONNECTION HELPERS =====
+function completeConnection(toId) {
+  const fromId = state.connecting.nodeId;
+  if (fromId !== toId && !connectionExists(fromId, toId)) {
+    state.connections.push({ from: fromId, to: toId });
+    saveHistory();
+    updateStats();
+    showToast('连接已创建', 'success');
+  } else if (fromId === toId) {
+    showToast('不能连接到自己', 'warning');
+  } else {
+    showToast('连接已存在', 'warning');
+  }
+  cancelConnection();
+  renderConnections();
+}
+
+function cancelConnection() {
+  state.connecting = null;
+  document.getElementById('connectionHint').classList.remove('show');
+  document.querySelectorAll('.port.active').forEach(p => p.classList.remove('active'));
+  if (state.tempLine) { state.tempLine.remove(); state.tempLine = null; }
+}
+
+// Click on canvas to deselect
+canvasContainer.addEventListener('mousedown', e => {
+  if (e.target === canvasContainer || e.target === connectionsSvg) {
+    document.querySelectorAll('.canvas-node.selected').forEach(el => el.classList.remove('selected'));
+    state.selectedNode = null;
+    closeConfig();
+  }
+  contextMenu.style.display = 'none';
+});
+
+// ===== CONNECTION RENDERING =====
+function renderConnections() {
+  connectionsSvg.querySelectorAll('.connection-path:not(.temp)').forEach(p => p.remove());
+  state.connections.forEach((conn, idx) => {
+    const fromEl = document.getElementById(`node-${conn.from}`);
+    const toEl = document.getElementById(`node-${conn.to}`);
+    if (!fromEl || !toEl) return;
+    const svgRect = connectionsSvg.getBoundingClientRect();
+    const outPort = fromEl.querySelector('.port-out');
+    const inPort = toEl.querySelector('.port-in');
+    if (!outPort || !inPort) return;
+    const outRect = outPort.getBoundingClientRect();
+    const inRect = inPort.getBoundingClientRect();
+    const x1 = outRect.left + 8 - svgRect.left;
+    const y1 = outRect.top + 8 - svgRect.top;
+    const x2 = inRect.left + 8 - svgRect.left;
+    const y2 = inRect.top + 8 - svgRect.top;
+    const cx = (x1 + x2) / 2;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const fromNode = state.nodes.find(n => n.id === conn.from);
+    const lineClass = fromNode ? `${fromNode.type}-line` : '';
+    path.classList.add('connection-path', lineClass);
+    path.setAttribute('d', `M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}`);
+    path.dataset.index = idx;
+    path.addEventListener('dblclick', () => {
+      state.connections.splice(idx, 1);
+      renderConnections();
+      saveHistory();
+      updateStats();
+      showToast('连接已删除', 'warning');
+    });
+    connectionsSvg.appendChild(path);
+  });
+  updateMinimap();
+}
+
+// ===== CONFIG PANEL =====
+function openConfig(nodeId) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  selectNode(nodeId);
+  const typeLabel = { input: '数据输入', transform: '数据处理', rule: '规则引擎', action: '动作执行' };
+  const badgeClass = { input: 'badge-input', transform: 'badge-transform', rule: 'badge-rule', action: 'badge-action' };
+  configTitle.innerHTML = `${node.icon} ${node.name} <span class="config-badge ${badgeClass[node.type]}">${typeLabel[node.type]}</span>`;
+
+  // Initialize config if not exists
+  if (!node.config) node.config = {};
+  if (!node.config.params) node.config.params = {};
+
+  // Build type-specific config sections
+  let typeSpecificSection = '';
+
+  // ===== INPUT: 连接配置 (详细规范) =====
+  if (node.type === 'input') {
+    let inputConfigPanel = '';
+
+    // --- 通用：关联维度配置（所有输入节点共享） ---
+    const assocDim = node.config.assocDimension || 'product';
+    const assocProduct = node.config.assocProduct || '';
+    const assocFilters = node.config.assocFilters || [];
+    const allProducts = [
+      { id: 'prd_001', name: '温度传感器 TH-200', category: '环境监测' },
+      { id: 'prd_002', name: 'CO₂传感器 CD-100', category: '环境监测' },
+      { id: 'prd_003', name: '通风机组 VF-500', category: '暖通空调' },
+      { id: 'prd_004', name: '排水泵 WP-300', category: '给排水' },
+      { id: 'prd_005', name: '电扶梯 ES-800', category: '站台设备' },
+      { id: 'prd_006', name: '配电柜 PD-600', category: '供配电' },
+      { id: 'prd_007', name: '烟感探测器 SD-100', category: '消防系统' },
+      { id: 'prd_008', name: '集水池液位计 LT-200', category: '给排水' },
+    ];
+    const selectedProduct = allProducts.find(p => p.id === assocProduct);
+    const deviceGroups = selectedProduct ? [
+      { id: 'g1', label: '一期车间', count: 12 },
+      { id: 'g2', label: '二期车间', count: 8 },
+      { id: 'g3', label: '三期车间', count: 15 },
+      { id: 'g4', label: '控制中心', count: 3 },
+    ] : [];
+
+    const assocSection = `
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+        <div class="config-label" style="margin-bottom:10px;font-size:13px;font-weight:600;color:#333"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>数据源关联</div>
+
+        <div class="config-field">
+          <div class="config-label">关联维度</div>
+          <div style="display:flex;gap:16px">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#444">
+              <input type="radio" name="assocDim_${node.id}" value="product" ${assocDim==='product'?'checked':''} onchange="updateNodeConfig(${node.id},'assocDimension','product');toggleAssocMode('${node.id}','product')">
+              🔘 按产品（物模型）
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#444">
+              <input type="radio" name="assocDim_${node.id}" value="device" ${assocDim==='device'?'checked':''} onchange="updateNodeConfig(${node.id},'assocDimension','device');toggleAssocMode('${node.id}','device')">
+              ⚪ 按特定设备
+            </label>
+          </div>
+        </div>
+
+        <div id="assoc_product_fields_${node.id}" style="display:${assocDim==='product'?'block':'none'}">
+          <div class="config-field">
+            <div class="config-label">选择产品 <span style="color:#f44336">*</span></div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id},'assocProduct',this.value);refreshAssocFilters(${node.id},this.value)">
+              <option value="">-- 请选择产品 --</option>
+              ${allProducts.map(p => `<option value="${p.id}" ${assocProduct===p.id?'selected':''}>${p.name}（${p.category}）</option>`).join('')}
+            </select>
+          </div>
+
+          <div id="assoc_filter_section_${node.id}" style="display:${assocProduct?'block':'none'}">
+            <div class="config-field">
+              <div class="config-label">数据过滤</div>
+              <div style="font-size:11px;color:#999;margin-bottom:8px">默认该产品下所有设备的数据都会进入这条规则链。勾选可按设备分组过滤。</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px" id="assoc_filter_tags_${node.id}">
+                ${deviceGroups.map(g => {
+                  const checked = assocFilters.includes(g.id);
+                  return `<label style="display:flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid ${checked?'#7C4DFF':'#ddd'};border-radius:20px;cursor:pointer;font-size:12px;color:${checked?'#7C4DFF':'#666'};background:${checked?'#f3e5f5':'#fff'};transition:all 0.2s;user-select:none" onclick="toggleAssocFilter(${node.id},'${g.id}',this)">
+                    <input type="checkbox" ${checked?'checked':''} style="display:none">
+                    ${g.label}
+                    <span style="font-size:10px;color:#999;margin-left:2px">(${g.count})</span>
+                  </label>`;
+                }).join('')}
+              </div>
+              ${assocFilters.length > 0 ? `<div style="margin-top:8px;font-size:11px;color:#7C4DFF">已选择 ${assocFilters.length} 个分组：${assocFilters.map(fid => { const g = deviceGroups.find(d=>d.id===fid); return g ? g.label : fid; }).join('、')}</div>` : ''}
+            </div>
+          </div>
+        </div>
+
+        <div id="assoc_device_fields_${node.id}" style="display:${assocDim==='device'?'block':'none'}">
+          <div class="config-field">
+            <div class="config-label">选择设备 <span style="color:#f44336">*</span></div>
+            <div style="position:relative">
+              <input class="config-input" type="text" placeholder="搜索设备名称或 ID ..." id="deviceSearch_${node.id}" oninput="filterDeviceList(${node.id},this.value)">
+              <div style="position:absolute;right:10px;top:50%;transform:translateY(-50%)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+            </div>
+            <div id="deviceSelectList_${node.id}" style="margin-top:8px;max-height:180px;overflow-y:auto;border:1px solid #eee;border-radius:6px">
+              ${generateDeviceSelectList(node)}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Modbus Client
+    if (node.defId === 'modbus_client') {
+      const savedMode = node.config.connectionMode || 'TCP';
+      const isRTU = savedMode === 'RTU';
+      inputConfigPanel = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Modbus Client 数据接入配置</div>
+          
+          <div class="config-field">
+            <div class="config-label">连接模式</div>
+            <div style="display:flex;gap:12px">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                <input type="radio" name="connectionMode_${node.id}" value="TCP" ${savedMode==='TCP'?'checked':''} onchange="updateNodeConfig(${node.id},'connectionMode',this.value);toggleModbusMode('${node.id}','TCP')">
+                Modbus TCP
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                <input type="radio" name="connectionMode_${node.id}" value="RTU" ${savedMode==='RTU'?'checked':''} onchange="updateNodeConfig(${node.id},'connectionMode',this.value);toggleModbusMode('${node.id}','RTU')">
+                Modbus RTU (串口)
+              </label>
+            </div>
+          </div>
+
+          <div id="tcp_fields_${node.id}" style="display:${isRTU?'none':'block'}">
+            <div class="config-field">
+              <div class="config-label">IP 地址 <span style="color:#f44336">*</span></div>
+              <input class="config-input" type="text" placeholder="例如: 192.168.1.100" value="${node.config.host || ''}" onchange="updateNodeConfig(${node.id},'host',this.value)">
+            </div>
+            <div class="config-field">
+              <div class="config-label">端口号 <span style="color:#f44336">*</span></div>
+              <input class="config-input" type="number" placeholder="502" value="${node.config.port || '502'}" min="1" max="65535" onchange="updateNodeConfig(${node.id},'port',this.value)">
+            </div>
+          </div>
+
+          <div id="rtu_fields_${node.id}" style="display:${isRTU?'block':'none'}">
+            <div class="config-field">
+              <div class="config-label">串口号 <span style="color:#f44336">*</span></div>
+              <select class="config-select" onchange="updateNodeConfig(${node.id},'serialPort',this.value)">
+                ${['COM1','COM2','COM3','/dev/ttyUSB0','/dev/ttyUSB1'].map(p => `<option value="${p}" ${node.config.serialPort===p?'selected':''}>${p}</option>`).join('')}
+              </select>
+            </div>
+            <div class="config-field">
+              <div class="config-label">波特率</div>
+              <select class="config-select" onchange="updateNodeConfig(${node.id},'baudRate',this.value)">
+                ${[4800,9600,14400,19200,115200].map(b => `<option value="${b}" ${(node.config.baudRate||9600)==b?'selected':''}>${b}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">轮询周期 (ms) <span style="color:#f44336">*</span> <span title="系统向底层 PLC/仪表发起数据请求的时间间隔" style="cursor:help">ⓘ</span></div>
+            <input class="config-input" type="number" placeholder="5000" value="${node.config.pollingInterval || '5000'}" min="1000" onchange="updateNodeConfig(${node.id},'pollingInterval',this.value)">
+            <div style="font-size:10px;color:#999;margin-top:3px">工业场景轮询周期不得低于 1000ms</div>
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">寄存器数据映射配置 <span title="配置需要采集的寄存器地址并映射为 JSON 字段名" style="cursor:help">ⓘ</span></div>
+            <div id="registerList_${node.id}">
+              ${generateRegisterMappingRows(node)}
+            </div>
+            <button class="action-btn" style="margin-top:8px;padding:6px 12px;border:1px solid #1565C0;color:#1565C0;border-radius:5px;background:transparent;cursor:pointer;font-size:12px" onclick="addRegisterRow(${node.id})">+ 添加寄存器映射</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // MQTT Subscriber
+    else if (node.defId === 'mqtt_subscriber') {
+      const authMode = node.config.authMode || '账号密码认证';
+      const isAuth = authMode !== '匿名访问';
+      inputConfigPanel = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>MQTT 订阅客户端配置</div>
+          
+          <div class="config-field">
+            <div class="config-label">Broker 服务器地址 <span style="color:#f44336">*</span> <span title="支持 mqtt:// 或安全加密的 mqtts://" style="cursor:help">ⓘ</span></div>
+            <input class="config-input" type="text" placeholder="例如: mqtt://broker.emqx.io:1883" value="${node.config.brokerUrl || ''}" onchange="updateNodeConfig(${node.id},'brokerUrl',this.value)">
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">客户端 ID (Client ID)</div>
+            <div style="display:flex;gap:8px">
+              <input class="config-input" type="text" placeholder="自动生成默认 ID" value="${node.config.clientId || ''}" onchange="updateNodeConfig(${node.id},'clientId',this.value)" style="flex:1">
+              <button class="action-btn" style="padding:6px 12px;border:1px solid #ddd;border-radius:5px;background:#f5f5f5;cursor:pointer;font-size:11px" onclick="this.previousElementSibling.value='mqtt-client-'+Math.random().toString(36).substr(2,9);updateNodeConfig(${node.id},'clientId',this.previousElementSibling.value)">生成</button>
+            </div>
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">订阅主题 (Topic) <span style="color:#f44336">*</span> <span title="支持通配符：'+' 代表单级，'#' 代表多级" style="cursor:help">ⓘ</span></div>
+            <input class="config-input" type="text" placeholder="例如: /factory/+/telemetry" value="${node.config.topic || ''}" onchange="updateNodeConfig(${node.id},'topic',this.value)">
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">服务质量等级 (QoS)</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id},'qos',this.value)">
+              <option value="0" ${(node.config.qos||1)==0?'selected':''}>0 - 最多交付一次 (At most once)</option>
+              <option value="1" ${(node.config.qos||1)==1?'selected':''}>1 - 至少交付一次 (At least once)</option>
+              <option value="2" ${node.config.qos==2?'selected':''}>2 - 刚好交付一次 (Exactly once)</option>
+            </select>
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">身份认证方式</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id},'authMode',this.value);toggleMqttAuth('${node.id}',this.value)">
+              <option value="匿名访问" ${authMode==='匿名访问'?'selected':''}>匿名访问</option>
+              <option value="账号密码认证" ${authMode==='账号密码认证'?'selected':''}>账号密码认证</option>
+              <option value="SSL/TLS 证书加密" ${authMode==='SSL/TLS 证书加密'?'selected':''}>SSL/TLS 证书加密</option>
+            </select>
+          </div>
+
+          <div id="mqtt_auth_${node.id}" style="display:${isAuth?'block':'none'}">
+            <div class="config-field">
+              <div class="config-label">用户名 <span style="color:#f44336">*</span></div>
+              <input class="config-input" type="text" placeholder="请输入用户名" value="${node.config.username || ''}" onchange="updateNodeConfig(${node.id},'username',this.value)">
+            </div>
+            <div class="config-field">
+              <div class="config-label">密码 <span style="color:#f44336">*</span></div>
+              <input class="config-input" type="password" placeholder="请输入密码" value="${node.config.password || ''}" onchange="updateNodeConfig(${node.id},'password',this.value)">
+            </div>
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">报文解析格式</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id},'payloadFormat',this.value)">
+              <option value="JSON 结构体" ${node.config.payloadFormat==='JSON 结构体'?'selected':''}>JSON 结构体</option>
+              <option value="Raw Text" ${node.config.payloadFormat==='Raw Text'?'selected':''}>Raw Text (文本)</option>
+              <option value="Hex Binary" ${node.config.payloadFormat==='Hex Binary'?'selected':''}>Hex Binary (二进制明文)</option>
+            </select>
+          </div>
+        </div>
+      `;
+    }
+
+    // HTTP Receiver
+    else if (node.defId === 'http_receiver') {
+      const webhookId = node.config.webhookUrl ? '' : 'cb7ebd83a2184ff7929' + Math.random().toString(16).substr(2,6);
+      inputConfigPanel = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>HTTP Webhook 接收端配置</div>
+          
+          <div style="background:#e3f2fd;border:1px solid #90caf9;border-radius:6px;padding:12px;margin-bottom:12px;font-size:12px;color:#1565c0">
+            本节点将生成一个唯一的免测 Webhook 接口，第三方系统通过 POST 请求将数据推送到此 URL，系统会自动将 Payload 转化为标准 Telemetry 流。
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">支持的请求方法</div>
+            <select class="config-select" disabled>
+              <option selected>POST</option>
+            </select>
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">Webhook 接收地址 (URL) <span title="此 URL 唯一且不可修改，点击右侧按钮直接复制" style="cursor:help">ⓘ</span></div>
+            <div style="display:flex;gap:8px">
+              <input class="config-input" type="text" value="https://iot-api.platform.com/v1/rules/webhook/${node.config.webhookId || webhookId}" readonly style="flex:1;background:#f5f5f5">
+              <button class="action-btn" style="padding:6px 12px;border:1px solid #ddd;border-radius:5px;background:#f5f5f5;cursor:pointer;font-size:11px;white-space:nowrap" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('input').value);this.textContent='已复制'">复制</button>
+            </div>
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">安全认证 Header 键名 <span style="color:#f44336">*</span></div>
+            <input class="config-input" type="text" value="${node.config.authHeaderKey || 'X-Webhook-Token'}" onchange="updateNodeConfig(${node.id},'authHeaderKey',this.value)">
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">安全认证凭证 (Token) <span title="第三方系统请求时，必须在 Header 中携带此 Token 进行身份验签" style="cursor:help">ⓘ</span></div>
+            <div style="display:flex;gap:8px">
+              <input class="config-input" type="password" value="${node.config.authToken || 'sec_b9f87c14aee6420f889ad43e110bb'}" readonly style="flex:1;background:#f5f5f5">
+              <button class="action-btn" style="padding:6px 12px;border:1px solid #ddd;border-radius:5px;background:#f5f5f5;cursor:pointer;font-size:11px" onclick="const t='sec_'+Math.random().toString(16).substr(2,12)+Math.random().toString(16).substr(2,8);this.previousElementSibling.value=t;updateNodeConfig(${node.id},'authToken',t)">重新生成</button>
+            </div>
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">同步响应返回内容 (JSON) <span title="当规则链成功接收请求时，向第三方系统返回的 HTTP 响应体" style="cursor:help">ⓘ</span></div>
+            <textarea class="config-textarea" rows="4" onchange="updateNodeConfig(${node.id},'successResponse',this.value)">${node.config.successResponse || '{\n  "status": "success",\n  "code": 200,\n  "message": "Data received"\n}'}</textarea>
+          </div>
+        </div>
+      `;
+    }
+
+    // OPC UA Client
+    else if (node.defId === 'opcua_client') {
+      const authMode = node.config.authMode || 'ANONYMOUS';
+      const isUserPass = authMode === 'USER_PASS';
+      inputConfigPanel = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>OPC UA Client 数据接入配置</div>
+          
+          <div class="config-field">
+            <div class="config-label">Endpoint URL (服务器地址) <span style="color:#f44336">*</span> <span title="OPC UA 服务器的访问终结点地址" style="cursor:help">ⓘ</span></div>
+            <input class="config-input" type="text" placeholder="例如: opc.tcp://192.168.1.200:4840" value="${node.config.endpointUrl || ''}" onchange="updateNodeConfig(${node.id},'endpointUrl',this.value)">
+            <div style="font-size:10px;color:#999;margin-top:3px">必须以 opc.tcp:// 开头</div>
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">安全策略 (Security Policy)</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id},'securityPolicy',this.value)">
+              ${['None','Basic128Rsa15','Basic256','Basic256Sha256','Aes128_Sha256_RsaOaep'].map(p => `<option value="${p}" ${node.config.securityPolicy===p?'selected':''}>${p}</option>`).join('')}
+            </select>
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">安全模式 (Message Security)</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id},'securityMode',this.value)">
+              <option value="None" ${node.config.securityMode==='None'?'selected':''}>None</option>
+              <option value="Sign" ${node.config.securityMode==='Sign'?'selected':''}>Sign (签名)</option>
+              <option value="SignAndEncrypt" ${node.config.securityMode==='SignAndEncrypt'?'selected':''}>SignAndEncrypt (签名与加密)</option>
+            </select>
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">身份认证方式</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                <input type="radio" name="opcAuth_${node.id}" value="ANONYMOUS" ${authMode==='ANONYMOUS'?'checked':''} onchange="updateNodeConfig(${node.id},'authMode',this.value);toggleOpcAuth('${node.id}','ANONYMOUS')">匿名登录
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                <input type="radio" name="opcAuth_${node.id}" value="USER_PASS" ${authMode==='USER_PASS'?'checked':''} onchange="updateNodeConfig(${node.id},'authMode',this.value);toggleOpcAuth('${node.id}','USER_PASS')">账号密码
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                <input type="radio" name="opcAuth_${node.id}" value="CERTIFICATE" ${authMode==='CERTIFICATE'?'checked':''} onchange="updateNodeConfig(${node.id},'authMode',this.value);toggleOpcAuth('${node.id}','CERTIFICATE')">数字证书
+              </label>
+            </div>
+          </div>
+
+          <div id="opc_userpass_${node.id}" style="display:${isUserPass?'block':'none'}">
+            <div class="config-field">
+              <div class="config-label">用户名 <span style="color:#f44336">*</span></div>
+              <input class="config-input" type="text" value="${node.config.username || ''}" onchange="updateNodeConfig(${node.id},'username',this.value)">
+            </div>
+            <div class="config-field">
+              <div class="config-label">密码 <span style="color:#f44336">*</span></div>
+              <input class="config-input" type="password" value="${node.config.password || ''}" onchange="updateNodeConfig(${node.id},'password',this.value)">
+            </div>
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">发布间隔 / 采样频率 (ms) <span style="color:#f44336">*</span> <span title="OPC UA 服务器向本系统推送数据变更的时间间隔" style="cursor:help">ⓘ</span></div>
+            <input class="config-input" type="number" value="${node.config.publishingInterval || '1000'}" min="100" onchange="updateNodeConfig(${node.id},'publishingInterval',this.value)">
+            <div style="font-size:10px;color:#999;margin-top:3px">采样频率不得低于 100ms</div>
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">OPC UA 节点标签订阅配置 <span title="配置需要订阅的 Node ID 并映射为系统内部的 JSON 键名" style="cursor:help">ⓘ</span></div>
+            <div id="nodeTagsList_${node.id}">
+              ${generateNodeTagsRows(node)}
+            </div>
+            <button class="action-btn" style="margin-top:8px;padding:6px 12px;border:1px solid #7B1FA2;color:#7B1FA2;border-radius:5px;background:transparent;cursor:pointer;font-size:12px" onclick="addNodeTagRow(${node.id})">+ 添加节点标签订阅</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Kafka Consumer
+    else if (node.defId === 'kafka_consumer') {
+      const secProtocol = node.config.securityProtocol || 'PLAINTEXT';
+      const isSASL = ['SASL_PLAINTEXT','SASL_SSL'].includes(secProtocol);
+      inputConfigPanel = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M4 4h16v16H4z"/><path d="M4 9h16"/><path d="M9 4v16"/></svg>Kafka 消息消费端配置</div>
+          
+          <div class="config-field">
+            <div class="config-label">Bootstrap Servers (集群地址) <span style="color:#f44336">*</span> <span title="Kafka 集群 Broker 地址列表，多个地址用英文逗号隔开" style="cursor:help">ⓘ</span></div>
+            <input class="config-input" type="text" placeholder="例如: 10.0.0.1:9092,10.0.0.2:9092" value="${node.config.bootstrapServers || ''}" onchange="updateNodeConfig(${node.id},'bootstrapServers',this.value)">
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">消费者组 ID (Group ID) <span style="color:#f44336">*</span> <span title="同一个 Group ID 内的消费者会共同消费该 Topic 下的数据，实现负载均衡" style="cursor:help">ⓘ</span></div>
+            <input class="config-input" type="text" placeholder="例如: iiot-rule-engine-group" value="${node.config.groupId || ''}" onchange="updateNodeConfig(${node.id},'groupId',this.value)">
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">消费主题 (Topics) <span style="color:#f44336">*</span></div>
+            <input class="config-input" type="text" placeholder="多个 Topic 请用逗号隔开，如: telemetry-raw, alarm-raw" value="${node.config.topics || ''}" onchange="updateNodeConfig(${node.id},'topics',this.value)">
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">位移重置策略 (Offset Reset)</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id},'autoOffsetReset',this.value)">
+              <option value="latest" ${node.config.autoOffsetReset==='latest'?'selected':''}>latest - 从最新的消息开始消费</option>
+              <option value="earliest" ${node.config.autoOffsetReset==='earliest'?'selected':''}>earliest - 从最早未消费的消息开始消费</option>
+            </select>
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">安全协议 (Security Protocol)</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id},'securityProtocol',this.value);toggleKafkaSec('${node.id}',this.value)">
+              <option value="PLAINTEXT" ${secProtocol==='PLAINTEXT'?'selected':''}>PLAINTEXT</option>
+              <option value="SASL_PLAINTEXT" ${secProtocol==='SASL_PLAINTEXT'?'selected':''}>SASL_PLAINTEXT</option>
+              <option value="SASL_SSL" ${secProtocol==='SASL_SSL'?'selected':''}>SASL_SSL</option>
+              <option value="SSL" ${secProtocol==='SSL'?'selected':''}>SSL</option>
+            </select>
+          </div>
+
+          <div id="kafka_sasl_${node.id}" style="display:${isSASL?'block':'none'}">
+            <div class="config-field">
+              <div class="config-label">SASL 认证机制</div>
+              <select class="config-select" onchange="updateNodeConfig(${node.id},'saslMechanism',this.value)">
+                <option value="PLAIN" ${node.config.saslMechanism==='PLAIN'?'selected':''}>PLAIN</option>
+                <option value="SCRAM-SHA-256" ${node.config.saslMechanism==='SCRAM-SHA-256'?'selected':''}>SCRAM-SHA-256</option>
+                <option value="SCRAM-SHA-512" ${node.config.saslMechanism==='SCRAM-SHA-512'?'selected':''}>SCRAM-SHA-512</option>
+              </select>
+            </div>
+            <div class="config-field">
+              <div class="config-label">SASL 用户名 <span style="color:#f44336">*</span></div>
+              <input class="config-input" type="text" value="${node.config.saslUsername || ''}" onchange="updateNodeConfig(${node.id},'saslUsername',this.value)">
+            </div>
+            <div class="config-field">
+              <div class="config-label">SASL 密码 <span style="color:#f44336">*</span></div>
+              <input class="config-input" type="password" value="${node.config.saslPassword || ''}" onchange="updateNodeConfig(${node.id},'saslPassword',this.value)">
+            </div>
+          </div>
+
+          <div class="config-field">
+            <div class="config-label">消息体反序列化格式 <span title="一般工业设备上报至 Kafka 的消息推荐采用 String(JSON) 格式直接解析" style="cursor:help">ⓘ</span></div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id},'valueDeserializer',this.value)">
+              <option value="String (字符串/JSON)" ${node.config.valueDeserializer==='String (字符串/JSON)'?'selected':''}>String (字符串/JSON)</option>
+              <option value="ByteArray" ${node.config.valueDeserializer==='ByteArray'?'selected':''}>ByteArray (字节数组)</option>
+              <option value="Avro" ${node.config.valueDeserializer==='Avro'?'selected':''}>Avro</option>
+            </select>
+          </div>
+        </div>
+      `;
+    }
+
+    typeSpecificSection = assocSection + inputConfigPanel;
+  }
+
+  // ===== TRANSFORM: 数据处理配置 =====
+  if (node.type === 'transform') {
+    if (node.defId === 'script_transform') {
+      typeSpecificSection = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>脚本配置</div>
+          <div class="config-field">
+            <div class="config-label">脚本语言</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id}, 'language', this.value)">
+              <option value="javascript" ${node.config.language==='javascript'?'selected':''}>JavaScript</option>
+              <option value="python" ${node.config.language==='python'?'selected':''}>Python</option>
+            </select>
+          </div>
+          <div class="config-field">
+            <div class="config-label">脚本内容</div>
+            <textarea class="config-textarea" rows="6" placeholder="// 在此编写转换脚本&#10;// 入参: msg (消息对象)&#10;// 出参: 修改后的 msg" onchange="updateNodeConfig(${node.id}, 'script', this.value)">${node.config.script || ''}</textarea>
+          </div>
+        </div>
+      `;
+    } else if (node.defId === 'data_filter') {
+      typeSpecificSection = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>数据分流配置</div>
+          <div class="config-field">
+            <div class="config-label">路由字段</div>
+            <input class="config-input" placeholder="如: deviceType" value="${node.config.routeField || ''}" onchange="updateNodeConfig(${node.id}, 'routeField', this.value)" />
+          </div>
+          <div class="config-field">
+            <div class="config-label">默认路由 (无匹配时)</div>
+            <input class="config-input" placeholder="如: default" value="${node.config.defaultRoute || ''}" onchange="updateNodeConfig(${node.id}, 'defaultRoute', this.value)" />
+          </div>
+          <div class="config-field">
+            <div class="config-label">路由规则 (JSON)</div>
+            <textarea class="config-textarea" rows="4" placeholder='{"temperature": "temp_chain", "humidity": "humi_chain"}' onchange="updateNodeConfig(${node.id}, 'routeRules', this.value)">${node.config.routeRules || ''}</textarea>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // ===== RULE: 规则引擎配置 =====
+  if (node.type === 'rule') {
+    if (node.defId === 'condition') {
+      typeSpecificSection = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22V8"/><path d="M12 8a4 4 0 0 1 8 0"/><path d="M12 8a4 4 0 0 0-8 0"/></svg>条件判断配置</div>
+          <div class="config-field">
+            <div class="config-label">逻辑组合</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id}, 'logic', this.value)">
+              <option value="and" ${(!node.config.logic || node.config.logic==='and')?'selected':''}>AND (全部满足)</option>
+              <option value="or" ${node.config.logic==='or'?'selected':''}>OR (满足任一)</option>
+            </select>
+          </div>
+          <div class="config-field">
+            <div class="config-label">条件表达式</div>
+            <textarea class="config-textarea" rows="4" placeholder="如: msg.temperature > 28&#10;如: msg.status === 'alarm'" onchange="updateNodeConfig(${node.id}, 'expression', this.value)">${node.config.expression || ''}</textarea>
+          </div>
+        </div>
+      `;
+    } else if (node.defId === 'time_window') {
+      typeSpecificSection = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>时间窗口配置</div>
+          <div class="config-field">
+            <div class="config-label">窗口类型</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id}, 'windowType', this.value)">
+              <option value="tumbling" ${(!node.config.windowType || node.config.windowType==='tumbling')?'selected':''}>滚动窗口 (Tumbling)</option>
+              <option value="sliding" ${node.config.windowType==='sliding'?'selected':''}>滑动窗口 (Sliding)</option>
+              <option value="session" ${node.config.windowType==='session'?'selected':''}>会话窗口 (Session)</option>
+            </select>
+          </div>
+          <div class="config-field">
+            <div class="config-label">窗口大小 (秒)</div>
+            <input class="config-input" type="number" min="1" placeholder="60" value="${node.config.windowSize || 60}" onchange="updateNodeConfig(${node.id}, 'windowSize', parseInt(this.value)||60)" />
+          </div>
+          <div class="config-field">
+            <div class="config-label">聚合函数</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id}, 'aggFunction', this.value)">
+              <option value="avg" ${(!node.config.aggFunction || node.config.aggFunction==='avg')?'selected':''}>AVG (平均值)</option>
+              <option value="sum" ${node.config.aggFunction==='sum'?'selected':''}>SUM (求和)</option>
+              <option value="max" ${node.config.aggFunction==='max'?'selected':''}>MAX (最大值)</option>
+              <option value="min" ${node.config.aggFunction==='min'?'selected':''}>MIN (最小值)</option>
+              <option value="count" ${node.config.aggFunction==='count'?'selected':''}>COUNT (计数)</option>
+            </select>
+          </div>
+          <div class="config-field">
+            <div class="config-label">聚合字段</div>
+            <input class="config-input" placeholder="如: temperature" value="${node.config.aggField || ''}" onchange="updateNodeConfig(${node.id}, 'aggField', this.value)" />
+          </div>
+        </div>
+      `;
+    } else if (node.defId === 'debounce_delay') {
+      typeSpecificSection = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>去抖与延时配置</div>
+          <div class="config-field">
+            <div class="config-label">模式</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id}, 'debounceMode', this.value)">
+              <option value="debounce" ${(!node.config.debounceMode || node.config.debounceMode==='debounce')?'selected':''}>去抖 (Debounce)</option>
+              <option value="delay" ${node.config.debounceMode==='delay'?'selected':''}>固定延时 (Delay)</option>
+              <option value="throttle" ${node.config.debounceMode==='throttle'?'selected':''}>节流 (Throttle)</option>
+            </select>
+          </div>
+          <div class="config-field">
+            <div class="config-label">延时时间 (ms)</div>
+            <input class="config-input" type="number" min="0" placeholder="1000" value="${node.config.delayTime || 1000}" onchange="updateNodeConfig(${node.id}, 'delayTime', parseInt(this.value)||1000)" />
+          </div>
+        </div>
+      `;
+    } else if (node.defId === 'cep_state_machine') {
+      typeSpecificSection = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>CEP / 状态机配置</div>
+          <div class="config-field">
+            <div class="config-label">事件模式</div>
+            <textarea class="config-textarea" rows="4" placeholder="定义事件匹配模式..." onchange="updateNodeConfig(${node.id}, 'pattern', this.value)">${node.config.pattern || ''}</textarea>
+          </div>
+          <div class="config-field">
+            <div class="config-label">时间窗口 (秒)</div>
+            <input class="config-input" type="number" min="1" placeholder="300" value="${node.config.cepWindow || 300}" onchange="updateNodeConfig(${node.id}, 'cepWindow', parseInt(this.value)||300)" />
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // ===== ACTION: 动作执行配置 =====
+  if (node.type === 'action') {
+    if (node.defId === 'alarm') {
+      typeSpecificSection = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>告警配置</div>
+          <div class="config-field">
+            <div class="config-label">告警类型</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id}, 'alarmType', this.value)">
+              <option value="device" ${(!node.config.alarmType || node.config.alarmType==='device')?'selected':''}>设备告警</option>
+              <option value="system" ${node.config.alarmType==='system'?'selected':''}>系统告警</option>
+              <option value="environment" ${node.config.alarmType==='environment'?'selected':''}>环境告警</option>
+            </select>
+          </div>
+          <div class="config-field">
+            <div class="config-label">告警级别</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id}, 'severity', this.value)">
+              <option value="info" ${(!node.config.severity || node.config.severity==='info')?'selected':''}>INFO - 信息</option>
+              <option value="warning" ${node.config.severity==='warning'?'selected':''}>WARNING - 警告</option>
+              <option value="critical" ${node.config.severity==='critical'?'selected':''}>CRITICAL - 严重</option>
+            </select>
+          </div>
+          <div class="config-field">
+            <div class="config-label">告警消息模板</div>
+            <textarea class="config-textarea" rows="3" placeholder="支持变量: ${'{{alarmName}}'}, ${'{{severity}}'}, ${'{{deviceName}}'}, ${'{{time}}'}" onchange="updateNodeConfig(${node.id}, 'messageTemplate', this.value)">${node.config.messageTemplate || ''}</textarea>
+          </div>
+        </div>
+      `;
+    } else if (node.defId === 'notification') {
+      typeSpecificSection = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>通知配置</div>
+          <div class="config-field">
+            <div class="config-label">推送渠道</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id}, 'pushChannel', this.value)">
+              <option value="dingtalk" ${(!node.config.pushChannel || node.config.pushChannel==='dingtalk')?'selected':''}>钉钉机器人</option>
+              <option value="wechat" ${node.config.pushChannel==='wechat'?'selected':''}>企业微信</option>
+              <option value="sms" ${node.config.pushChannel==='sms'?'selected':''}>短信</option>
+              <option value="email" ${node.config.pushChannel==='email'?'selected':''}>邮件</option>
+            </select>
+          </div>
+          <div class="config-field">
+            <div class="config-label">Webhook 地址</div>
+            <input class="config-input" placeholder="如: https://oapi.dingtalk.com/robot/send?access_token=xxx" value="${node.config.webhook || ''}" onchange="updateNodeConfig(${node.id}, 'webhook', this.value)" />
+          </div>
+          <div class="config-field">
+            <div class="config-label">消息模板</div>
+            <textarea class="config-textarea" rows="3" placeholder="支持变量: ${'{{alarmName}}'}, ${'{{severity}}'}, ${'{{deviceName}}'}, ${'{{time}}'}" onchange="updateNodeConfig(${node.id}, 'notifyTemplate', this.value)">${node.config.notifyTemplate || ''}</textarea>
+          </div>
+        </div>
+      `;
+    } else if (node.defId === 'rpc_control') {
+      typeSpecificSection = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>RPC 控制配置</div>
+          <div class="config-field">
+            <div class="config-label">目标设备</div>
+            <input class="config-input" placeholder="如: device-001" value="${node.config.targetDevice || ''}" onchange="updateNodeConfig(${node.id}, 'targetDevice', this.value)" />
+          </div>
+          <div class="config-field">
+            <div class="config-label">控制方法</div>
+            <input class="config-input" placeholder="如: setSpeed" value="${node.config.rpcMethod || ''}" onchange="updateNodeConfig(${node.id}, 'rpcMethod', this.value)" />
+          </div>
+          <div class="config-field">
+            <div class="config-label">参数 (JSON)</div>
+            <textarea class="config-textarea" rows="3" placeholder='{"speed": "high"}' onchange="updateNodeConfig(${node.id}, 'rpcParams', this.value)">${node.config.rpcParams || ''}</textarea>
+          </div>
+        </div>
+      `;
+    } else if (node.defId === 'sql_executor') {
+      typeSpecificSection = `
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+          <div class="config-label" style="margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>SQL 执行配置</div>
+          <div class="config-field">
+            <div class="config-label">数据库类型</div>
+            <select class="config-select" onchange="updateNodeConfig(${node.id}, 'dbType', this.value)">
+              <option value="mysql" ${(!node.config.dbType || node.config.dbType==='mysql')?'selected':''}>MySQL</option>
+              <option value="postgresql" ${node.config.dbType==='postgresql'?'selected':''}>PostgreSQL</option>
+              <option value="tdengine" ${node.config.dbType==='tdengine'?'selected':''}>TDengine</option>
+              <option value="influxdb" ${node.config.dbType==='influxdb'?'selected':''}>InfluxDB</option>
+            </select>
+          </div>
+          <div class="config-field">
+            <div class="config-label">连接地址</div>
+            <input class="config-input" placeholder="如: jdbc:mysql://localhost:3306/iot_db" value="${node.config.dbConnection || ''}" onchange="updateNodeConfig(${node.id}, 'dbConnection', this.value)" />
+          </div>
+          <div class="config-field">
+            <div class="config-label">目标表</div>
+            <input class="config-input" placeholder="如: sensor_data" value="${node.config.dbTable || ''}" onchange="updateNodeConfig(${node.id}, 'dbTable', this.value)" />
+          </div>
+          <div class="config-field">
+            <div class="config-label">字段映射 (JSON)</div>
+            <textarea class="config-textarea" rows="3" placeholder='{"temperature": "msg.temp", "device_id": "msg.deviceId"}' onchange="updateNodeConfig(${node.id}, 'fieldMapping', this.value)">${node.config.fieldMapping || ''}</textarea>
+          </div>
+        </div>
+      `;
+    }
+
+    // Common action execution control
+    typeSpecificSection += `
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+        <div class="config-label" style="margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>执行控制</div>
+        <div class="config-field">
+          <div class="config-label">执行延迟 (秒)</div>
+          <input class="config-input" type="number" min="0" placeholder="0" value="${node.config.execDelay || 0}" onchange="updateNodeConfig(${node.id}, 'execDelay', parseInt(this.value)||0)" />
+        </div>
+        <div class="config-field">
+          <div class="config-label">重试次数</div>
+          <input class="config-input" type="number" min="0" max="5" placeholder="0" value="${node.config.retryCount || 0}" onchange="updateNodeConfig(${node.id}, 'retryCount', parseInt(this.value)||0)" />
+        </div>
+        <div class="config-field">
+          <div class="config-label">超时时间 (秒)</div>
+          <input class="config-input" type="number" min="1" placeholder="30" value="${node.config.timeout || 30}" onchange="updateNodeConfig(${node.id}, 'timeout', parseInt(this.value)||30)" />
+        </div>
+      </div>
+    `;
+  }
+
+  configBody.innerHTML = `
+    <div class="config-field">
+      <div class="config-label">节点名称</div>
+      <input class="config-input" value="${node.name}" onchange="updateNodeConfig(${node.id}, 'name', this.value)" />
+    </div>
+    <div class="config-field">
+      <div class="config-label">条件表达式</div>
+      <textarea class="config-textarea" onchange="updateNodeConfig(${node.id}, 'cond', this.value)">${node.cond}</textarea>
+    </div>
+    <div class="config-field">
+      <div class="config-label">优先级</div>
+      <select class="config-select" onchange="updateNodeConfig(${node.id}, 'priority', this.value)">
+        <option value="low" ${node.config.priority==='low'?'selected':''}>低</option>
+        <option value="medium" ${node.config.priority==='medium' || !node.config.priority?'selected':''}>中</option>
+        <option value="high" ${node.config.priority==='high'?'selected':''}>高</option>
+        <option value="critical" ${node.config.priority==='critical'?'selected':''}>紧急</option>
+      </select>
+    </div>
+    <div class="config-field">
+      <div class="config-label">是否启用</div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" ${node.config.enabled!==false?'checked':''} onchange="updateNodeConfig(${node.id}, 'enabled', this.checked)" />
+        <span style="font-size:13px">${node.config.enabled!==false?'已启用':'已禁用'}</span>
+      </label>
+    </div>
+    <div class="config-field">
+      <div class="config-label">备注说明</div>
+      <textarea class="config-textarea" placeholder="添加备注..." onchange="updateNodeConfig(${node.id}, 'description', this.value)">${node.config.description || ''}</textarea>
+    </div>
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
+      <div class="config-label" style="margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>连接信息</div>
+      <div style="font-size:12px;color:#666">
+        <div>入站连接: ${state.connections.filter(c=>c.to===node.id).length} 条</div>
+        <div>出站连接: ${state.connections.filter(c=>c.from===node.id).length} 条</div>
+      </div>
+    </div>
+    ${typeSpecificSection}
+  `;
+  configPanel.classList.add('open');
+}
+
+function closeConfig() { configPanel.classList.remove('open'); }
+
+function updateNodeConfig(nodeId, key, value) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  if (key === 'name' || key === 'cond') {
+    node[key] = value;
+    const el = document.getElementById(`node-${nodeId}`);
+    if (el) {
+      el.querySelector('.node-header').innerHTML = `<span class="node-icon">${node.icon}</span>${node.name}`;
+      el.querySelector('.node-cond').textContent = node.cond;
+    }
+  } else {
+    node.config[key] = value;
+  }
+  saveHistory();
+}
+
+// ===== CONTEXT MENU =====
+function duplicateNode() {
+  contextMenu.style.display = 'none';
+  const node = state.nodes.find(n => n.id === state.selectedNode);
+  if (!node) return;
+  addNode(node.defId, node.type, node.x + 40 + 160, node.y + 40);
+}
+
+function deleteSelectedNode() {
+  contextMenu.style.display = 'none';
+  if (state.selectedNode) removeNode(state.selectedNode);
+}
+
+document.addEventListener('click', () => { contextMenu.style.display = 'none'; });
+
+// ===== ZOOM =====
+function applyZoom() {
+  canvasContainer.style.transform = `scale(${state.zoom})`;
+  canvasContainer.style.transformOrigin = '0 0';
+  document.getElementById('zoomLabel').textContent = Math.round(state.zoom * 100) + '%';
+  renderConnections();
+}
+function zoomIn() { state.zoom = Math.min(2, state.zoom + 0.1); applyZoom(); }
+function zoomOut() { state.zoom = Math.max(0.3, state.zoom - 0.1); applyZoom(); }
+function zoomReset() { state.zoom = 1; applyZoom(); }
+
+canvasContainer.addEventListener('wheel', e => {
+  e.preventDefault();
+  if (e.deltaY < 0) zoomIn(); else zoomOut();
+}, { passive: false });
+
+// ===== MINIMAP =====
+function updateMinimap() {
+  const mc = document.getElementById('minimapCanvas');
+  mc.innerHTML = '';
+  if (state.nodes.length === 0) return;
+  const xs = state.nodes.map(n => n.x);
+  const ys = state.nodes.map(n => n.y);
+  const minX = Math.min(...xs) - 20, maxX = Math.max(...xs) + 200;
+  const minY = Math.min(...ys) - 20, maxY = Math.max(...ys) + 60;
+  const rangeX = maxX - minX || 1, rangeY = maxY - minY || 1;
+  const scale = Math.min(140 / rangeX, 70 / rangeY);
+  const offX = (140 - rangeX * scale) / 2, offY = (70 - rangeY * scale) / 2;
+  const colors = { input: '#42A5F5', transform: '#AB47BC', rule: '#FFA726', action: '#66BB6A' };
+  state.nodes.forEach(n => {
+    const dot = document.createElement('div');
+    dot.className = 'minimap-node';
+    dot.style.left = (offX + (n.x - minX) * scale) + 'px';
+    dot.style.top = (offY + (n.y - minY) * scale) + 'px';
+    dot.style.width = (160 * scale) + 'px';
+    dot.style.height = (50 * scale) + 'px';
+    dot.style.background = colors[n.type] || '#999';
+    mc.appendChild(dot);
+  });
+}
+
+// ===== UNDO / REDO =====
+function saveHistory() {
+  const snapshot = JSON.stringify({ nodes: state.nodes, connections: state.connections, nextId: state.nextId });
+  state.history = state.history.slice(0, state.historyIndex + 1);
+  state.history.push(snapshot);
+  if (state.history.length > state.maxHistory) state.history.shift();
+  state.historyIndex = state.history.length - 1;
+  updateUndoRedoButtons();
+}
+
+function undo() {
+  if (state.historyIndex <= 0) return;
+  state.historyIndex--;
+  restoreSnapshot(state.history[state.historyIndex]);
+}
+
+function redo() {
+  if (state.historyIndex >= state.history.length - 1) return;
+  state.historyIndex++;
+  restoreSnapshot(state.history[state.historyIndex]);
+}
+
+function restoreSnapshot(snapshot) {
+  const data = JSON.parse(snapshot);
+  // Clear canvas
+  document.querySelectorAll('.canvas-node').forEach(el => el.remove());
+  connectionsSvg.querySelectorAll('.connection-path').forEach(p => p.remove());
+  state.nodes = data.nodes;
+  state.connections = data.connections;
+  state.nextId = data.nextId;
+  state.selectedNode = null;
+  closeConfig();
+  state.nodes.forEach(n => renderNode(n));
+  renderConnections();
+  updateStats();
+  updateMinimap();
+  updateUndoRedoButtons();
+}
+
+function updateUndoRedoButtons() {
+  document.getElementById('btnUndo').disabled = state.historyIndex <= 0;
+  document.getElementById('btnRedo').disabled = state.historyIndex >= state.history.length - 1;
+}
+
+document.getElementById('btnUndo').addEventListener('click', undo);
+document.getElementById('btnRedo').addEventListener('click', redo);
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo(); }
+  if (e.ctrlKey && e.key === 'y') { e.preventDefault(); redo(); }
+  if (e.key === 'Delete' && state.selectedNode) { removeNode(state.selectedNode); }
+  if (e.key === 'Escape') { state.selectedNode = null; closeConfig(); contextMenu.style.display = 'none'; }
+});
+
+// ===== STATS =====
+function updateStats() {
+  document.getElementById('nodeCount').textContent = state.nodes.length;
+  document.getElementById('connCount').textContent = state.connections.length;
+}
+
+// ===== TOAST =====
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  const icons = { success: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>', info: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>', warning: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', error: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>' };
+  toast.innerHTML = `<span>${icons[type] || ''}</span> ${msg}`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ===== TEST =====
+document.getElementById('btnTest').addEventListener('click', () => {
+  const modal = document.getElementById('testModal');
+  const result = document.getElementById('testResult');
+  if (state.nodes.length === 0) {
+    result.innerHTML = '<div class="test-result test-fail">画布为空，请先添加节点并建立连接。</div>';
+    modal.classList.add('open');
+    return;
+  }
+  const inputs = state.nodes.filter(n => n.type === 'input');
+  const transforms = state.nodes.filter(n => n.type === 'transform');
+  const rules = state.nodes.filter(n => n.type === 'rule');
+  const actions = state.nodes.filter(n => n.type === 'action');
+  let issues = [];
+  let log = [];
+
+  inputs.forEach(t => {
+    const outConns = state.connections.filter(c => c.from === t.id);
+    if (outConns.length === 0) issues.push(`输入节点 "${t.name}" 没有出站连接`);
+  });
+  actions.forEach(a => {
+    const inConns = state.connections.filter(c => c.to === a.id);
+    if (inConns.length === 0) issues.push(`动作节点 "${a.name}" 没有入站连接`);
+  });
+  if (inputs.length === 0) issues.push('缺少输入节点');
+  if (actions.length === 0) issues.push('缺少动作节点');
+
+  log.push(`[INFO] 开始测试规则链...`);
+  log.push(`[INFO] 节点总数: ${state.nodes.length} (输入:${inputs.length}, 处理:${transforms.length}, 规则:${rules.length}, 动作:${actions.length})`);
+  log.push(`[INFO] 连接总数: ${state.connections.length}`);
+
+  // Simulate chain traversal
+  const visited = new Set();
+  inputs.forEach(t => {
+    log.push(`[TEST] 检查输入节点: ${t.name} (${t.cond})`);
+    const queue = [t.id];
+    while (queue.length > 0) {
+      const curr = queue.shift();
+      if (visited.has(curr)) continue;
+      visited.add(curr);
+      const node = state.nodes.find(n => n.id === curr);
+      if (node && node.type !== 'input') log.push(`  → ${node.name} (${node.type})`);
+      state.connections.filter(c => c.from === curr).forEach(c => queue.push(c.to));
+    }
+  });
+
+  const unreachable = state.nodes.filter(n => !visited.has(n.id) && n.type !== 'rule');
+  unreachable.forEach(n => log.push(`[WARN] 节点 "${n.name}" 未被连接到任何规则链`));
+
+  const passed = issues.length === 0;
+  let html = `<div class="test-result ${passed ? 'test-pass' : 'test-fail'}">${passed ? '规则链测试通过！所有节点和连接均有效。' : '发现 ' + issues.length + ' 个问题：'}</div>`;
+  if (issues.length > 0) {
+    html += '<ul style="margin:10px 0 10px 20px;font-size:13px;color:#C62828">';
+    issues.forEach(i => html += `<li>${i}</li>`);
+    html += '</ul>';
+  }
+  html += `<div class="test-log">${log.join('\n')}</div>`;
+  result.innerHTML = html;
+  modal.classList.add('open');
+});
+
+function closeTestModal() { document.getElementById('testModal').classList.remove('open'); }
+
+// ===== SAVE =====
+document.getElementById('btnSave').addEventListener('click', () => {
+  if (state.nodes.length === 0) { showToast('画布为空，无法保存', 'warning'); return; }
+  document.getElementById('saveModal').classList.add('open');
+});
+
+function closeSaveModal() { document.getElementById('saveModal').classList.remove('open'); }
+
+// ===== DEVICE ASSOCIATION =====
+function openDeviceModal(nodeId) {
+  deviceModalTargetNodeId = nodeId;
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  selectedDeviceIds = [...(node.deviceIds || [])];
+  document.getElementById('deviceSearchInput').value = '';
+  renderDeviceSelectList('');
+  document.getElementById('deviceModal').classList.add('open');
+}
+
+function closeDeviceModal() { document.getElementById('deviceModal').classList.remove('open'); }
+
+function renderDeviceSelectList(search) {
+  const node = state.nodes.find(n => n.id === deviceModalTargetNodeId);
+  const suggestedTypes = node ? (TRIGGER_DEVICE_MAP[node.defId] || []) : [];
+  const statusText = { online: '在线', offline: '离线', alarm: '告警', warning: '预警' };
+  const searchLower = search.toLowerCase();
+
+  let filtered = DEVICES;
+  if (searchLower) {
+    filtered = filtered.filter(d => d.name.toLowerCase().includes(searchLower) || d.id.toLowerCase().includes(searchLower));
+  }
+
+  // Sort: suggested types first, then others
+  filtered.sort((a, b) => {
+    const aSug = suggestedTypes.includes(a.type) ? 0 : 1;
+    const bSug = suggestedTypes.includes(b.type) ? 0 : 1;
+    return aSug - bSug;
+  });
+
+  const list = document.getElementById('deviceSelectList');
+  list.innerHTML = filtered.map(d => {
+    const isSelected = selectedDeviceIds.includes(d.id);
+    const isSuggested = suggestedTypes.includes(d.type);
+    return `
+      <div class="device-select-item ${isSelected ? 'selected' : ''}" onclick="toggleDeviceSelect('${d.id}', this)">
+        <div class="ds-check">✓</div>
+        <span class="ds-icon">${DEVICE_TYPES[d.type]?.icon || '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>'}</span>
+        <div class="ds-info">
+          <div class="ds-name">${d.name} ${isSuggested ? '<span style="font-size:10px;color:#008B8B;background:#E0F2F1;padding:1px 5px;border-radius:3px;margin-left:4px">推荐</span>' : ''}</div>
+          <div class="ds-meta">${d.station} · ${DEVICE_TYPES[d.type]?.name || d.type} · ${d.id}</div>
+        </div>
+        <span class="ds-status"><span class="ds-status-badge ${d.status}">${statusText[d.status]}</span></span>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterModalDeviceList(val) { renderDeviceSelectList(val); }
+
+function toggleDeviceSelect(deviceId, el) {
+  const idx = selectedDeviceIds.indexOf(deviceId);
+  if (idx >= 0) {
+    selectedDeviceIds.splice(idx, 1);
+    el.classList.remove('selected');
+  } else {
+    selectedDeviceIds.push(deviceId);
+    el.classList.add('selected');
+  }
+}
+
+function confirmDeviceAssociation() {
+  const node = state.nodes.find(n => n.id === deviceModalTargetNodeId);
+  if (!node) return;
+  node.deviceIds = [...selectedDeviceIds];
+  closeDeviceModal();
+  saveHistory();
+  // Re-render the node to update badge
+  const el = document.getElementById(`node-${node.id}`);
+  if (el) el.remove();
+  renderNode(node);
+  renderConnections();
+  // Refresh config panel if open
+  if (configPanel.classList.contains('open') && state.selectedNode === node.id) {
+    openConfig(node.id);
+  }
+  showToast(`已关联 ${node.deviceIds.length} 个设备到 "${node.name}"`, 'success');
+}
+
+function removeDeviceFromTrigger(nodeId, deviceId) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  node.deviceIds = (node.deviceIds || []).filter(id => id !== deviceId);
+  const dev = DEVICES.find(d => d.id === deviceId);
+  saveHistory();
+  // Re-render node
+  const el = document.getElementById(`node-${nodeId}`);
+  if (el) el.remove();
+  renderNode(node);
+  renderConnections();
+  // Refresh config
+  if (configPanel.classList.contains('open') && state.selectedNode === nodeId) {
+    openConfig(nodeId);
+  }
+  showToast(`已解除设备 "${dev?.name || deviceId}" 的关联`, 'warning');
+}
+
+function confirmSave() {
+  const name = document.getElementById('ruleName').value;
+  const desc = document.getElementById('ruleDesc').value;
+  const data = {
+    name, description: desc,
+    nodes: state.nodes.map(n => ({ id: n.id, defId: n.defId, type: n.type, name: n.name, cond: n.cond, x: Math.round(n.x), y: Math.round(n.y), config: n.config })),
+    connections: state.connections,
+    createdAt: new Date().toISOString(),
+  };
+  // Download as JSON
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${name}.json`; a.click();
+  URL.revokeObjectURL(url);
+  closeSaveModal();
+  showToast(`规则链 "${name}" 已保存`, 'success');
+}
+
+// ===== HELPERS: Dynamic Form Components =====
+
+// Modbus register mapping rows
+function generateRegisterMappingRows(node) {
+  const rows = node.config.registerMappings || [{ slaveId: 1, functionCode: '03 Read Holding Registers (保持寄存器)', startAddress: '', fieldName: '' }];
+  return rows.map((r, i) => `
+    <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center" id="reg_row_${node.id}_${i}">
+      <input type="number" min="1" max="247" value="${r.slaveId}" placeholder="从站号" style="width:15%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px" onchange="updateRegisterRow(${node.id},${i},'slaveId',this.value)">
+      <select style="width:35%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px" onchange="updateRegisterRow(${node.id},${i},'functionCode',this.value)">
+        ${['01 Read Coils (线圈)','02 Read Discrete Inputs (离散输入)','03 Read Holding Registers (保持寄存器)','04 Read Input Registers (输入寄存器)'].map(f => `<option value="${f}" ${r.functionCode===f?'selected':''}>${f}</option>`).join('')}
+      </select>
+      <input type="text" placeholder="起始地址" value="${r.startAddress || ''}" style="width:20%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px" onchange="updateRegisterRow(${node.id},${i},'startAddress',this.value)">
+      <input type="text" placeholder="映射字段名" value="${r.fieldName || ''}" style="width:25%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px" onchange="updateRegisterRow(${node.id},${i},'fieldName',this.value)">
+      <button onclick="removeRegisterRow(${node.id},${i})" style="background:none;border:none;color:#f44336;cursor:pointer;font-size:14px;padding:2px 4px">✕</button>
+    </div>
+  `).join('');
+}
+
+function addRegisterRow(nodeId) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  node.config.registerMappings = node.config.registerMappings || [];
+  node.config.registerMappings.push({ slaveId: 1, functionCode: '03 Read Holding Registers (保持寄存器)', startAddress: '', fieldName: '' });
+  openConfig(nodeId);
+}
+
+function updateRegisterRow(nodeId, index, field, value) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node || !node.config.registerMappings) return;
+  node.config.registerMappings[index][field] = value;
+  document.getElementById(`reg_row_${nodeId}_${index}`).querySelector('input,select').dispatchEvent(new Event('change'));
+}
+
+function removeRegisterRow(nodeId, index) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node || !node.config.registerMappings) return;
+  node.config.registerMappings.splice(index, 1);
+  openConfig(nodeId);
+}
+
+// OPC UA node tags rows
+function generateNodeTagsRows(node) {
+  const rows = node.config.nodeTags || [{ namespaceIndex: 2, identifierType: 's (字符串)', nodeIdentifier: '', jsonKey: '' }];
+  return rows.map((r, i) => `
+    <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center" id="tag_row_${node.id}_${i}">
+      <input type="number" min="0" value="${r.namespaceIndex}" placeholder="ns" style="width:15%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px" onchange="updateNodeTagRow(${node.id},${i},'namespaceIndex',this.value)">
+      <select style="width:25%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px" onchange="updateNodeTagRow(${node.id},${i},'identifierType',this.value)">
+        ${['s (字符串)','i (整数)','g (GUID)','b (二进制)'].map(t => `<option value="${t}" ${r.identifierType===t?'selected':''}>${t}</option>`).join('')}
+      </select>
+      <input type="text" placeholder="节点标识符" value="${r.nodeIdentifier || ''}" style="width:35%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px" onchange="updateNodeTagRow(${node.id},${i},'nodeIdentifier',this.value)">
+      <input type="text" placeholder="映射字段" value="${r.jsonKey || ''}" style="width:20%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px" onchange="updateNodeTagRow(${node.id},${i},'jsonKey',this.value)">
+      <button onclick="removeNodeTagRow(${node.id},${i})" style="background:none;border:none;color:#f44336;cursor:pointer;font-size:14px;padding:2px 4px">✕</button>
+    </div>
+  `).join('');
+}
+
+function addNodeTagRow(nodeId) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  node.config.nodeTags = node.config.nodeTags || [];
+  node.config.nodeTags.push({ namespaceIndex: 2, identifierType: 's (字符串)', nodeIdentifier: '', jsonKey: '' });
+  openConfig(nodeId);
+}
+
+function updateNodeTagRow(nodeId, index, field, value) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node || !node.config.nodeTags) return;
+  node.config.nodeTags[index][field] = value;
+}
+
+function removeNodeTagRow(nodeId, index) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node || !node.config.nodeTags) return;
+  node.config.nodeTags.splice(index, 1);
+  openConfig(nodeId);
+}
+
+// Toggle visibility functions
+function toggleModbusMode(nodeId, mode) {
+  document.getElementById('tcp_fields_' + nodeId).style.display = mode === 'TCP' ? 'block' : 'none';
+  document.getElementById('rtu_fields_' + nodeId).style.display = mode === 'RTU' ? 'block' : 'none';
+}
+
+function toggleMqttAuth(nodeId, mode) {
+  document.getElementById('mqtt_auth_' + nodeId).style.display = mode !== '匿名访问' ? 'block' : 'none';
+}
+
+function toggleOpcAuth(nodeId, mode) {
+  document.getElementById('opc_userpass_' + nodeId).style.display = mode === 'USER_PASS' ? 'block' : 'none';
+}
+
+function toggleKafkaSec(nodeId, protocol) {
+  const isSASL = ['SASL_PLAINTEXT', 'SASL_SSL'].includes(protocol);
+  document.getElementById('kafka_sasl_' + nodeId).style.display = isSASL ? 'block' : 'none';
+}
+
+// ===== HELPERS: Association Dimension =====
+function toggleAssocMode(nodeId, mode) {
+  document.getElementById('assoc_product_fields_' + nodeId).style.display = mode === 'product' ? 'block' : 'none';
+  document.getElementById('assoc_device_fields_' + nodeId).style.display = mode === 'device' ? 'block' : 'none';
+}
+
+function toggleAssocFilter(nodeId, groupId, labelEl) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  node.config.assocFilters = node.config.assocFilters || [];
+  const idx = node.config.assocFilters.indexOf(groupId);
+  if (idx >= 0) {
+    node.config.assocFilters.splice(idx, 1);
+    labelEl.style.borderColor = '#ddd';
+    labelEl.style.color = '#666';
+    labelEl.style.background = '#fff';
+  } else {
+    node.config.assocFilters.push(groupId);
+    labelEl.style.borderColor = '#7C4DFF';
+    labelEl.style.color = '#7C4DFF';
+    labelEl.style.background = '#f3e5f5';
+  }
+  // Refresh summary
+  const container = document.getElementById('assoc_filter_tags_' + nodeId);
+  const summary = container.parentElement.querySelector('div[style*="color:#7C4DFF"]');
+  if (summary) summary.remove();
+  if (node.config.assocFilters.length > 0) {
+    const div = document.createElement('div');
+    div.style.cssText = 'margin-top:8px;font-size:11px;color:#7C4DFF';
+    div.textContent = '已选择 ' + node.config.assocFilters.length + ' 个分组';
+    container.parentElement.appendChild(div);
+  }
+}
+
+function refreshAssocFilters(nodeId, productId) {
+  const section = document.getElementById('assoc_filter_section_' + nodeId);
+  if (section) section.style.display = productId ? 'block' : 'none';
+  // Reset filters when product changes
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (node) node.config.assocFilters = [];
+  openConfig(nodeId);
+}
+
+function generateDeviceSelectList(node) {
+  const allDevices = [
+    { id: 'DEV-001', name: '1号站台温度传感器', product: 'prd_001', station: '1号线-人民广场', status: 'online' },
+    { id: 'DEV-002', name: '2号站台温度传感器', product: 'prd_001', station: '1号线-人民广场', status: 'online' },
+    { id: 'DEV-003', name: 'A出口CO₂传感器', product: 'prd_002', station: '1号线-人民广场', status: 'online' },
+    { id: 'DEV-005', name: '2号通风机组', product: 'prd_003', station: '1号线-南京东路', status: 'alarm' },
+    { id: 'DEV-006', name: '3号通风机组', product: 'prd_003', station: '2号线-中山公园', status: 'offline' },
+    { id: 'DEV-007', name: '1号集水池', product: 'prd_008', station: '1号线-人民广场', status: 'online' },
+    { id: 'DEV-008', name: '2号集水池', product: 'prd_008', station: '1号线-南京东路', status: 'online' },
+    { id: 'DEV-010', name: '1号站台屏蔽门-上行', product: 'prd_005', station: '1号线-人民广场', status: 'online' },
+    { id: 'DEV-013', name: 'A出口电扶梯-上行', product: 'prd_005', station: '1号线-人民广场', status: 'warning' },
+    { id: 'DEV-016', name: '1号烟感探测器', product: 'prd_007', station: '1号线-人民广场', status: 'online' },
+  ];
+  const selected = node.config.assocDevices || [];
+  const statusColors = { online: '#4CAF50', alarm: '#f44336', offline: '#9e9e9e', warning: '#FF9800' };
+  const statusLabels = { online: '在线', alarm: '告警', offline: '离线', warning: '预警' };
+
+  return allDevices.map(d => {
+    const checked = selected.includes(d.id);
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid #f5f5f5;cursor:pointer;${checked?'background:#f3e5f5':''}" onclick="toggleDeviceSelect(${node.id},'${d.id}',this)">
+      <input type="checkbox" ${checked?'checked':''} style="accent-color:#7C4DFF">
+      <span style="width:8px;height:8px;border-radius:50%;background:${statusColors[d.status]};flex-shrink:0"></span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.name}</div>
+        <div style="font-size:10px;color:#999">${d.station} · ${d.id}</div>
+      </div>
+      <span style="font-size:10px;color:${statusColors[d.status]};flex-shrink:0">${statusLabels[d.status]}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleDeviceSelect(nodeId, deviceId, rowEl) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  node.config.assocDevices = node.config.assocDevices || [];
+  const idx = node.config.assocDevices.indexOf(deviceId);
+  if (idx >= 0) {
+    node.config.assocDevices.splice(idx, 1);
+    rowEl.style.background = '';
+    rowEl.querySelector('input[type="checkbox"]').checked = false;
+  } else {
+    node.config.assocDevices.push(deviceId);
+    rowEl.style.background = '#f3e5f5';
+    rowEl.querySelector('input[type="checkbox"]').checked = true;
+  }
+}
+
+function filterDeviceList(nodeId, query) {
+  const container = document.getElementById('deviceSelectList_' + nodeId);
+  if (!container) return;
+  const rows = container.children;
+  const q = query.toLowerCase();
+  for (let i = 0; i < rows.length; i++) {
+    const text = rows[i].textContent.toLowerCase();
+    rows[i].style.display = text.includes(q) ? 'flex' : 'none';
+  }
+}
+
+// ===== INIT =====
+// ─── 从 URL 参数加载规则链 ──────────────────────────────────────────────────
+function loadChainFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const chainId = params.get('chainId');
+  const fromPage = params.get('from') || '';
+  const productId = params.get('productId') || '';
+  const deviceId = params.get('deviceId') || '';
+  
+  // 如果没有 chainId，初始化空画布
+  if (!chainId) {
+    saveHistory();
+    updateStats();
+    return;
+  }
+
+  // 新建规则链，显示空画布
+  if (chainId === 'new') {
+    const chainName = params.get('name') || '新建规则链';
+    // 更新规则链名称显示
+    const nameDisplayEl = document.getElementById('chainNameDisplay');
+    if (nameDisplayEl) nameDisplayEl.textContent = chainName;
+    // 清空画布
+    state.nodes = [];
+    state.connections = [];
+    state.nextId = 1;
+    saveHistory();
+    updateStats();
+    // 清除 URL 参数
+    window.history.replaceState({}, '', window.location.pathname);
+    return;
+  }
+
+  // 优先从 sessionStorage 读取规则链数据（由列表页提供）
+  // 如果没有，则使用内置的 chainTemplates 作为后备
+  let chainData = null;
+  try {
+    const stored = sessionStorage.getItem('allChainData');
+    if (stored) {
+      const allData = JSON.parse(stored);
+      chainData = allData[chainId];
+    }
+  } catch (e) {
+    // 忽略解析错误
+  }
+  
+  // 如果 sessionStorage 中没有，尝试使用内置的 chainTemplates
+  if (!chainData) {
+    const chainTemplates = {
+      '1': {
+        name: 'Modbus温度超限告警',
+        nodes: [
+          { id: 1, defId: 'modbus_client', type: 'input', name: 'Modbus Client', cond: 'Modbus TCP/RTU', x: 100, y: 200, config: { host: '192.168.1.100', port: 502, slaveId: 1 } },
+          { id: 2, defId: 'condition', type: 'rule', name: 'Condition 判断', cond: 'IF-AND-OR 逻辑', x: 350, y: 200, config: { field: 'temperature', operator: '>', value: '80' } },
+          { id: 3, defId: 'alarm', type: 'action', name: 'Alarm 系统告警', cond: '生成告警记录', x: 600, y: 200, config: { severity: 'critical', message: '温度超限告警' } },
+        ],
+        connections: [
+          { from: 1, to: 2 },
+          { from: 2, to: 3 },
+        ]
+      },
+      '2': {
+        name: 'OPC UA压力异常检测',
+        nodes: [
+          { id: 1, defId: 'opcua_client', type: 'input', name: 'OPC UA Client', cond: 'OPC UA Server', x: 100, y: 200, config: { endpoint: 'opc.tcp://localhost:4840' } },
+          { id: 2, defId: 'data_filter', type: 'transform', name: 'Data Filter/Switch', cond: '数据分流路由', x: 350, y: 200, config: { filterType: 'threshold' } },
+          { id: 3, defId: 'condition', type: 'rule', name: 'Condition 判断', cond: 'IF-AND-OR 逻辑', x: 600, y: 150, config: { field: 'pressure', operator: '>', value: '10' } },
+          { id: 4, defId: 'alarm', type: 'action', name: 'Alarm 系统告警', cond: '生成告警记录', x: 850, y: 150, config: { severity: 'major' } },
+          { id: 5, defId: 'rpc_control', type: 'action', name: 'RPC Control', cond: '设备反向控制', x: 850, y: 280, config: { method: 'emergencyStop' } },
+        ],
+        connections: [
+          { from: 1, to: 2 },
+          { from: 2, to: 3 },
+          { from: 3, to: 4 },
+          { from: 2, to: 5 },
+        ]
+      },
+      '3': {
+        name: 'Kafka数据转发至时序库',
+        nodes: [
+          { id: 1, defId: 'kafka_consumer', type: 'input', name: 'Kafka Consumer', cond: 'Kafka Topic', x: 100, y: 200, config: { topic: 'sensor-data', groupId: 'consumer-group-1' } },
+          { id: 2, defId: 'script_transform', type: 'transform', name: 'Script', cond: 'JS/Python 脚本', x: 350, y: 200, config: { script: 'return data.map(d => ({ ...d, timestamp: Date.now() }));' } },
+          { id: 3, defId: 'sql_executor', type: 'action', name: 'SQL Executor', cond: '数据持久化', x: 600, y: 200, config: { table: 'sensor_readings' } },
+        ],
+        connections: [
+          { from: 1, to: 2 },
+          { from: 2, to: 3 },
+        ]
+      }
+    };
+    chainData = chainTemplates[chainId];
+  }
+
+  const chain = chainData;
+  if (!chain) {
+    // 未知的 chainId，显示空画布
+    saveHistory();
+    updateStats();
+    return;
+  }
+  const chainName = chain.name;
+
+  // 清除画布
+  state.nodes = [];
+  state.connections = [];
+  state.nextId = 1;
+
+  // 更新规则链名称显示
+  const nameDisplayEl = document.getElementById('chainNameDisplay');
+  if (nameDisplayEl) nameDisplayEl.textContent = chainName;
+
+  // 渲染节点
+  chain.nodes.forEach(nodeData => {
+    const def = NODE_DEFS[nodeData.defId] || {};
+    const node = {
+      id: nodeData.id,
+      defId: nodeData.defId,
+      type: nodeData.type || def.type,
+      name: nodeData.name || def.name,
+      cond: nodeData.cond || def.cond,
+      icon: def.icon || '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
+      x: nodeData.x,
+      y: nodeData.y,
+      config: nodeData.config || {}
+    };
+    state.nodes.push(node);
+    if (nodeData.id >= state.nextId) state.nextId = nodeData.id + 1;
+    renderNode(node);
+  });
+
+  // 渲染连线
+  chain.connections.forEach(conn => {
+    state.connections.push(conn);
+  });
+  renderConnections();
+
+  // 设置返回链接：根据来源参数返回对应页面
+  const backLink = document.getElementById('breadcrumbBack');
+  if (backLink) {
+    if (fromPage === 'product' || fromPage === 'product-detail') {
+      backLink.href = 'product-detail.html?id=' + productId + '&tab=rules';
+      backLink.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><polyline points="15 18 9 12 15 6"/></svg>返回产品详情';
+    } else if (fromPage === 'device' || fromPage === 'device-detail') {
+      backLink.href = 'device-management.html?device=' + deviceId + '&tab=rules';
+      backLink.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><polyline points="15 18 9 12 15 6"/></svg>返回设备详情';
+    } else {
+      backLink.href = 'rule-chain-list.html';
+      backLink.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><polyline points="15 18 9 12 15 6"/></svg>返回规则链列表';
+    }
+  }
+
+  // 显示绑定信息（产品/设备）- 对应 rule-chain-list.html 中的16个规则链
+  const RULE_BINDINGS = {
+    '1': { products: [{id:'PRD-001',name:'环境温度传感器'}], devices: [{id:'DEV-001',name:'1号站台温度传感器'},{id:'DEV-002',name:'2号站台温度传感器'},{id:'DEV-003',name:'A出口CO₂传感器'}], groups: [{name:'一楼车间'}] },
+    '2': { products: [{id:'PRD-004',name:'通风机组'}], devices: [{id:'DEV-004',name:'1号通风机组'},{id:'DEV-005',name:'2号通风机组'},{id:'DEV-006',name:'3号通风机组'}], groups: [] },
+    '3': { products: [{id:'PRD-005',name:'排水泵监控'}], devices: [{id:'DEV-007',name:'1号集水池'},{id:'DEV-008',name:'2号集水池'},{id:'DEV-009',name:'3号集水池'}], groups: [{name:'排水组'}] },
+    '4': { products: [{id:'PRD-001',name:'环境温度传感器'},{id:'PRD-002',name:'屏蔽门控制器'}], devices: [{id:'DEV-010',name:'1号站台屏蔽门'},{id:'DEV-011',name:'2号站台屏蔽门'}], groups: [{name:'北京分公司'}] },
+    '5': { products: [{id:'PRD-006',name:'电扶梯监控'}], devices: [{id:'DEV-012',name:'A出口电扶梯'},{id:'DEV-013',name:'B出口电扶梯'},{id:'DEV-014',name:'C出口电扶梯'}], groups: [] },
+    '6': { products: [{id:'PRD-003',name:'烟感探测器'}], devices: [{id:'DEV-015',name:'1号烟感'},{id:'DEV-016',name:'2号烟感'},{id:'DEV-017',name:'3号烟感'}], groups: [{name:'消防组'}] },
+    '7': { products: [{id:'PRD-007',name:'配电柜监控'}], devices: [{id:'DEV-018',name:'UPS电源'},{id:'DEV-019',name:'1号配电柜'},{id:'DEV-020',name:'2号配电柜'}], groups: [{name:'供电组'}] },
+    '8': { products: [{id:'PRD-001',name:'环境温度传感器'}], devices: [{id:'DEV-021',name:'4号站台温度'},{id:'DEV-022',name:'5号站台温度'},{id:'DEV-023',name:'6号站台温度'}], groups: [{name:'夜间监测组'}] },
+    '9': { products: [{id:'PRD-001',name:'环境温度传感器'},{id:'PRD-005',name:'排水泵监控'}], devices: [{id:'DEV-024',name:'环境传感器A'},{id:'DEV-025',name:'排水泵1号'}], groups: [{name:'一楼车间'},{name:'排水组'}] },
+    '10': { products: [{id:'PRD-007',name:'配电柜监控'}], devices: [{id:'DEV-026',name:'备用电源'},{id:'DEV-027',name:'应急配电柜'}], groups: [{name:'供电组'}] },
+    '11': { products: [{id:'PRD-002',name:'门禁控制器'}], devices: [{id:'DEV-028',name:'A出口门禁'},{id:'DEV-029',name:'B出口门禁'}], groups: [{name:'安全组'}] },
+    '12': { products: [{id:'PRD-002',name:'门禁控制器'},{id:'PRD-006',name:'电扶梯监控'}], devices: [{id:'DEV-030',name:'C出口门禁'},{id:'DEV-031',name:'D出口电扶梯'}], groups: [] },
+    '13': { products: [{id:'PRD-002',name:'门禁控制器'},{id:'PRD-003',name:'烟感探测器'}], devices: [{id:'DEV-032',name:'D出口门禁'},{id:'DEV-033',name:'4号烟感'}], groups: [{name:'消防组'},{name:'安全组'}] },
+    '14': { products: [{id:'PRD-003',name:'烟感探测器'}], devices: [{id:'DEV-034',name:'5号烟感'},{id:'DEV-035',name:'6号烟感'}], groups: [{name:'消防组'}] },
+    '15': { products: [{id:'PRD-004',name:'通风机组'}], devices: [{id:'DEV-036',name:'4号通风机组'},{id:'DEV-037',name:'5号通风机组'}], groups: [] },
+    '16': { products: [{id:'PRD-005',name:'排水泵监控'},{id:'PRD-007',name:'配电柜监控'}], devices: [{id:'DEV-038',name:'备用排水泵'},{id:'DEV-039',name:'3号配电柜'}], groups: [{name:'排水组'}] }
+  };
+  const binding = RULE_BINDINGS[chainId];
+  const bindingEl = document.getElementById('bindingInfo');
+  if (binding && bindingEl && (binding.products.length || binding.devices.length || binding.groups.length)) {
+    let html = '<span style="color:#999;margin-right:4px">绑定：</span>';
+    if (binding.products.length) {
+      html += binding.products.map(p => '<a href="product-detail.html?id=' + p.id + '" style="display:inline-block;padding:2px 8px;background:#e6f7ff;color:#0958d9;border-radius:3px;margin:0 2px;font-size:11px;text-decoration:none;">📦 ' + p.name + '</a>').join('');
+    }
+    if (binding.groups.length) {
+      html += binding.groups.map(g => '<span style="display:inline-block;padding:2px 8px;background:#f6ffed;color:#389e0d;border-radius:3px;margin:0 2px;font-size:11px;">👥 ' + g.name + '</span>').join('');
+    }
+    if (binding.devices.length) {
+      const deviceNames = binding.devices.map(d => d.id + ' - ' + d.name).join('<br>');
+      html += '<span class="device-tooltip" style="display:inline-block;padding:2px 8px;background:#fff7e6;color:#d46b08;border-radius:3px;margin:0 2px;font-size:11px;cursor:pointer;position:relative;">🔧 ' + binding.devices.length + '台设备<span class="tooltip-content" style="display:none;position:absolute;top:100%;right:0;background:#fff;border:1px solid #ddd;border-radius:4px;padding:8px 12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:100;white-space:nowrap;text-align:left;font-size:11px;color:#333;margin-top:4px;max-width:300px;">' + deviceNames + '</span></span>';
+    }
+    bindingEl.innerHTML = html;
+    bindingEl.style.display = 'flex';
+    bindingEl.style.alignItems = 'center';
+    bindingEl.style.gap = '4px';
+    bindingEl.style.flexWrap = 'wrap';
+
+    // 添加设备浮窗鼠标悬停效果
+    setTimeout(() => {
+      const tooltip = bindingEl.querySelector('.device-tooltip');
+      if (tooltip) {
+        tooltip.addEventListener('mouseenter', () => {
+          tooltip.querySelector('.tooltip-content').style.display = 'block';
+        });
+        tooltip.addEventListener('mouseleave', () => {
+          tooltip.querySelector('.tooltip-content').style.display = 'none';
+        });
+      }
+    }, 100);
+  }
+
+  saveHistory();
+  updateStats();
+  showToast(`已加载规则链: ${chainName}`, 'success');
+
+  // 清除 URL 参数（但保留来源参数用于返回）
+  window.history.replaceState({}, '', window.location.pathname + '?chainId=' + chainId + '&from=' + fromPage + '&productId=' + productId + '&deviceId=' + deviceId);
+}
+
+// 在 DOM 加载完成后执行
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadChainFromURL);
+} else {
+  loadChainFromURL();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>规则链管理</title>
+<style>
+  :root {
+    --tb-green: #00A0A0;
+    --tb-green-light: #00B8B8;
+    --tb-green-dark: #008B8B;
+    --tb-green-bg: #E0F7F7;
+    --tb-accent: #00B8B8;
+    --tb-accent-light: #00D4D4;
+    --tb-danger: #e53935;
+    --tb-danger-light: #ff5252;
+    --tb-warning: #fb8c00;
+    --tb-success: #10B981;
+    --tb-success-light: #34D399;
+    --tb-purple: #8e24aa;
+    --tb-purple-light: #ab47bc;
+    --bg: #F0F2F5;
+    --surface: #ffffff;
+    --border: #E5E7EB;
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
+    --text-muted: #9CA3AF;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+    --radius: 6px;
+    --sidebar-w: 200px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; font-size: 14px; background: var(--bg); color: var(--text-primary); }
+
+  /* Sidebar */
+  .sidebar {
+    width: var(--sidebar-w);
+    height: 100vh;
+    background: #001529;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+  .sidebar-nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+  .nav-icon { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .nav-icon svg { display: block; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 20px;
+    height: 44px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .nav-item svg { width: 20px; height: 20px; text-align: center; flex-shrink: 0; }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); }
+  .nav-item.active { color: #fff; background: linear-gradient(135deg, var(--tb-green) 0%, var(--tb-green-light) 100%); }
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #fff;
+  }
+  .nav-badge {
+    margin-left: auto;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 11px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    min-width: 22px;
+    text-align: center;
+  }
+
+  /* Main */
+  .main {
+    margin-left: var(--sidebar-w); min-height: 100vh; display: flex; flex-direction: column;
+  }
+
+  /* Top Header */
+  .top-header {
+    background: #fff; height: 52px; display: flex; align-items: center;
+    justify-content: space-between; padding: 0 20px;
+    border-bottom: 1px solid var(--border); box-shadow: var(--shadow-sm);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .header-left { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); }
+  .header-left svg { width: 14px; height: 14px; opacity: 0.6; }
+  .header-right { display: flex; align-items: center; gap: 6px; }
+  .header-icon-btn {
+    width: 34px; height: 34px; border-radius: 6px; border: none;
+    background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary); transition: all 0.15s; position: relative;
+  }
+  .header-icon-btn:hover { background: var(--bg); color: var(--tb-green); }
+  .header-icon-btn svg { width: 18px; height: 18px; }
+  .notif-badge {
+    position: absolute; top: 4px; right: 4px;
+    width: 8px; height: 8px; border-radius: 50%; background: var(--tb-danger);
+    border: 2px solid #fff;
+  }
+  .header-tenant-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border);
+    background: transparent; cursor: pointer; font-size: 13px; color: var(--text-primary);
+    transition: all 0.15s;
+  }
+  .header-tenant-btn:hover { border-color: var(--tb-green); color: var(--tb-green); }
+  .header-tenant-btn svg { width: 14px; height: 14px; }
+
+  /* Page Content */
+  .page-content { padding: 20px 24px; flex: 1; }
+
+  /* Page Title */
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .page-title { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+  .page-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+
+  /* Stats Cards */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--surface); border-radius: var(--radius);
+    border: 1px solid var(--border); padding: 16px 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .stat-card-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+  .stat-card-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .stat-card-icon svg { width: 18px; height: 18px; }
+  .stat-card-value { font-size: 28px; font-weight: 700; color: var(--tb-green-dark); line-height: 1; }
+  .stat-card-change { font-size: 11px; color: var(--tb-success); margin-top: 6px; font-weight: 500; }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .search-box {
+    position: relative; flex: 1; min-width: 200px; max-width: 320px;
+  }
+  .search-box svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--text-muted); pointer-events: none; }
+  .search-box input {
+    width: 100%; height: 34px; padding: 0 12px 0 34px; border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 13px; outline: none;
+    transition: border-color 0.15s; background: var(--surface);
+  }
+  .search-box input:focus { border-color: var(--tb-green); }
+  .filter-select {
+    height: 34px; padding: 0 30px 0 10px; border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 13px; outline: none; cursor: pointer;
+    background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2390a4ae'%3E%3Cpath d='M7 10l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 8px center / 16px;
+    -webkit-appearance: none; appearance: none; transition: border-color 0.15s;
+  }
+  .filter-select:focus { border-color: var(--tb-green); box-shadow: 0 0 0 2px rgba(0,139,139,0.1); }
+  .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 0 14px; height: 34px; border-radius: var(--radius);
+    font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s;
+    border: 1px solid transparent; white-space: nowrap;
+  }
+  .btn svg { width: 15px; height: 15px; }
+  .btn-ghost { background: transparent; border-color: var(--border); color: var(--text-secondary); }
+  .btn-ghost:hover { background: var(--bg); color: var(--text-primary); }
+  .btn-primary { background: linear-gradient(135deg, var(--tb-green) 0%, var(--tb-green-light) 100%); color: #fff; border-color: var(--tb-green); box-shadow: 0 2px 6px rgba(0,160,160,0.2); }
+  .btn-primary:hover { background: linear-gradient(135deg, var(--tb-green-dark) 0%, var(--tb-green) 100%); border-color: var(--tb-green-dark); box-shadow: 0 3px 8px rgba(0,160,160,0.3); }
+  .btn-danger { background: transparent; border-color: var(--tb-danger); color: var(--tb-danger); }
+  .btn-danger:hover { background: var(--tb-danger); color: #fff; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Table Card */
+  .table-card {
+    background: var(--surface); border-radius: var(--radius);
+    border: 1px solid var(--border); overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: #fafafa; padding: 10px 14px; font-size: 12px; font-weight: 600;
+    color: var(--text-secondary); text-align: left; white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+    user-select: none; position: relative;
+  }
+  thead th.sortable { cursor: pointer; }
+  thead th.sortable:hover { color: var(--tb-green); }
+  thead th.sortable::after {
+    content: ''; display: inline-block; width: 0; height: 0;
+    border-left: 4px solid transparent; border-right: 4px solid transparent;
+    border-top: 5px solid var(--text-muted); margin-left: 5px; vertical-align: middle;
+  }
+  thead th.sort-asc::after { border-top: none; border-bottom: 5px solid var(--tb-green); }
+  thead th.sort-desc::after { border-top: 5px solid var(--tb-green); }
+  tbody tr { transition: background 0.1s; border-bottom: 1px solid #f5f5f5; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #f8fffe; }
+  tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
+  .col-checkbox { width: 40px; }
+  .col-name { min-width: 220px; }
+  .col-time { min-width: 160px; }
+  .col-status { min-width: 100px; }
+  .col-nodes { min-width: 80px; }
+  .col-actions { min-width: 130px; }
+
+  /* Checkbox */
+  .checkbox-wrap { position: relative; display: inline-flex; }
+  .checkbox-wrap input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--tb-green); border-radius: 3px; }
+
+  /* Rule Chain Name Cell */
+  .chain-name-cell { display: flex; align-items: center; gap: 8px; }
+  .chain-name-text { font-weight: 600; color: var(--text-primary); }
+  .chain-root-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    background: rgba(0, 139, 139, 0.1); color: var(--tb-green);
+    font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .chain-name-text:hover { color: var(--tb-green); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .chain-desc { color: var(--text-muted); font-size: 12px; margin-top: 2px; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Status Badges */
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: 12px; font-size: 12px; font-weight: 500;
+  }
+  .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+  .status-published { background: #E8F5E9; color: #2E7D32; }
+  .status-published::before { background: #43A047; }
+  .status-testing { background: #FFF3E0; color: #E65100; }
+  .status-testing::before { background: #FB8C00; }
+  .status-draft { background: #ECEFF1; color: #546E7A; }
+  .status-draft::before { background: #78909C; }
+  .status-disabled { background: #FFEBEE; color: #C62828; }
+  .status-disabled::before { background: #E53935; }
+
+  /* Node Count */
+  .node-count { display: flex; align-items: center; gap: 6px; }
+  .node-count-dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--tb-green); background: var(--tb-green-bg); }
+  .node-count-num { font-weight: 600; color: var(--tb-green); }
+
+  /* Creator Cell */
+  .creator-cell { display: flex; align-items: center; gap: 7px; }
+  .creator-avatar {
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: #fff;
+  }
+  .creator-name { color: var(--text-secondary); font-size: 13px; }
+
+  /* Action Buttons */
+  .row-actions { display: flex; align-items: center; gap: 2px; }
+  .action-btn {
+    width: 28px; height: 28px; border-radius: 5px; border: none;
+    background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); transition: all 0.15s;
+  }
+  .action-btn svg { width: 15px; height: 15px; }
+  .action-btn:hover { background: var(--bg); }
+  .action-btn.btn-edit:hover { color: var(--tb-green); }
+  .action-btn.btn-copy:hover { color: var(--tb-success); }
+  .action-btn.btn-delete:hover { color: var(--tb-danger); background: rgba(229, 57, 53, 0.06); }
+  .action-btn.btn-test:hover { color: var(--tb-warning); }
+
+  /* Pagination */
+  .pagination-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-top: 1px solid var(--border);
+    background: #fafafa;
+  }
+  .pagination-info { font-size: 12px; color: var(--text-secondary); }
+  .pagination-controls { display: flex; align-items: center; gap: 4px; }
+  .page-btn {
+    min-width: 30px; height: 30px; padding: 0 6px; border-radius: 5px;
+    border: 1px solid var(--border); background: var(--surface);
+    cursor: pointer; font-size: 12px; color: var(--text-secondary);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .page-btn:hover:not(:disabled) { border-color: var(--tb-green); color: var(--tb-green); background: var(--tb-green-bg); }
+  .page-btn.active { background: var(--tb-green); border-color: var(--tb-green); color: #fff; font-weight: 600; }
+  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .page-btn svg { width: 14px; height: 14px; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface); border-radius: 10px;
+    width: 520px; max-width: 95vw;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-20px); transition: transform 0.2s;
+  }
+  .modal-overlay.show .modal { transform: translateY(0); }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 22px 16px; border-bottom: 1px solid var(--border);
+  }
+  .modal-title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+  .modal-close {
+    width: 30px; height: 30px; border-radius: 6px; border: none;
+    background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); transition: all 0.15s;
+  }
+  .modal-close:hover { background: var(--bg); color: var(--text-primary); }
+  .modal-close svg { width: 18px; height: 18px; }
+  .modal-body { padding: 22px; }
+  .modal-footer {
+    display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+    padding: 14px 22px; border-top: 1px solid var(--border);
+    background: #fafafa; border-radius: 0 0 10px 10px;
+  }
+  .form-group { margin-bottom: 18px; }
+  .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 6px; }
+  .form-label .required { color: var(--tb-danger); margin-left: 2px; }
+  .form-input {
+    width: 100%; height: 36px; padding: 0 12px; border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 13px; outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus { border-color: var(--tb-green); }
+  .form-textarea {
+    width: 100%; padding: 8px 12px; border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 13px; outline: none;
+    resize: vertical; min-height: 80px; font-family: inherit;
+    transition: border-color 0.15s;
+  }
+  .form-textarea:focus { border-color: var(--tb-green); }
+  .form-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* Toast */
+  .toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; border-radius: 8px; font-size: 13px;
+    box-shadow: var(--shadow-md); min-width: 260px; max-width: 380px;
+    animation: slideIn 0.25s ease;
+    border-left: 4px solid;
+  }
+  @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .toast-success { background: #E8F5E9; color: #2E7D32; border-color: #43A047; }
+  .toast-error { background: #FFEBEE; color: #C62828; border-color: #E53935; }
+  .toast-info { background: #E0F2F1; color: #00695C; border-color: var(--tb-green); }
+  .toast svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  /* Bulk Action Bar */
+  .bulk-bar {
+    display: none; align-items: center; gap: 10px;
+    padding: 10px 16px; background: linear-gradient(135deg, var(--tb-green) 0%, var(--tb-green-light) 100%); border-radius: var(--radius);
+    color: #fff; font-size: 13px; margin-bottom: 12px;
+    animation: slideIn 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,160,160,0.2);
+  }
+  .bulk-bar.show { display: flex; }
+  .bulk-bar strong { font-weight: 600; }
+  .bulk-bar .btn { height: 30px; padding: 0 12px; font-size: 12px; }
+  .bulk-bar .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.5); color: #fff; }
+  .bulk-bar .btn-outline:hover { background: rgba(255,255,255,0.15); }
+
+  /* Loading skeleton */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%; animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/></svg>
+    CAT
+  </div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="product-management.html">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+      设备管理
+    </a>
+    <a class="nav-item active" href="rule-chain-list.html">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>
+      规则链
+      <span class="nav-badge">16</span>
+    </a>
+    <a class="nav-item" href="alarm-management.html">
+      <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+      告警管理
+    </a>
+  </nav>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <!-- Top Header -->
+  <header class="top-header">
+    <div></div>
+    <div class="header-right">
+      <button class="header-icon-btn" title="通知" onclick="showToast('暂无新通知','info')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge"></span>
+      </button>
+      <button class="header-icon-btn" title="帮助" onclick="showToast('帮助文档开发中','info')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Page Content -->
+  <div class="page-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">规则链</div>
+        <div class="page-subtitle">管理工业物联网数据处理与自动化规则</div>
+      </div>
+    </div>
+
+    <!-- Bulk Action Bar -->
+    <div class="bulk-bar" id="bulkBar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      已选择 <strong id="bulkCount">0</strong> 项&nbsp;&nbsp;
+      <button class="btn btn-outline" onclick="bulkDelete()">批量删除</button>
+      <button class="btn btn-outline" onclick="clearSelection()">取消</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <div class="stat-card-label">规则链总数</div>
+          <div class="stat-card-icon" style="background: linear-gradient(135deg, rgba(0,139,139,0.15) 0%, rgba(0,160,160,0.1) 100%)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--tb-green)" stroke-width="2"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 12h4l3-6h2l-3 6h3l3 6h2"/></svg>
+          </div>
+        </div>
+        <div class="stat-card-value" id="statTotal">16</div>
+        <div class="stat-card-change">↑ 3 本月新增</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <div class="stat-card-label">已发布</div>
+          <div class="stat-card-icon" style="background: linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(52,211,153,0.1) 100%)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+        <div class="stat-card-value" id="statPublished" style="color:#10B981">9</div>
+        <div class="stat-card-change">56% 占比</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <div class="stat-card-label">测试中</div>
+          <div class="stat-card-icon" style="background: linear-gradient(135deg, rgba(251,140,0,0.15) 0%, rgba(255,167,38,0.1) 100%)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#FB8C00" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+        </div>
+        <div class="stat-card-value" id="statTesting" style="color:#FB8C00">4</div>
+        <div class="stat-card-change">正在验证逻辑</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <div class="stat-card-label">今日执行次数</div>
+          <div class="stat-card-icon" style="background: linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(52,211,153,0.1) 100%)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+        </div>
+        <div class="stat-card-value" id="statExecutions" style="color:#008B8B">24,318</div>
+        <div class="stat-card-change">↑ 12% 较昨日</div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="搜索规则链名称或描述…" oninput="applyFilters()">
+      </div>
+      <select class="filter-select" id="filterStatus" onchange="applyFilters()">
+        <option value="">全部状态</option>
+        <option value="published">已发布</option>
+        <option value="testing">测试中</option>
+        <option value="draft">草稿</option>
+        <option value="disabled">已禁用</option>
+      </select>
+      <select class="filter-select" id="filterCreator" onchange="applyFilters()">
+        <option value="">全部创建人</option>
+        <option value="张工">张工</option>
+        <option value="李明">李明</option>
+        <option value="王芳">王芳</option>
+      </select>
+      <div class="toolbar-right">
+        <button class="btn btn-ghost" onclick="refreshData()" title="刷新">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          刷新
+        </button>
+        <button class="btn btn-ghost" onclick="exportData()" title="导出">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          导出
+        </button>
+        <button class="btn btn-primary" onclick="openCreateModal()" title="新建规则链">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          新建规则链
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-checkbox">
+                <div class="checkbox-wrap">
+                  <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                </div>
+              </th>
+              <th class="col-time sortable" data-sort="createdAt" onclick="toggleSort('createdAt')">创建时间</th>
+              <th class="col-name sortable" data-sort="name" onclick="toggleSort('name')">规则链名称</th>
+              <th style="min-width:200px">描述</th>
+              <th class="col-status sortable" data-sort="status" onclick="toggleSort('status')">状态</th>
+              <th style="min-width:70px">节点数</th>
+              <th style="min-width:120px">创建人</th>
+              <th style="min-width:130px">操作</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="pagination-bar">
+        <div class="pagination-info" id="paginationInfo">显示 1-10 / 共 16 条</div>
+        <div class="pagination-controls" id="paginationControls"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal-overlay" id="createModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">新建规则链</div>
+      <button class="modal-close" onclick="closeCreateModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">规则链名称 <span class="required">*</span></label>
+        <input type="text" class="form-input" id="modalName" placeholder="例如：温度超限告警规则链" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">关联产品</label>
+          <select class="form-input" id="modalProduct">
+            <option value="">不关联特定产品</option>
+            <option value="temp-sensor">温度传感器</option>
+            <option value="pressure-sensor">压力传感器</option>
+            <option value="plc-s7">西门子 S7 PLC</option>
+            <option value="inverter">变频器监控</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">初始状态</label>
+          <select class="form-input" id="modalStatus">
+            <option value="draft">草稿</option>
+            <option value="testing">测试中</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">描述</label>
+        <textarea class="form-textarea" id="modalDesc" placeholder="描述该规则链的用途和处理逻辑…"></textarea>
+        <div class="form-hint">描述将帮助团队成员理解规则链的用途。</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeCreateModal()">取消</button>
+      <button class="btn btn-primary" onclick="createChain()">创建并打开编辑器</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ─── 所有规则链的完整数据 ─────────────────────────────────────────────────────
+const allChainData = {
+  1: {
+    name: 'Modbus温度超限告警', nodes: [
+      { id: 1, defId: 'modbus_client', type: 'input', name: 'Modbus Client', cond: 'Modbus TCP/RTU', x: 100, y: 200, config: { host: '192.168.1.100', port: 502, slaveId: 1 } },
+      { id: 2, defId: 'condition', type: 'rule', name: 'Condition 判断', cond: 'IF-AND-OR 逻辑', x: 350, y: 200, config: { field: 'temperature', operator: '>', value: '80' } },
+      { id: 3, defId: 'alarm', type: 'action', name: 'Alarm 系统告警', cond: '生成告警记录', x: 600, y: 200, config: { severity: 'critical', message: '温度超限告警' } },
+    ], connections: [{ from: 1, to: 2 }, { from: 2, to: 3 }]
+  },
+  2: {
+    name: 'OPC UA压力异常检测', nodes: [
+      { id: 1, defId: 'opcua_client', type: 'input', name: 'OPC UA Client', cond: 'OPC UA Server', x: 100, y: 200, config: { endpoint: 'opc.tcp://localhost:4840' } },
+      { id: 2, defId: 'data_filter', type: 'transform', name: 'Data Filter/Switch', cond: '数据分流路由', x: 350, y: 200, config: { filterType: 'threshold' } },
+      { id: 3, defId: 'condition', type: 'rule', name: 'Condition 判断', cond: 'IF-AND-OR 逻辑', x: 600, y: 150, config: { field: 'pressure', operator: '>', value: '10' } },
+      { id: 4, defId: 'alarm', type: 'action', name: 'Alarm 系统告警', cond: '生成告警记录', x: 850, y: 150, config: { severity: 'major' } },
+      { id: 5, defId: 'rpc_control', type: 'action', name: 'RPC Control', cond: '设备反向控制', x: 850, y: 280, config: { method: 'emergencyStop' } },
+    ], connections: [{ from: 1, to: 2 }, { from: 2, to: 3 }, { from: 3, to: 4 }, { from: 2, to: 5 }]
+  },
+  3: {
+    name: 'Kafka数据转发至时序库', nodes: [
+      { id: 1, defId: 'kafka_consumer', type: 'input', name: 'Kafka Consumer', cond: 'Kafka Topic', x: 100, y: 200, config: { topic: 'sensor-data', groupId: 'consumer-group-1' } },
+      { id: 2, defId: 'script_transform', type: 'transform', name: 'Script', cond: 'JS/Python 脚本', x: 350, y: 200, config: { script: 'return data.map(d => ({ ...d, timestamp: Date.now() }));' } },
+      { id: 3, defId: 'sql_executor', type: 'action', name: 'SQL Executor', cond: '数据持久化', x: 600, y: 200, config: { table: 'sensor_readings' } },
+    ], connections: [{ from: 1, to: 2 }, { from: 2, to: 3 }]
+  },
+  4: {
+    name: '设备离线告警', nodes: [
+      { id: 1, defId: 'opcua_client', type: 'input', name: 'OPC UA Client', cond: 'OPC UA Server', x: 100, y: 200, config: { endpoint: 'opc.tcp://localhost:4840' } },
+      { id: 2, defId: 'time_window', type: 'rule', name: 'Time Window', cond: '滚动/滑动窗口聚合', x: 350, y: 200, config: { windowType: 'sliding', size: 180, unit: 'seconds' } },
+      { id: 3, defId: 'condition', type: 'rule', name: 'Condition 判断', cond: 'IF-AND-OR 逻辑', x: 600, y: 200, config: { field: 'heartbeat', operator: '==', value: '0' } },
+      { id: 4, defId: 'alarm', type: 'action', name: 'Alarm 系统告警', cond: '生成告警记录', x: 850, y: 200, config: { severity: 'warning', message: '设备离线告警' } },
+    ], connections: [{ from: 1, to: 2 }, { from: 2, to: 3 }, { from: 3, to: 4 }]
+  },
+  5: {
+    name: 'MQTT数据清洗规则', nodes: [
+      { id: 1, defId: 'mqtt_subscriber', type: 'input', name: 'MQTT Subscriber', cond: 'MQTT Broker', x: 100, y: 200, config: { broker: 'tcp://localhost:1883', topic: 'production/#' } },
+      { id: 2, defId: 'script_transform', type: 'transform', name: 'Script', cond: 'JS/Python 脚本', x: 350, y: 200, config: { script: 'return payload.filter(d => d.value > 0);' } },
+      { id: 3, defId: 'kafka_producer', type: 'action', name: 'Kafka Producer', cond: 'Kafka Topic', x: 600, y: 200, config: { topic: 'production-cleaned' } },
+    ], connections: [{ from: 1, to: 2 }, { from: 2, to: 3 }]
+  },
+  6: {
+    name: '生产报表数据聚合', nodes: [
+      { id: 1, defId: 'sql_executor', type: 'input', name: 'SQL Executor', cond: '数据查询', x: 100, y: 200, config: { query: 'SELECT * FROM production WHERE date = yesterday' } },
+      { id: 2, defId: 'script_transform', type: 'transform', name: 'Script', cond: 'JS/Python 脚本', x: 350, y: 200, config: { script: 'return aggregate(data);' } },
+      { id: 3, defId: 'http_request', type: 'action', name: 'HTTP Request', cond: '发送邮件', x: 600, y: 200, config: { url: 'http://mail.example.com/send', method: 'POST' } },
+    ], connections: [{ from: 1, to: 2 }, { from: 2, to: 3 }]
+  },
+  7: {
+    name: 'ABB变频器状态监控', nodes: [
+      { id: 1, defId: 'modbus_client', type: 'input', name: 'Modbus Client', cond: 'Modbus TCP/RTU', x: 100, y: 200, config: { host: '192.168.1.50', port: 502, slaveId: 1 } },
+      { id: 2, defId: 'condition', type: 'rule', name: 'Condition 判断', cond: 'IF-AND-OR 逻辑', x: 350, y: 200, config: { field: 'frequency', operator: '>', value: '50' } },
+      { id: 3, defId: 'alarm', type: 'action', name: 'Alarm 系统告警', cond: '生成告警记录', x: 600, y: 200, config: { severity: 'warning', message: '变频器频率超限' } },
+    ], connections: [{ from: 1, to: 2 }, { from: 2, to: 3 }]
+  },
+  8: {
+    name: 'HTTP Webhook事件推送', nodes: [
+      { id: 1, defId: 'http_server', type: 'input', name: 'HTTP Server', cond: 'REST API', x: 100, y: 200, config: { port: 8080, path: '/webhook' } },
+      { id: 2, defId: 'script_transform', type: 'transform', name: 'Script', cond: '签名验证', x: 350, y: 200, config: { script: 'return verifySignature(payload);' } },
+      { id: 3, defId: 'http_request', type: 'action', name: 'HTTP Request', cond: '触发工作流', x: 600, y: 200, config: { url: 'http://workflow.example.com/trigger', method: 'POST' } },
+    ], connections: [{ from: 1, to: 2 }, { from: 2, to: 3 }]
+  },
+  9: {
+    name: 'CEP复杂事件处理', nodes: [
+      { id: 1, defId: 'mqtt_subscriber', type: 'input', name: 'MQTT Subscriber', cond: 'MQTT Broker', x: 100, y: 200, config: { broker: 'tcp://localhost:1883', topic: 'device/events' } },
+      { id: 2, defId: 'cep_state', type: 'rule', name: 'CEP / 状态机', cond: '复杂事件处理', x: 350, y: 200, config: { pattern: 'start->running->stop' } },
+      { id: 3, defId: 'alarm', type: 'action', name: 'Alarm 系统告警', cond: '生成告警记录', x: 600, y: 200, config: { severity: 'critical', message: '异常启停模式' } },
+    ], connections: [{ from: 1, to: 2 }, { from: 2, to: 3 }]
+  },
+  10: {
+    name: 'PLC S7数据归档', nodes: [
+      { id: 1, defId: 's7_client', type: 'input', name: 'S7 Client', cond: '西门子 S7 PLC', x: 100, y: 200, config: { host: '192.168.1.10', rack: 0, slot: 1 } },
+      { id: 2, defId: 'sql_executor', type: 'action', name: 'SQL Executor', cond: '数据持久化', x: 350, y: 200, config: { table: 'plc_s7_data' } },
+    ], connections: [{ from: 1, to: 2 }]
+  },
+  11: {
+    name: '电量统计规则链', nodes: [
+      { id: 1, defId: 'sql_executor', type: 'input', name: 'SQL Executor', cond: '数据查询', x: 100, y: 200, config: { query: 'SELECT SUM(power) FROM meter_data WHERE date = yesterday' } },
+      { id: 2, defId: 'condition', type: 'rule', name: 'Condition 判断', cond: 'IF-AND-OR 逻辑', x: 350, y: 200, config: { field: 'total_power', operator: '>', value: '1000' } },
+      { id: 3, defId: 'alarm', type: 'action', name: 'Alarm 系统告警', cond: '生成告警记录', x: 600, y: 200, config: { severity: 'warning', message: '用电量超配额' } },
+    ], connections: [{ from: 1, to: 2 }, { from: 2, to: 3 }]
+  },
+  12: {
+    name: '设备预测性维护', nodes: [
+      { id: 1, defId: 'mqtt_subscriber', type: 'input', name: 'MQTT Subscriber', cond: 'MQTT Broker', x: 100, y: 200, config: { broker: 'tcp://localhost:1883', topic: 'vibration/#' } },
+      { id: 2, defId: 'script_transform', type: 'transform', name: 'Script', cond: 'ML预测', x: 350, y: 200, config: { script: 'return predictBearingWear(data);' } },
+      { id: 3, defId: 'condition', type: 'rule', name: 'Condition 判断', cond: 'IF-AND-OR 逻辑', x: 600, y: 200, config: { field: 'wear_level', operator: '>', value: '0.8' } },
+      { id: 4, defId: 'alarm', type: 'action', name: 'Alarm 系统告警', cond: '生成告警记录', x: 850, y: 200, config: { severity: 'major', message: '轴承磨损预警' } },
+    ], connections: [{ from: 1, to: 2 }, { from: 2, to: 3 }, { from: 3, to: 4 }]
+  },
+  13: {
+    name: '安全联锁监控', nodes: [
+      { id: 1, defId: 'opcua_client', type: 'input', name: 'OPC UA Client', cond: 'OPC UA Server', x: 100, y: 200, config: { endpoint: 'opc.tcp://localhost:4840' } },
+      { id: 2, defId: 'condition', type: 'rule', name: 'Condition 判断', cond: 'IF-AND-OR 逻辑', x: 350, y: 200, config: { field: 'safety_signal', operator: '==', value: '0' } },
+      { id: 3, defId: 'rpc_control', type: 'action', name: 'RPC Control', cond: '设备反向控制', x: 600, y: 200, config: { method: 'emergencyStop' } },
+    ], connections: [{ from: 1, to: 2 }, { from: 2, to: 3 }]
+  },
+  14: {
+    name: '能耗优化建议', nodes: [
+      { id: 1, defId: 'sql_executor', type: 'input', name: 'SQL Executor', cond: '历史数据查询', x: 100, y: 200, config: { query: 'SELECT * FROM energy_data WHERE date BETWEEN last_month AND yesterday' } },
+      { id: 2, defId: 'script_transform', type: 'transform', name: 'Script', cond: 'AI分析', x: 350, y: 200, config: { script: 'return analyzeOptimization(data);' } },
+      { id: 3, defId: 'http_request', type: 'action', name: 'HTTP Request', cond: '推送APP', x: 600, y: 200, config: { url: 'http://app.example.com/notify', method: 'POST' } },
+    ], connections: [{ from: 1, to: 2 }, { from: 2, to: 3 }]
+  },
+  15: {
+    name: 'Modbus冗余采集', nodes: [
+      { id: 1, defId: 'modbus_client', type: 'input', name: 'Modbus Client A', cond: '主路', x: 100, y: 150, config: { host: '192.168.1.100', port: 502 } },
+      { id: 2, defId: 'modbus_client', type: 'input', name: 'Modbus Client B', cond: '备路', x: 100, y: 280, config: { host: '192.168.1.101', port: 502 } },
+      { id: 3, defId: 'data_filter', type: 'transform', name: 'Data Filter/Switch', cond: '自动切换', x: 350, y: 215, config: { mode: 'redundancy', autoSwitch: true } },
+      { id: 4, defId: 'sql_executor', type: 'action', name: 'SQL Executor', cond: '数据持久化', x: 600, y: 215, config: { table: 'modbus_data' } },
+    ], connections: [{ from: 1, to: 3 }, { from: 2, to: 3 }, { from: 3, to: 4 }]
+  },
+  16: {
+    name: '告警升级策略', nodes: [
+      { id: 1, defId: 'alarm', type: 'input', name: 'Alarm Listener', cond: '监听告警', x: 100, y: 200, config: { events: ['alarm_created'] } },
+      { id: 2, defId: 'time_delay', type: 'rule', name: 'Debounce & Delay', cond: '延时30分钟', x: 350, y: 200, config: { delay: 1800 } },
+      { id: 3, defId: 'condition', type: 'rule', name: 'Condition 判断', cond: 'IF-AND-OR 逻辑', x: 600, y: 200, config: { field: 'acknowledged', operator: '==', value: 'false' } },
+      { id: 4, defId: 'http_request', type: 'action', name: 'HTTP Request', cond: '通知经理', x: 850, y: 200, config: { url: 'http://notify.example.com/manager', method: 'POST' } },
+    ], connections: [{ from: 1, to: 2 }, { from: 2, to: 3 }, { from: 3, to: 4 }]
+  }
+};
+
+// 初始化 sessionStorage 中的数据
+sessionStorage.setItem('allChainData', JSON.stringify(allChainData));
+
+// ─── Data ────────────────────────────────────────────────────────────────────
+const AVATAR_COLORS = ['#0d7377','#e53935','#fb8c00','#8e24aa','#1565c0','#2e7d32','#d84315','#00838f'];
+const CREATOR_INITIALS = { '张工': '张', '李明': '李', '王芳': '王', '赵工': '赵' };
+
+const ruleChains = [
+  { id: 1, name: 'Modbus温度超限告警', desc: '采集PLC温度数据，超限时生成告警并推送钉钉群', status: 'published', nodes: 3, creator: '张工', createdAt: '2026-05-27 14:32', isRoot: true, executions: 4820 },
+  { id: 2, name: 'OPC UA压力异常检测', desc: '监测萃取车间压力传感器，异常时触发告警和设备停机', status: 'published', nodes: 5, creator: '张工', createdAt: '2026-05-25 09:15', isRoot: false, executions: 3210 },
+  { id: 3, name: 'Kafka数据转发至时序库', desc: '消费Kafka Topic数据，清洗后写入InfluxDB时序数据库', status: 'published', nodes: 3, creator: '李明', createdAt: '2026-05-22 16:48', isRoot: false, executions: 8930 },
+  { id: 4, name: '设备离线告警', desc: '检测OPC UA设备心跳，3分钟无响应标记为离线并告警', status: 'testing', nodes: 4, creator: '李明', createdAt: '2026-05-26 11:20', isRoot: false, executions: 0 },
+  { id: 5, name: 'MQTT数据清洗规则', desc: '接收产线MQTT数据，过滤无效值并转发至Kafka', status: 'published', nodes: 3, creator: '王芳', createdAt: '2026-05-20 08:00', isRoot: false, executions: 12400 },
+  { id: 6, name: '生产报表数据聚合', desc: '每日08:00汇总昨日生产数据，生成Excel报表发送邮件', status: 'published', nodes: 3, creator: '王芳', createdAt: '2026-05-18 13:45', isRoot: false, executions: 180 },
+  { id: 7, name: 'ABB变频器状态监控', desc: '通过Modbus TCP读取ABB变频器运行参数，超阈值告警', status: 'testing', nodes: 3, creator: '张工', createdAt: '2026-05-28 10:00', isRoot: false, executions: 0 },
+  { id: 8, name: 'HTTP Webhook事件推送', desc: '接收外部系统HTTP回调，验证签名后触发工作流', status: 'published', nodes: 3, creator: '赵工', createdAt: '2026-05-15 14:20', isRoot: false, executions: 560 },
+  { id: 9, name: 'CEP复杂事件处理', desc: '检测设备启停序列，识别异常启停模式并告警', status: 'testing', nodes: 3, creator: '李明', createdAt: '2026-05-29 08:30', isRoot: false, executions: 0 },
+  { id: 10, name: 'PLC S7数据归档', desc: '采集西门子S7-1200 PLC数据，持久化至MySQL数据库', status: 'published', nodes: 2, creator: '王芳', createdAt: '2026-05-12 09:00', isRoot: false, executions: 4200 },
+  { id: 11, name: '电量统计规则链', desc: '统计各车间日用电量，超配额时触发告警通知', status: 'draft', nodes: 3, creator: '赵工', createdAt: '2026-05-28 16:00', isRoot: false, executions: 0 },
+  { id: 12, name: '设备预测性维护', desc: '分析振动传感器时序数据，预测轴承磨损程度', status: 'testing', nodes: 4, creator: '张工', createdAt: '2026-05-27 17:00', isRoot: false, executions: 0 },
+  { id: 13, name: '安全联锁监控', desc: '监控安全门和急停信号，危险时自动切断设备电源', status: 'published', nodes: 3, creator: '张工', createdAt: '2026-05-10 10:00', isRoot: true, executions: 890 },
+  { id: 14, name: '能耗优化建议', desc: '基于历史数据生成能耗优化建议，推送至管理APP', status: 'draft', nodes: 3, creator: '李明', createdAt: '2026-05-29 09:00', isRoot: false, executions: 0 },
+  { id: 15, name: 'Modbus冗余采集', desc: '双路Modbus TCP冗余采集，任一路径故障自动切换', status: 'disabled', nodes: 4, creator: '王芳', createdAt: '2026-04-30 11:00', isRoot: false, executions: 0 },
+  { id: 16, name: '告警升级策略', desc: '告警发出30分钟未处理自动升级至值班经理', status: 'published', nodes: 4, creator: '赵工', createdAt: '2026-05-08 15:30', isRoot: false, executions: 128 },
+];
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let currentPage = 1;
+let pageSize = 10;
+let sortField = 'createdAt';
+let sortDir = 'desc';
+let selectedIds = new Set();
+let filteredData = [...ruleChains];
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function getStatusLabel(s) {
+  const map = { published: '已发布', testing: '测试中', draft: '草稿', disabled: '已禁用' };
+  return map[s] || s;
+}
+function getAvatarColor(name) {
+  let hash = 0;
+  for (let c of name) hash = c.charCodeAt(0) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+function getInitials(name) { return CREATOR_INITIALS[name] || name[0]; }
+
+function renderTable(data) {
+  const start = (currentPage - 1) * pageSize;
+  const end = start + pageSize;
+  const pageData = data.slice(start, end);
+  const tbody = document.getElementById('tableBody');
+  
+  if (pageData.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:48px;color:var(--text-muted);font-size:14px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--tb-green)" stroke-width="1.5" style="width:40px;height:40px;margin-bottom:8px;opacity:0.3"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 12h4l3-6h2l-3 6h3l3 6h2"/></svg><br>未找到匹配的规则链
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = pageData.map(chain => {
+    const checked = selectedIds.has(chain.id) ? 'checked' : '';
+    return `<tr data-id="${chain.id}">
+      <td class="col-checkbox">
+        <div class="checkbox-wrap">
+          <input type="checkbox" ${checked} onchange="toggleSelect(${chain.id})">
+        </div>
+      </td>
+      <td class="col-time" style="color:var(--text-secondary);font-size:12px">${chain.createdAt}</td>
+      <td class="col-name">
+        <div class="chain-name-cell">
+          <span class="chain-name-text" onclick="openChain(${chain.id})">${chain.name}</span>
+          ${chain.isRoot ? '<span class="chain-root-badge">ROOT</span>' : ''}
+        </div>
+        <div class="chain-desc">${chain.desc}</div>
+      </td>
+      <td style="color:var(--text-secondary);font-size:12px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${chain.desc}</td>
+      <td class="col-status"><span class="status-badge status-${chain.status}">${getStatusLabel(chain.status)}</span></td>
+      <td class="col-nodes">
+        <div class="node-count">
+          <span class="node-count-num">${chain.nodes}</span>
+        </div>
+      </td>
+      <td>
+        <div class="creator-cell">
+          <div class="creator-avatar" style="background:${getAvatarColor(chain.creator)}">${getInitials(chain.creator)}</div>
+          <span class="creator-name">${chain.creator}</span>
+        </div>
+      </td>
+      <td>
+        <div class="row-actions">
+          <button class="action-btn btn-edit" title="编辑" onclick="openChain(${chain.id})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="action-btn btn-test" title="测试" onclick="testChain(${chain.id})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </button>
+          <button class="action-btn btn-copy" title="复制" onclick="copyChain(${chain.id})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <button class="action-btn btn-delete" title="删除" onclick="deleteChain(${chain.id})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  updatePagination(data.length);
+  updateBulkBar();
+}
+
+function updatePagination(total) {
+  const totalPages = Math.ceil(total / pageSize);
+  const start = (currentPage - 1) * pageSize + 1;
+  const end = Math.min(currentPage * pageSize, total);
+  document.getElementById('paginationInfo').textContent = total === 0 ? '无数据' : `显示 ${start}-${end} / 共 ${total} 条`;
+
+  const controls = document.getElementById('paginationControls');
+  let html = '';
+  html += `<button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>`;
+
+  const maxBtns = 5;
+  let startPage = Math.max(1, currentPage - 2);
+  let endPage = Math.min(totalPages, startPage + maxBtns - 1);
+  if (endPage - startPage < maxBtns - 1) startPage = Math.max(1, endPage - maxBtns + 1);
+
+  if (startPage > 1) {
+    html += `<button class="page-btn" onclick="goPage(1)">1</button>`;
+    if (startPage > 2) html += `<span style="color:var(--text-muted);padding:0 4px">…</span>`;
+  }
+  for (let i = startPage; i <= endPage; i++) {
+    html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) html += `<span style="color:var(--text-muted);padding:0 4px">…</span>`;
+    html += `<button class="page-btn" onclick="goPage(${totalPages})">${totalPages}</button>`;
+  }
+
+  html += `<button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>`;
+  controls.innerHTML = html;
+}
+
+// ─── Filters & Sort ──────────────────────────────────────────────────────────
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const status = document.getElementById('filterStatus').value;
+  const creator = document.getElementById('filterCreator').value;
+
+  filteredData = ruleChains.filter(c => {
+    const matchQ = !q || c.name.toLowerCase().includes(q) || c.desc.toLowerCase().includes(q);
+    const matchS = !status || c.status === status;
+    const matchC = !creator || c.creator === creator;
+    return matchQ && matchS && matchC;
+  });
+
+  if (sortField) {
+    filteredData.sort((a, b) => {
+      let va = a[sortField], vb = b[sortField];
+      if (typeof va === 'string') va = va.toLowerCase(), vb = vb.toLowerCase();
+      if (va < vb) return sortDir === 'asc' ? -1 : 1;
+      if (va > vb) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  currentPage = 1;
+  renderTable(filteredData);
+  updateStats();
+}
+
+function toggleSort(field) {
+  const headers = document.querySelectorAll('thead th.sortable');
+  headers.forEach(h => { h.classList.remove('sort-asc', 'sort-desc'); });
+  const target = document.querySelector(`thead th[data-sort="${field}"]`);
+  
+  if (sortField === field) {
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortField = field;
+    sortDir = 'asc';
+  }
+  target.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+  applyFilters();
+}
+
+function goPage(p) {
+  const totalPages = Math.ceil(filteredData.length / pageSize);
+  if (p < 1 || p > totalPages || totalPages === 0) return;
+  currentPage = p;
+  renderTable(filteredData);
+}
+
+// ─── Selection ────────────────────────────────────────────────────────────────
+function toggleSelect(id) {
+  if (selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  updateBulkBar();
+  updateSelectAll();
+}
+function toggleSelectAll() {
+  const checked = document.getElementById('selectAll').checked;
+  const start = (currentPage - 1) * pageSize;
+  const end = Math.min(start + pageSize, filteredData.length);
+  const pageData = filteredData.slice(start, end);
+  if (checked) pageData.forEach(c => selectedIds.add(c.id));
+  else pageData.forEach(c => selectedIds.delete(c.id));
+  renderTable(filteredData);
+}
+function updateSelectAll() {
+  const start = (currentPage - 1) * pageSize;
+  const end = Math.min(start + pageSize, filteredData.length);
+  const pageData = filteredData.slice(start, end);
+  const allSelected = pageData.every(c => selectedIds.has(c.id));
+  document.getElementById('selectAll').checked = pageData.length > 0 && allSelected;
+  document.getElementById('selectAll').indeterminate = !allSelected && pageData.some(c => selectedIds.has(c.id));
+}
+function updateBulkBar() {
+  const bar = document.getElementById('bulkBar');
+  document.getElementById('bulkCount').textContent = selectedIds.size;
+  bar.classList.toggle('show', selectedIds.size > 0);
+}
+function clearSelection() { selectedIds.clear(); renderTable(filteredData); }
+function bulkDelete() {
+  if (!confirm(`确定删除选中的 ${selectedIds.size} 条规则链？`)) return;
+  selectedIds.forEach(id => {
+    const idx = ruleChains.findIndex(c => c.id === id);
+    if (idx !== -1) ruleChains.splice(idx, 1);
+  });
+  selectedIds.clear();
+  applyFilters();
+  showToast(`已删除 ${ruleChains.length === 0 ? 0 : ruleChains.length} 条规则链`, 'success');
+}
+
+// ─── Stats ────────────────────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('statTotal').textContent = filteredData.length;
+  const pub = filteredData.filter(c => c.status === 'published').length;
+  const test = filteredData.filter(c => c.status === 'testing').length;
+  document.getElementById('statPublished').textContent = pub;
+  document.getElementById('statTesting').textContent = test;
+}
+
+// ─── CRUD Actions ─────────────────────────────────────────────────────────────
+function openChain(id) {
+  // 跳转到规则链编辑器，并传递规则链 ID
+  window.location.href = `rule-chain-editor.html?chainId=${id}`;
+}
+function testChain(id) {
+  showToast(`正在测试规则链 #${id}，请稍候…`, 'info');
+  setTimeout(() => {
+    const chain = ruleChains.find(c => c.id === id);
+    if (chain) {
+      chain.status = 'published';
+      renderTable(filteredData);
+      showToast(`规则链「${chain.name}」测试通过，已发布`, 'success');
+    }
+  }, 1500);
+}
+function copyChain(id) {
+  const chain = ruleChains.find(c => c.id === id);
+  if (!chain) return;
+  const newChain = {
+    ...chain,
+    id: Date.now(),
+    name: chain.name + '（副本）',
+    status: 'draft',
+    createdAt: new Date().toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(/\//g, '-'),
+    executions: 0,
+  };
+  ruleChains.unshift(newChain);
+  applyFilters();
+  showToast(`已复制为「${newChain.name}」`, 'success');
+}
+function deleteChain(id) {
+  const chain = ruleChains.find(c => c.id === id);
+  if (!chain) return;
+  if (!confirm(`确定删除规则链「${chain.name}」？此操作不可撤销。`)) return;
+  const idx = ruleChains.findIndex(c => c.id === id);
+  if (idx !== -1) ruleChains.splice(idx, 1);
+  selectedIds.delete(id);
+  applyFilters();
+  showToast(`「${chain.name}」已删除`, 'success');
+}
+
+// ─── Toolbar Actions ──────────────────────────────────────────────────────────
+function refreshData() {
+  showToast('数据已刷新', 'info');
+  applyFilters();
+}
+function exportData() {
+  showToast('正在导出规则链数据…', 'info');
+  setTimeout(() => showToast('导出功能开发中', 'info'), 800);
+}
+
+// ─── Modal ────────────────────────────────────────────────────────────────────
+function openCreateModal() {
+  document.getElementById('modalName').value = '';
+  document.getElementById('modalDesc').value = '';
+  document.getElementById('modalProduct').value = '';
+  document.getElementById('modalStatus').value = 'draft';
+  const modal = document.getElementById('createModal');
+  modal.classList.add('show');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const input = document.getElementById('modalName');
+      input.focus();
+      input.click();
+    });
+  });
+}
+function closeCreateModal() {
+  document.getElementById('createModal').classList.remove('show');
+}
+function createChain() {
+  const name = document.getElementById('modalName').value.trim();
+  if (!name) {
+    showToast('请输入规则链名称', 'error');
+    return;
+  }
+  const desc = document.getElementById('modalDesc').value.trim();
+  const product = document.getElementById('modalProduct').value;
+  const status = document.getElementById('modalStatus').value;
+  const newChain = {
+    id: Date.now(),
+    name,
+    desc: desc || '暂无描述',
+    status,
+    nodes: 0,
+    creator: '张工',
+    createdAt: new Date().toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(/\//g, '-'),
+    isRoot: false,
+    executions: 0,
+  };
+  ruleChains.unshift(newChain);
+  closeCreateModal();
+  applyFilters();
+  showToast(`规则链「${name}」创建成功，正在打开编辑器…`, 'success');
+  // 新建规则链，打开空画布
+  setTimeout(() => {
+    window.location.href = `rule-chain-editor.html?chainId=new&name=${encodeURIComponent(name)}`;
+  }, 800);
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const icons = {
+    success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+    error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+  };
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `${icons[type]}<span>${msg}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(20px)'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+// 规则ID映射：RULE-xxx -> 数字ID
+const RULE_ID_MAP = {
+  'RULE-001': 1,  // 温度超限告警
+  'RULE-002': 2,  // 压力异常检测
+  'RULE-003': 3,  // 数据转发
+  'RULE-004': 4,  // 设备离线告警
+  'RULE-005': 5,  // MQTT数据清洗
+  'RULE-006': 6,  // 生产报表
+  'RULE-007': 7,  // 变频器监控
+  'RULE-008': 8,  // Webhook推送
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  applyFilters();
+  // Set initial sort indicator
+  const defaultSort = document.querySelector('thead th[data-sort="createdAt"]');
+  if (defaultSort) defaultSort.classList.add('sort-desc');
+  
+  // 处理URL参数：高亮并打开对应规则链
+  const params = new URLSearchParams(window.location.search);
+  const highlight = params.get('highlight');
+  if (highlight) {
+    const chainId = RULE_ID_MAP[highlight] || parseInt(highlight);
+    if (chainId) {
+      setTimeout(() => {
+        const chain = ruleChains.find(c => c.id === chainId);
+        if (chain) {
+          showToast(`已定位到规则链: ${chain.name}`, 'info');
+          // 高亮对应行
+          const rows = document.querySelectorAll('tbody tr');
+          rows.forEach(row => {
+            if (row.onclick && row.onclick.toString().includes(chainId)) {
+              row.style.background = '#e6f7ff';
+              row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          });
+        }
+      }, 300);
+    }
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>产品 - IoT</title>
+<style>
+:root {
+  --primary: #008B8B;
+  --primary-light: #00A0A0;
+  --primary-lighter: #E0F7F7;
+  --primary-dark: #006B6B;
+  --bg: #F0F2F5;
+  --card-bg: #FFFFFF;
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --border: #E5E7EB;
+  --border-light: #F3F4F6;
+  --success: #10B981;
+  --success-bg: #D1FAE5;
+  --warning: #F59E0B;
+  --warning-bg: #FEF3C7;
+  --danger: #EF4444;
+  --danger-bg: #FEE2E2;
+  --info: #3B82F6;
+  --info-bg: #DBEAFE;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+  --radius: 8px;
+  --radius-sm: 6px;
+  --radius-lg: 12px;
+  --transition: all 0.2s ease;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  margin: 0;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 200px;
+  height: 100vh;
+  background: #001529;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.sidebar-logo {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+.sidebar-menu {
+  flex: 1;
+  padding: 8px 0;
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  height: 44px;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.menu-item:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+}
+.menu-item.active {
+  color: #fff;
+  background: #1890ff;
+}
+.menu-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #fff;
+}
+.menu-icon {
+  margin-right: 10px;
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+.menu-text {
+  flex: 1;
+}
+.menu-arrow {
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+.menu-arrow.open {
+  transform: rotate(90deg);
+}
+.menu-group .menu-item.has-submenu {
+  color: rgba(255,255,255,0.65);
+}
+.menu-group .menu-item.has-submenu.expanded {
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+}
+.submenu {
+  display: none;
+  background: rgba(0,0,0,0.15);
+}
+.submenu.open {
+  display: block;
+}
+.submenu-item {
+  display: block;
+  padding: 0 20px 0 50px;
+  height: 40px;
+  line-height: 40px;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.submenu-item:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+}
+.submenu-item.active {
+  color: #1890ff;
+  background: rgba(24,144,255,0.08);
+}
+
+/* Main Content */
+.main-content {
+  padding: 16px 20px;
+  margin-left: 200px;
+  flex: 1;
+  min-height: 100vh;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: #fff;
+  color: var(--primary);
+}
+
+.btn-primary:hover {
+  background: rgba(255,255,255,0.9);
+  box-shadow: var(--shadow);
+}
+
+.btn-default {
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.btn-default:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: #DC2626;
+}
+
+.btn-success {
+  background: var(--success);
+  color: #fff;
+}
+
+.btn-success:hover {
+  background: #059669;
+}
+
+.btn-warning {
+  background: var(--warning);
+  color: #fff;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--primary);
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.btn-text:hover {
+  background: var(--primary-lighter);
+}
+
+/* Main Content */
+.main-content {
+  padding: 16px 20px;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.breadcrumb a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  color: var(--primary);
+}
+
+.breadcrumb .separator {
+  color: var(--text-muted);
+}
+
+.breadcrumb .current {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-select {
+  padding: 6px 30px 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--card-bg);
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' stroke='%236B7280' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  transition: var(--transition);
+}
+
+.filter-select:hover {
+  border-color: var(--primary);
+}
+
+.filter-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0,139,139,0.1);
+}
+
+.search-box {
+  position: relative;
+}
+
+.search-box input {
+  padding: 6px 10px 6px 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  width: 200px;
+  outline: none;
+  transition: var(--transition);
+}
+
+.search-box input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0,139,139,0.1);
+  width: 240px;
+}
+
+.search-box::before {
+  content: '🔍';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+}
+
+.view-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.view-toggle button {
+  padding: 6px 10px;
+  border: none;
+  background: var(--card-bg);
+  cursor: pointer;
+  font-size: 14px;
+  transition: var(--transition);
+  line-height: 1;
+}
+
+.view-toggle button:not(:last-child) {
+  border-right: 1px solid var(--border);
+}
+
+.view-toggle button.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.view-toggle button:hover:not(.active) {
+  background: var(--primary-lighter);
+}
+
+/* Stats Bar */
+.stats-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 16px;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+}
+
+.stat-card {
+  flex: 1;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: var(--transition);
+}
+
+.stat-card:last-child {
+  border-right: none;
+}
+
+.stat-card:hover {
+  background: var(--bg-hover);
+}
+
+.stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.stat-icon.total { background: var(--primary-lighter); }
+.stat-icon.published { background: var(--success-bg); }
+.stat-icon.draft { background: var(--warning-bg); }
+.stat-icon.devices { background: var(--info-bg); }
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+/* Table View */
+.table-container {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #F9FAFB;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr {
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+tbody tr:hover {
+  background: var(--primary-lighter);
+}
+
+.product-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.product-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--primary-lighter);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.product-name {
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.product-id {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.status-badge.published {
+  background: var(--success-bg);
+  color: #065F46;
+}
+
+.status-badge.draft {
+  background: #F3F4F6;
+  color: #6B7280;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.published { background: var(--success); }
+.status-dot.draft { background: #9CA3AF; }
+
+.category-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: var(--primary-lighter);
+  color: var(--primary-dark);
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.protocol-tag {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.action-btns {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-btns .btn-text {
+  padding: 4px 6px;
+}
+
+/* Card View */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.product-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  padding: 20px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.product-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius);
+  background: var(--primary-lighter);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.card-id {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+.card-body {
+  margin-bottom: 14px;
+}
+
+.card-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.card-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.card-meta-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.card-meta-value {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+}
+
+.card-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.card-device-count {
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Drawer */
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 200;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.drawer-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: -720px;
+  width: 720px;
+  height: 100%;
+  background: var(--card-bg);
+  z-index: 201;
+  box-shadow: var(--shadow-lg);
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer.open {
+  right: 0;
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.drawer-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.drawer-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.drawer-close:hover {
+  background: var(--bg);
+  color: var(--text-primary);
+}
+
+/* Drawer Tabs */
+.drawer-tabs {
+  display: flex;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+.drawer-tab {
+  padding: 12px 18px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.drawer-tab:hover { color: var(--primary); }
+.drawer-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 500; }
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+  background: var(--bg);
+}
+
+.drawer-tab-panel { display: none; padding: 20px 24px; }
+.drawer-tab-panel.active { display: block; }
+
+/* Product Detail Card in Drawer */
+.pd-info-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.pd-info-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+.pd-info-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.pd-info-name { font-size: 18px; font-weight: 600; color: var(--text-primary); }
+.pd-info-meta { display: flex; align-items: center; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+.pd-info-tag { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 12px; background: var(--primary-lighter); color: var(--primary); border: 1px solid #b2e0e0; }
+.pd-info-id { font-size: 12px; color: var(--text-muted); font-family: monospace; }
+.pd-info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.pd-stat-card { text-align: center; padding: 12px; background: var(--bg); border-radius: var(--radius-sm); }
+.pd-stat-value { font-size: 24px; font-weight: 700; color: var(--primary); }
+.pd-stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+/* Drawer inner cards */
+.pd-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.pd-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.pd-card-title { font-size: 14px; font-weight: 600; color: var(--text-primary); padding-left: 10px; border-left: 3px solid var(--primary); line-height: 1; }
+.pd-card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* Drawer table */
+.pd-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.pd-table th { background: #fafafa; padding: 10px 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border); white-space: nowrap; }
+.pd-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+.pd-table tbody tr:hover { background: #fafbfc; }
+
+/* Toggle switch for drawer */
+.pd-toggle { position: relative; width: 36px; height: 20px; cursor: pointer; display: inline-block; }
+.pd-toggle input { opacity: 0; width: 0; height: 0; }
+.pd-toggle-slider { position: absolute; inset: 0; background: #ccc; border-radius: 20px; transition: 0.3s; }
+.pd-toggle-slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 2px; bottom: 2px; background: #fff; border-radius: 50%; transition: 0.3s; }
+.pd-toggle input:checked + .pd-toggle-slider { background: var(--danger); }
+.pd-toggle input:checked + .pd-toggle-slider::before { transform: translateX(16px); }
+
+/* Config rows in drawer */
+.pd-config-list { display: flex; flex-direction: column; }
+.pd-config-row { display: flex; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border-light); gap: 16px; }
+.pd-config-row:last-child { border-bottom: none; }
+.pd-config-title { font-size: 14px; font-weight: 600; color: var(--text-primary); min-width: 120px; }
+.pd-config-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.pd-config-center { flex: 1; display: flex; align-items: center; gap: 8px; }
+.pd-config-right { display: flex; gap: 8px; flex-shrink: 0; }
+.pd-config-input { padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; outline: none; width: 120px; }
+.pd-config-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0,139,139,0.1); }
+.pd-config-select { padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; outline: none; width: 200px; cursor: pointer; }
+
+/* Alarm level badges */
+.pd-level-critical { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: var(--danger-bg); color: var(--danger); border: 1px solid #fca5a5; }
+.pd-level-major { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: var(--warning-bg); color: var(--warning); border: 1px solid #fcd34d; }
+.pd-level-minor { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: var(--info-bg); color: var(--info); border: 1px solid #93c5fd; }
+
+/* Status badges */
+.pd-badge-online { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: var(--success-bg); color: var(--success); border: 1px solid #6ee7b7; }
+.pd-badge-offline { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: var(--warning-bg); color: var(--warning); border: 1px solid #fcd34d; }
+
+/* Action buttons */
+.pd-btn { padding: 5px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--card-bg); font-size: 12px; cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; gap: 4px; font-weight: 500; }
+.pd-btn:hover { border-color: var(--primary); color: var(--primary); }
+.pd-btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+.pd-btn-primary:hover { background: var(--primary-dark); color: #fff; }
+.pd-btn-danger { color: var(--danger); border-color: var(--danger); }
+.pd-btn-danger:hover { background: var(--danger); color: #fff; }
+.pd-btn-success { color: var(--success); border-color: var(--success); }
+.pd-btn-success:hover { background: var(--success); color: #fff; }
+
+.drawer-section {
+  margin-bottom: 24px;
+}
+
+.drawer-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-item.full {
+  grid-column: 1 / -1;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.detail-value {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.detail-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  padding: 10px 14px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+}
+
+.thing-model-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.thing-model-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: #F9FAFB;
+  border-bottom: 1px solid var(--border);
+}
+
+.thing-model-table td {
+  padding: 8px 12px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.thing-model-table tr:last-child td {
+  border-bottom: none;
+}
+
+.drawer-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Toast */
+.toast-container {
+  position: fixed;
+  top: 72px;
+  right: 20px;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  font-size: 13px;
+  color: #fff;
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+  min-width: 240px;
+}
+
+.toast.success { background: var(--success); }
+.toast.error { background: var(--danger); }
+.toast.warning { background: var(--warning); }
+.toast.info { background: var(--info); }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(100px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(100px); }
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.empty-state-text {
+  font-size: 14px;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 250;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 480px;
+  max-width: 90vw;
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+.modal-overlay.open .modal {
+  transform: scale(1);
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .toolbar-right {
+    flex-wrap: wrap;
+  }
+  .drawer {
+    width: 100%;
+    right: -100%;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">🚇 IoT</div>
+  <nav class="sidebar-menu">
+    <div class="menu-group">
+      <div class="menu-item has-submenu expanded" onclick="toggleSubmenu(this)">
+        <span class="menu-icon">📊</span>
+        <span class="menu-text">设备管理</span>
+        <span class="menu-arrow open">▶</span>
+      </div>
+      <div class="submenu open" id="submenuDevice">
+        <a href="product-management.html" class="submenu-item active">产品</a>
+        <a href="device-management.html" class="submenu-item">设备</a>
+      </div>
+    </div>
+    <a href="rule-chain-list.html" class="menu-item">
+      <span class="menu-icon">⚙️</span>
+      <span class="menu-text">规则链</span>
+    </a>
+    <a href="alarm-management.html" class="menu-item">
+      <span class="menu-icon">🚨</span>
+      <span class="menu-text">告警管理</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="breadcrumb">
+      <a href="#">产品</a>
+      <span class="separator">/</span>
+      <span class="current">全部产品</span>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn btn-primary" onclick="showToast('新建产品功能开发中', 'info')">➕ 新建产品</button>
+      <select class="filter-select" id="categoryFilter" onchange="applyFilters()">
+        <option value="">全部分类</option>
+      </select>
+      <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+        <option value="">全部状态</option>
+        <option value="published">已发布</option>
+        <option value="draft">开发中</option>
+      </select>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="搜索产品名称/ID..." oninput="applyFilters()">
+      </div>
+      <div class="view-toggle">
+        <button id="viewToggleBtn" onclick="toggleView()" title="切换视图">🔲</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon total">📦</div>
+      <div class="stat-info">
+        <div class="stat-label">产品总数</div>
+        <div class="stat-value" id="statTotal">10</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon published">✅</div>
+      <div class="stat-info">
+        <div class="stat-label">已发布</div>
+        <div class="stat-value" id="statPublished">8</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon draft">📝</div>
+      <div class="stat-info">
+        <div class="stat-label">开发中</div>
+        <div class="stat-value" id="statDraft">2</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon devices">🔧</div>
+      <div class="stat-info">
+        <div class="stat-label">设备总数</div>
+        <div class="stat-value" id="statDevices">24</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- List View -->
+  <div id="listView" class="table-container">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>产品信息</th>
+            <th>分类</th>
+            <th>型号</th>
+            <th>厂商</th>
+            <th>协议</th>
+            <th>传输方式</th>
+            <th>状态</th>
+            <th>设备数</th>
+            <th>更新时间</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Card View -->
+  <div id="cardView" class="card-grid" style="display:none;">
+  </div>
+
+  <!-- Empty State -->
+  <div id="emptyState" class="empty-state" style="display:none;">
+    <div class="empty-state-icon">🔍</div>
+    <div class="empty-state-text">没有找到匹配的产品</div>
+  </div>
+</main>
+
+<!-- Drawer Overlay -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- Drawer -->
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title" id="drawerTitle">产品详情</div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-tabs" id="drawerTabs">
+    <button class="drawer-tab active" data-tab="overview" onclick="switchPdTab('overview')">📋 设备列表</button>
+    <button class="drawer-tab" data-tab="things" onclick="switchPdTab('things')">🔧 物模型</button>
+    <button class="drawer-tab" data-tab="commands" onclick="switchPdTab('commands')">📡 指令配置</button>
+    <button class="drawer-tab" data-tab="alarms" onclick="switchPdTab('alarms')">🚨 告警配置</button>
+    <button class="drawer-tab" data-tab="config" onclick="switchPdTab('config')">⚙️ 其他配置</button>
+  </div>
+  <div class="drawer-body" id="drawerBody">
+  </div>
+  <div class="drawer-footer" id="drawerFooter">
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">确认删除</div>
+      <button class="drawer-close" onclick="closeDeleteModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color: var(--text-secondary);">确定要删除产品 <strong id="deleteProductName"></strong> 吗？此操作不可撤销，关联的设备也将被移除。</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeDeleteModal()">取消</button>
+      <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+function toggleSubmenu(el) {
+  const submenu = el.nextElementSibling;
+  const arrow = el.querySelector('.menu-arrow');
+  el.classList.toggle('expanded');
+  arrow.classList.toggle('open');
+  submenu.classList.toggle('open');
+}
+
+const PRODUCTS = [
+  { id:'PRD-001', name:'智能温控器', category:'hvac', model:'TC-2000', manufacturer:'华为', protocol:'MQTT', transport:'TCP', status:'published', deviceCount:4, description:'站台环境温度监测与控制设备', createdAt:'2026-01-15', updatedAt:'2026-04-20' },
+  { id:'PRD-002', name:'CO₂浓度传感器', category:'hvac', model:'CO2-S100', manufacturer:'海康威视', protocol:'MQTT', transport:'TCP', status:'published', deviceCount:3, description:'实时监测空气中CO₂浓度', createdAt:'2026-01-18', updatedAt:'2026-04-18' },
+  { id:'PRD-003', name:'智能风机控制器', category:'fan', model:'FC-3000', manufacturer:'西门子', protocol:'Modbus TCP', transport:'TCP', status:'published', deviceCount:3, description:'地铁通风系统智能控制', createdAt:'2026-02-01', updatedAt:'2026-04-15' },
+  { id:'PRD-004', name:'液位传感器', category:'pump', model:'LS-500', manufacturer:'艾默生', protocol:'MQTT', transport:'TCP', status:'published', deviceCount:2, description:'集水池液位实时监测', createdAt:'2026-02-10', updatedAt:'2026-04-12' },
+  { id:'PRD-005', name:'排水泵控制器', category:'pump', model:'PC-800', manufacturer:'施耐德', protocol:'Modbus RTU', transport:'RS485', status:'published', deviceCount:2, description:'排水泵启停控制与状态监测', createdAt:'2026-02-15', updatedAt:'2026-04-10' },
+  { id:'PRD-006', name:'屏蔽门控制器', category:'door', model:'DC-1000', manufacturer:'方大集团', protocol:'OPC UA', transport:'TCP', status:'published', deviceCount:3, description:'站台屏蔽门开关控制与状态监测', createdAt:'2026-03-01', updatedAt:'2026-04-08' },
+  { id:'PRD-007', name:'扶梯监测终端', category:'escalator', model:'EM-200', manufacturer:'三菱', protocol:'MQTT', transport:'TCP', status:'draft', deviceCount:2, description:'电扶梯运行状态监测与故障预警', createdAt:'2026-03-10', updatedAt:'2026-04-05' },
+  { id:'PRD-008', name:'烟雾探测器', category:'fire', model:'SD-100', manufacturer:'海湾安全技术', protocol:'MQTT', transport:'TCP', status:'published', deviceCount:2, description:'高灵敏度光电烟雾探测', createdAt:'2026-03-15', updatedAt:'2026-04-01' },
+  { id:'PRD-009', name:'电力监测仪', category:'power', model:'PM-5000', manufacturer:'ABB', protocol:'Modbus TCP', transport:'TCP', status:'draft', deviceCount:2, description:'供电系统电压电流功率监测', createdAt:'2026-03-20', updatedAt:'2026-03-28' },
+  { id:'PRD-010', name:'温湿度传感器', category:'hvac', model:'TH-300', manufacturer:'霍尼韦尔', protocol:'MQTT', transport:'TCP', status:'published', deviceCount:1, description:'环境温湿度一体化监测', createdAt:'2026-04-01', updatedAt:'2026-04-22' },
+];
+
+const PRODUCT_CATEGORIES = {
+  hvac: { name: '环境监控', icon: '🌡️' },
+  fan: { name: '通风系统', icon: '🌀' },
+  pump: { name: '排水系统', icon: '💧' },
+  door: { name: '屏蔽门系统', icon: '🚪' },
+  escalator: { name: '电扶梯系统', icon: '🛑' },
+  fire: { name: '消防系统', icon: '🔥' },
+  power: { name: '供电系统', icon: '⚡' }
+};
+
+const THING_MODELS = {
+  hvac: [
+    { id: 'temperature', name: '温度', identifier: 'temperature', type: 'float', unit: '°C', desc: '当前环境温度' },
+    { id: 'humidity', name: '湿度', identifier: 'humidity', type: 'float', unit: '%RH', desc: '当前环境湿度' },
+    { id: 'co2', name: 'CO₂浓度', identifier: 'co2', type: 'float', unit: 'ppm', desc: 'CO₂浓度值' },
+    { id: 'status', name: '设备状态', identifier: 'status', type: 'enum', unit: '', desc: '在线/离线/故障' },
+    { id: 'reportInterval', name: '上报间隔', identifier: 'reportInterval', type: 'int', unit: 's', desc: '数据上报周期' },
+  ],
+  fan: [
+    { id: 'speed', name: '转速', identifier: 'speed', type: 'int', unit: 'RPM', desc: '风机当前转速' },
+    { id: 'mode', name: '运行模式', identifier: 'mode', type: 'enum', unit: '', desc: '自动/手动/停止' },
+    { id: 'status', name: '设备状态', identifier: 'status', type: 'enum', unit: '', desc: '运行/停止/故障' },
+    { id: 'vibration', name: '振动值', identifier: 'vibration', type: 'float', unit: 'mm/s', desc: '风机振动幅度' },
+  ],
+  pump: [
+    { id: 'level', name: '液位', identifier: 'level', type: 'float', unit: 'm', desc: '当前液位高度' },
+    { id: 'pumpStatus', name: '泵状态', identifier: 'pumpStatus', type: 'enum', unit: '', desc: '运行/停止/故障' },
+    { id: 'flowRate', name: '流量', identifier: 'flowRate', type: 'float', unit: 'm³/h', desc: '排水流量' },
+    { id: 'status', name: '设备状态', identifier: 'status', type: 'enum', unit: '', desc: '在线/离线/故障' },
+  ],
+  door: [
+    { id: 'doorStatus', name: '门状态', identifier: 'doorStatus', type: 'enum', unit: '', desc: '开/关/故障' },
+    { id: 'openCount', name: '开关次数', identifier: 'openCount', type: 'int', unit: '次', desc: '当日开关次数' },
+    { id: 'motorTemp', name: '电机温度', identifier: 'motorTemp', type: 'float', unit: '°C', desc: '电机运行温度' },
+    { id: 'status', name: '设备状态', identifier: 'status', type: 'enum', unit: '', desc: '正常/告警/故障' },
+  ],
+  escalator: [
+    { id: 'runStatus', name: '运行状态', identifier: 'runStatus', type: 'enum', unit: '', desc: '上行/下行/停止' },
+    { id: 'speed', name: '运行速度', identifier: 'speed', type: 'float', unit: 'm/s', desc: '当前运行速度' },
+    { id: 'passengerCount', name: '乘客计数', identifier: 'passengerCount', type: 'int', unit: '人', desc: '当日乘客数' },
+    { id: 'alarm', name: '故障码', identifier: 'alarm', type: 'string', unit: '', desc: '当前故障码' },
+    { id: 'status', name: '设备状态', identifier: 'status', type: 'enum', unit: '', desc: '正常/告警/故障' },
+  ],
+  fire: [
+    { id: 'smokeValue', name: '烟雾浓度', identifier: 'smokeValue', type: 'float', unit: '%obs/m', desc: '烟雾浓度值' },
+    { id: 'batteryLevel', name: '电池电量', identifier: 'batteryLevel', type: 'int', unit: '%', desc: '电池剩余电量' },
+    { id: 'alarm', name: '告警状态', identifier: 'alarm', type: 'enum', unit: '', desc: '正常/预警/火警' },
+    { id: 'status', name: '设备状态', identifier: 'status', type: 'enum', unit: '', desc: '在线/离线/故障' },
+  ],
+  power: [
+    { id: 'voltage', name: '电压', identifier: 'voltage', type: 'float', unit: 'V', desc: '当前电压值' },
+    { id: 'current', name: '电流', identifier: 'current', type: 'float', unit: 'A', desc: '当前电流值' },
+    { id: 'power', name: '功率', identifier: 'power', type: 'float', unit: 'kW', desc: '当前功率' },
+    { id: 'energy', name: '电能', identifier: 'energy', type: 'float', unit: 'kWh', desc: '累计用电量' },
+    { id: 'status', name: '设备状态', identifier: 'status', type: 'enum', unit: '', desc: '正常/告警/故障' },
+  ],
+};
+
+let currentView = 'card';
+let filteredProducts = [...PRODUCTS];
+let selectedProduct = null;
+let deleteTargetId = null;
+
+// Initialize
+function init() {
+  populateCategoryFilter();
+  applyFilters();
+}
+
+function populateCategoryFilter() {
+  const select = document.getElementById('categoryFilter');
+  Object.entries(PRODUCT_CATEGORIES).forEach(([key, val]) => {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = `${val.icon} ${val.name}`;
+    select.appendChild(opt);
+  });
+}
+
+function applyFilters() {
+  const category = document.getElementById('categoryFilter').value;
+  const status = document.getElementById('statusFilter').value;
+  const search = document.getElementById('searchInput').value.toLowerCase().trim();
+
+  filteredProducts = PRODUCTS.filter(p => {
+    if (category && p.category !== category) return false;
+    if (status && p.status !== status) return false;
+    if (search && !p.name.toLowerCase().includes(search) && !p.id.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  updateStats();
+  renderListView();
+  renderCardView();
+  toggleEmptyState();
+}
+
+function updateStats() {
+  const total = filteredProducts.length;
+  const published = filteredProducts.filter(p => p.status === 'published').length;
+  const draft = filteredProducts.filter(p => p.status === 'draft').length;
+  const devices = filteredProducts.reduce((sum, p) => sum + p.deviceCount, 0);
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statPublished').textContent = published;
+  document.getElementById('statDraft').textContent = draft;
+  document.getElementById('statDevices').textContent = devices;
+}
+
+function getCategoryInfo(category) {
+  return PRODUCT_CATEGORIES[category] || { name: '未知', icon: '❓' };
+}
+
+function getStatusLabel(status) {
+  return status === 'published' ? '已发布' : '开发中';
+}
+
+function renderListView() {
+  const tbody = document.getElementById('tableBody');
+  if (filteredProducts.length === 0) {
+    tbody.innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = filteredProducts.map(p => {
+    const cat = getCategoryInfo(p.category);
+    return `
+      <tr onclick="location.href='product-detail.html?id=${p.id}'">
+        <td>
+          <div class="product-cell">
+            <div class="product-icon">${cat.icon}</div>
+            <div>
+              <div class="product-name">${p.name}</div>
+              <div class="product-id">${p.id}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="category-tag">${cat.icon} ${cat.name}</span></td>
+        <td>${p.model}</td>
+        <td>${p.manufacturer}</td>
+        <td><span class="protocol-tag">${p.protocol}</span></td>
+        <td>${p.transport}</td>
+        <td><span class="status-badge ${p.status}"><span class="status-dot ${p.status}"></span>${getStatusLabel(p.status)}</span></td>
+        <td>${p.deviceCount}</td>
+        <td>${p.updatedAt}</td>
+        <td>
+          <div class="action-btns" onclick="event.stopPropagation()">
+            <button class="btn-text" onclick="location.href='product-detail.html?id=${p.id}'">详情</button>
+            <button class="btn-text" onclick="editProduct('${p.id}')">编辑</button>
+            <button class="btn-text" style="color:var(--danger)" onclick="deleteProduct('${p.id}')">删除</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderCardView() {
+  const container = document.getElementById('cardView');
+  if (filteredProducts.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = filteredProducts.map(p => {
+    const cat = getCategoryInfo(p.category);
+    return `
+      <div class="product-card" onclick="location.href='product-detail.html?id=${p.id}'">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon">${cat.icon}</div>
+            <div>
+              <div class="card-title">${p.name}</div>
+              <div class="card-id">${p.id}</div>
+            </div>
+          </div>
+          <span class="status-badge ${p.status}"><span class="status-dot ${p.status}"></span>${getStatusLabel(p.status)}</span>
+        </div>
+        <div class="card-body">
+          <div class="card-desc">${p.description}</div>
+          <div class="card-meta">
+            <div class="card-meta-item">
+              <span class="card-meta-label">型号</span>
+              <span class="card-meta-value">${p.model}</span>
+            </div>
+            <div class="card-meta-item">
+              <span class="card-meta-label">厂商</span>
+              <span class="card-meta-value">${p.manufacturer}</span>
+            </div>
+            <div class="card-meta-item">
+              <span class="card-meta-label">协议</span>
+              <span class="card-meta-value">${p.protocol}</span>
+            </div>
+            <div class="card-meta-item">
+              <span class="card-meta-label">传输</span>
+              <span class="card-meta-value">${p.transport}</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-tags">
+            <span class="category-tag">${cat.icon} ${cat.name}</span>
+          </div>
+          <div class="card-device-count">🔗 ${p.deviceCount} 台设备</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleEmptyState() {
+  const empty = document.getElementById('emptyState');
+  const listView = document.getElementById('listView');
+  const cardView = document.getElementById('cardView');
+
+  if (filteredProducts.length === 0) {
+    empty.style.display = 'block';
+    listView.style.display = 'none';
+    cardView.style.display = 'none';
+  } else {
+    empty.style.display = 'none';
+    if (currentView === 'list') {
+      listView.style.display = 'block';
+      cardView.style.display = 'none';
+    } else {
+      listView.style.display = 'none';
+      cardView.style.display = 'grid';
+    }
+  }
+}
+
+function switchView(view) {
+  currentView = view;
+  document.getElementById('viewToggleBtn').textContent = view === 'card' ? '🔲' : '📋';
+  document.getElementById('viewToggleBtn').title = view === 'card' ? '切换为列表视图' : '切换为卡片视图';
+  toggleEmptyState();
+}
+
+function toggleView() {
+  switchView(currentView === 'card' ? 'list' : 'card');
+}
+
+// ===== 产品详情数据（模拟） =====
+const PRODUCT_DETAIL = {
+  things: {
+    hvac: [
+      { name: '温度', identifier: 'temperature', dataType: 'float', rw: '只读', unit: '°C', desc: '环境温度' },
+      { name: '湿度', identifier: 'humidity', dataType: 'float', rw: '只读', unit: '%', desc: '环境湿度' },
+      { name: 'CO2浓度', identifier: 'co2', dataType: 'int', rw: '只读', unit: 'ppm', desc: '二氧化碳浓度' },
+      { name: '运行状态', identifier: 'run_status', dataType: 'enum', rw: '只读', unit: '-', desc: '设备运行状态' },
+      { name: '设定温度', identifier: 'set_temp', dataType: 'float', rw: '读写', unit: '°C', desc: '目标设定温度' }
+    ],
+    fan: [
+      { name: '转速', identifier: 'speed', dataType: 'int', rw: '只读', unit: 'rpm', desc: '风机当前转速' },
+      { name: '运行时间', identifier: 'run_time', dataType: 'int', rw: '只读', unit: 'h', desc: '累计运行小时数' },
+      { name: '功率', identifier: 'power', dataType: 'float', rw: '只读', unit: 'kW', desc: '当前运行功率' },
+      { name: '控制模式', identifier: 'control_mode', dataType: 'enum', rw: '读写', unit: '-', desc: '手动/自动/节能模式' }
+    ],
+    pump: [
+      { name: '液位', identifier: 'liquid_level', dataType: 'float', rw: '只读', unit: '%', desc: '集水井液位百分比' },
+      { name: '水泵1状态', identifier: 'pump1_status', dataType: 'enum', rw: '只读', unit: '-', desc: '1号水泵运行状态' },
+      { name: '水泵2状态', identifier: 'pump2_status', dataType: 'enum', rw: '只读', unit: '-', desc: '2号水泵运行状态' },
+      { name: '控制指令', identifier: 'control_cmd', dataType: 'enum', rw: '读写', unit: '-', desc: '启动/停止/自动' }
+    ],
+    door: [
+      { name: '门数量', identifier: 'door_count', dataType: 'int', rw: '只读', unit: '扇', desc: '控制的门数量' },
+      { name: '门状态', identifier: 'door_status', dataType: 'string', rw: '只读', unit: '-', desc: '各门当前状态' },
+      { name: '控制指令', identifier: 'control_cmd', dataType: 'enum', rw: '读写', unit: '-', desc: '开门/关门/锁定' },
+      { name: '上次维护', identifier: 'last_maint', dataType: 'string', rw: '只读', unit: '-', desc: '最近维护时间' }
+    ],
+    escalator: [
+      { name: '速度', identifier: 'speed', dataType: 'float', rw: '只读', unit: 'm/s', desc: '当前运行速度' },
+      { name: '方向', identifier: 'direction', dataType: 'enum', rw: '只读', unit: '-', desc: '上行/下行/停止' },
+      { name: '累计运行', identifier: 'total_runtime', dataType: 'int', rw: '只读', unit: 'h', desc: '累计运行小时数' },
+      { name: '急停状态', identifier: 'estop_status', dataType: 'boolean', rw: '只读', unit: '-', desc: '急停按钮是否触发' }
+    ],
+    fire: [
+      { name: '灵敏度', identifier: 'sensitivity', dataType: 'enum', rw: '只读', unit: '-', desc: '探测器灵敏度等级' },
+      { name: '烟雾浓度', identifier: 'smoke_density', dataType: 'float', rw: '只读', unit: '%', desc: '当前烟雾浓度百分比' },
+      { name: '电池电量', identifier: 'battery', dataType: 'int', rw: '只读', unit: '%', desc: '设备电池剩余电量' },
+      { name: '报警状态', identifier: 'alarm_status', dataType: 'boolean', rw: '只读', unit: '-', desc: '是否处于报警状态' }
+    ],
+    power: [
+      { name: '电压', identifier: 'voltage', dataType: 'float', rw: '只读', unit: 'V', desc: '三相电压' },
+      { name: '电流', identifier: 'current', dataType: 'float', rw: '只读', unit: 'A', desc: '三相电流' },
+      { name: '功率', identifier: 'active_power', dataType: 'float', rw: '只读', unit: 'kW', desc: '有功功率' },
+      { name: '负载率', identifier: 'load_rate', dataType: 'float', rw: '只读', unit: '%', desc: '当前负载百分比' }
+    ]
+  },
+  commands: {
+    hvac: [
+      { name: '查询设备状态', identifier: 'query_status', input: '无', output: 'status, battery, signal', desc: '查询传感器当前运行状态' },
+      { name: '设置上报周期', identifier: 'set_interval', input: 'interval(int)', output: 'result(bool)', desc: '设置数据上报间隔时间' },
+      { name: '重启设备', identifier: 'reboot', input: '无', output: 'result(bool)', desc: '远程重启传感器设备' }
+    ],
+    fan: [
+      { name: '设置控制模式', identifier: 'set_mode', input: 'mode(enum)', output: 'result(bool)', desc: '切换风机控制模式' },
+      { name: '查询运行参数', identifier: 'query_params', input: '无', output: 'speed, power, mode, run_time', desc: '获取风机运行参数' },
+      { name: '紧急停机', identifier: 'emergency_stop', input: '无', output: 'result(bool)', desc: '紧急停止风机运行' }
+    ],
+    pump: [
+      { name: '控制水泵', identifier: 'control_pump', input: 'pump_id(int), cmd(enum)', output: 'result(bool)', desc: '远程控制指定水泵启停' },
+      { name: '查询液位', identifier: 'query_level', input: '无', output: 'level(float)', desc: '获取当前液位数据' }
+    ],
+    door: [
+      { name: '远程开门', identifier: 'open_door', input: 'door_id(int)', output: 'result(bool)', desc: '远程控制指定门开启' },
+      { name: '查询通行记录', identifier: 'query_log', input: 'start_time, end_time', output: 'records(array)', desc: '查询指定时间段通行记录' }
+    ],
+    escalator: [
+      { name: '查询运行状态', identifier: 'query_status', input: '无', output: 'speed, direction, runtime, estop', desc: '获取扶梯运行状态' },
+      { name: '远程停机', identifier: 'remote_stop', input: 'reason(string)', output: 'result(bool)', desc: '远程控制扶梯停止运行' }
+    ],
+    fire: [
+      { name: '查询设备状态', identifier: 'query_status', input: '无', output: 'status, battery, sensitivity', desc: '获取探测器当前状态' },
+      { name: '自检测试', identifier: 'self_test', input: '无', output: 'result(bool)', desc: '触发设备自检程序' }
+    ],
+    power: [
+      { name: '查询电力参数', identifier: 'query_power', input: '无', output: 'voltage, current, power, load_rate', desc: '获取实时电力参数' },
+      { name: '设置阈值', identifier: 'set_threshold', input: 'param(string), value(float)', output: 'result(bool)', desc: '设置告警阈值参数' }
+    ]
+  },
+  alarms: {
+    hvac: [
+      { name: '温度超限告警', level: 'critical', condition: '温度 > 40°C', desc: '环境温度超过安全阈值' },
+      { name: '设备离线告警', level: 'major', condition: '离线超过5分钟', desc: '设备通信中断' },
+      { name: '电池低电量告警', level: 'minor', condition: '电池电量 < 20%', desc: '设备电池电量不足' }
+    ],
+    fan: [
+      { name: '风机故障告警', level: 'critical', condition: '转速异常或停转', desc: '风机运行出现故障' },
+      { name: '功率异常告警', level: 'major', condition: '功率偏差 > 30%', desc: '运行功率超出正常范围' },
+      { name: '维护提醒', level: 'minor', condition: '运行时间 > 8000h', desc: '设备需要定期维护' }
+    ],
+    pump: [
+      { name: '液位超高告警', level: 'critical', condition: '液位 > 85%', desc: '集水井液位超过警戒线' },
+      { name: '水泵故障告警', level: 'major', condition: '水泵启动失败', desc: '水泵无法正常启动' }
+    ],
+    door: [
+      { name: '非法闯入告警', level: 'critical', condition: '检测到非法开门', desc: '未经授权的门禁开启' },
+      { name: '门禁故障告警', level: 'major', condition: '设备响应超时', desc: '门禁控制器通信异常' }
+    ],
+    escalator: [
+      { name: '急停触发告警', level: 'critical', condition: '急停按钮触发', desc: '扶梯紧急停止' },
+      { name: '速度异常告警', level: 'major', condition: '速度偏差 > 10%', desc: '运行速度超出正常范围' }
+    ],
+    fire: [
+      { name: '火警告警', level: 'critical', condition: '烟雾浓度 > 15%', desc: '检测到火灾烟雾' },
+      { name: '设备故障告警', level: 'major', condition: '设备自检失败', desc: '探测器硬件故障' }
+    ],
+    power: [
+      { name: '电压异常告警', level: 'critical', condition: '电压偏差 > 15%', desc: '供电电压超出安全范围' },
+      { name: '过载告警', level: 'major', condition: '负载率 > 90%', desc: '电力负载过高' }
+    ]
+  }
+};
+
+function generateProductDevices(product) {
+  const count = product.deviceCount || 1;
+  const devices = [];
+  const dates = ['2026-05-01','2026-05-10','2026-05-15','2026-05-20','2026-06-01','2026-06-10'];
+  for (let i = 0; i < count; i++) {
+    devices.push({
+      name: product.name + '-' + String(i+1).padStart(3,'0'),
+      sn: product.id.replace('PRD','DEV') + '-' + String(i+1).padStart(4,'0'),
+      status: i < Math.ceil(count*0.7) ? '在线' : '离线',
+      accessTime: dates[i % dates.length] + ' ' + String(8+(i%12)).padStart(2,'0') + ':' + String(i*7%60).padStart(2,'0') + ':00'
+    });
+  }
+  return devices;
+}
+
+let currentPdTab = 'overview';
+let pdThingsData = [];
+let pdCommandsData = [];
+let pdAlarmsData = [];
+
+function openDrawer(productId) {
+  selectedProduct = PRODUCTS.find(p => p.id === productId);
+  if (!selectedProduct) return;
+
+  const cat = getCategoryInfo(selectedProduct.category);
+  document.getElementById('drawerTitle').innerHTML = `${cat.icon} ${selectedProduct.name} <span class="status-badge ${selectedProduct.status}"><span class="status-dot ${selectedProduct.status}"></span>${getStatusLabel(selectedProduct.status)}</span>`;
+
+  // Reset tabs
+  currentPdTab = 'overview';
+  document.querySelectorAll('.drawer-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.drawer-tab[data-tab="overview"]').classList.add('active');
+
+  renderPdContent('overview');
+
+  const statusBtn = selectedProduct.status === 'published'
+    ? `<button class="btn btn-warning" onclick="togglePublish('${selectedProduct.id}')">⬇️ 下架</button>`
+    : `<button class="btn btn-success" onclick="togglePublish('${selectedProduct.id}')">🚀 发布</button>`;
+
+  document.getElementById('drawerFooter').innerHTML = `
+    <button class="btn btn-default" onclick="editProduct('${selectedProduct.id}')">✏️ 编辑</button>
+    ${statusBtn}
+    <div style="flex:1;"></div>
+    <button class="btn btn-danger" onclick="deleteProduct('${selectedProduct.id}')">🗑️ 删除</button>
+  `;
+
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+
+function switchPdTab(tab) {
+  currentPdTab = tab;
+  document.querySelectorAll('.drawer-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.drawer-tab[data-tab="${tab}"]`).classList.add('active');
+  renderPdContent(tab);
+}
+
+function renderPdContent(tab) {
+  const p = selectedProduct;
+  if (!p) return;
+  const cat = getCategoryInfo(p.category);
+  const devices = generateProductDevices(p);
+  const things = PRODUCT_DETAIL.things[p.category] || [];
+  const commands = PRODUCT_DETAIL.commands[p.category] || [];
+  const alarms = PRODUCT_DETAIL.alarms[p.category] || [];
+  const statusBadge = p.status === 'published'
+    ? '<span class="status-badge published"><span class="status-dot published"></span>已发布</span>'
+    : '<span class="status-badge draft"><span class="status-dot draft"></span>开发中</span>';
+  const onlineCount = devices.filter(d => d.status === '在线').length;
+
+  let content = '';
+
+  if (tab === 'overview') {
+    content = `
+      <div class="drawer-tab-panel active">
+        <div class="pd-info-card">
+          <div class="pd-info-header">
+            <div class="pd-info-icon" style="background:var(--primary-lighter);color:var(--primary)">${cat.icon}</div>
+            <div>
+              <div class="pd-info-name">${p.name}</div>
+              <div class="pd-info-meta">
+                <span class="pd-info-tag">${p.model}</span>
+                <span class="pd-info-id">${p.id}</span>
+                ${statusBadge}
+              </div>
+            </div>
+          </div>
+          <div class="pd-info-grid">
+            <div class="pd-stat-card"><div class="pd-stat-value">${p.deviceCount}</div><div class="pd-stat-label">设备总数</div></div>
+            <div class="pd-stat-card"><div class="pd-stat-value" style="color:var(--success)">${onlineCount}</div><div class="pd-stat-label">在线设备</div></div>
+            <div class="pd-stat-card"><div class="pd-stat-value" style="color:var(--warning)">${p.deviceCount - onlineCount}</div><div class="pd-stat-label">离线设备</div></div>
+            <div class="pd-stat-card"><div class="pd-stat-value" style="color:var(--info)">${things.length}</div><div class="pd-stat-label">物模型属性</div></div>
+          </div>
+        </div>
+        <div class="pd-card">
+          <div class="pd-card-header">
+            <span class="pd-card-title">📋 设备列表</span>
+            <button class="pd-btn pd-btn-primary" onclick="showToast('添加设备功能开发中','info')">+ 添加设备</button>
+          </div>
+          <table class="pd-table">
+            <thead><tr><th>设备名称</th><th>设备SN</th><th>状态</th><th>接入时间</th><th>操作</th></tr></thead>
+            <tbody>
+              ${devices.map(d => `<tr>
+                <td style="font-weight:500">${d.name}</td>
+                <td style="font-family:monospace;font-size:12px;color:var(--text-secondary)">${d.sn}</td>
+                <td><span class="${d.status==='在线'?'pd-badge-online':'pd-badge-offline'}">${d.status}</span></td>
+                <td style="font-size:12px;color:var(--text-secondary)">${d.accessTime}</td>
+                <td><div style="display:flex;gap:4px">
+                  <button class="pd-btn" onclick="showToast('查看设备详情: ${d.name}','info')">详情</button>
+                  <button class="pd-btn pd-btn-danger" onclick="showToast('删除设备: ${d.name}','info')">删除</button>
+                </div></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  } else if (tab === 'things') {
+    pdThingsData = JSON.parse(JSON.stringify(things));
+    content = `
+      <div class="drawer-tab-panel active">
+        <div class="pd-card">
+          <div class="pd-card-header">
+            <span class="pd-card-title">🔧 物模型管理</span>
+            <div class="pd-card-actions">
+              <button class="pd-btn pd-btn-primary" onclick="pdAddThingRow()">+ 添加属性</button>
+              <button class="pd-btn pd-btn-primary" onclick="showToast('已保存','success')">全部保存</button>
+              <button class="pd-btn pd-btn-success" onclick="showToast('已同步到设备','success')">同步到设备</button>
+            </div>
+          </div>
+          <table class="pd-table">
+            <thead><tr><th>属性名称</th><th>标识符</th><th>数据类型</th><th>读写</th><th>单位</th><th>描述</th><th>操作</th></tr></thead>
+            <tbody id="pdThingsBody">
+              ${pdThingsData.map((t,i) => `<tr>
+                <td><input class="pd-config-input" style="width:100%" value="${t.name}" onchange="pdThingsData[${i}].name=this.value"></td>
+                <td><input class="pd-config-input" style="width:100%;font-family:monospace" value="${t.identifier}" onchange="pdThingsData[${i}].identifier=this.value"></td>
+                <td><select class="pd-config-select" style="width:80px" onchange="pdThingsData[${i}].dataType=this.value">
+                  ${['float','int','string','boolean','enum','date'].map(v=>`<option value="${v}"${t.dataType===v?' selected':''}>${v}</option>`).join('')}
+                </select></td>
+                <td>${t.rw||'只读'}</td>
+                <td>${t.unit||'-'}</td>
+                <td style="color:var(--text-secondary);font-size:12px">${t.desc||''}</td>
+                <td><button class="pd-btn pd-btn-danger" onclick="pdDeleteThingRow(${i})">删除</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  } else if (tab === 'commands') {
+    pdCommandsData = JSON.parse(JSON.stringify(commands));
+    content = `
+      <div class="drawer-tab-panel active">
+        <div class="pd-card">
+          <div class="pd-card-header">
+            <span class="pd-card-title">📡 指令下发配置</span>
+            <div class="pd-card-actions">
+              <button class="pd-btn pd-btn-primary" onclick="pdAddCommandRow()">+ 添加指令</button>
+              <button class="pd-btn" style="color:var(--info);border-color:var(--info)" onclick="showToast('已同步到所有设备','success')">同步到所有设备</button>
+            </div>
+          </div>
+          <table class="pd-table">
+            <thead><tr><th>指令名称</th><th>指令编码</th><th>输入参数</th><th>输出参数</th><th>说明</th><th>操作</th></tr></thead>
+            <tbody>
+              ${pdCommandsData.map((c,i) => `<tr>
+                <td style="font-weight:500">${c.name}</td>
+                <td style="font-family:monospace;font-size:12px">${c.identifier}</td>
+                <td style="font-size:12px;color:var(--text-secondary)">${c.input||'无'}</td>
+                <td style="font-size:12px;color:var(--text-secondary)">${c.output||'-'}</td>
+                <td style="font-size:12px;color:var(--text-secondary)">${c.desc||''}</td>
+                <td><div style="display:flex;gap:4px">
+                  <button class="pd-btn" onclick="showToast('编辑指令: ${c.name}','info')">编辑</button>
+                  <button class="pd-btn pd-btn-danger" onclick="pdDeleteCommandRow(${i})">删除</button>
+                </div></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  } else if (tab === 'alarms') {
+    pdAlarmsData = JSON.parse(JSON.stringify(alarms));
+    const levelMap = { critical: { label: '紧急', cls: 'pd-level-critical' }, major: { label: '严重', cls: 'pd-level-major' }, minor: { label: '警告', cls: 'pd-level-minor' } };
+    content = `
+      <div class="drawer-tab-panel active">
+        <div class="pd-card">
+          <div class="pd-card-header">
+            <span class="pd-card-title">🚨 告警规则配置</span>
+            <div class="pd-card-actions">
+              <button class="pd-btn pd-btn-primary" onclick="pdAddAlarmRow()">+ 添加告警规则</button>
+              <button class="pd-btn" style="color:var(--info);border-color:var(--info)" onclick="showToast('已同步到所有设备','success')">同步到所有设备</button>
+            </div>
+          </div>
+          <table class="pd-table">
+            <thead><tr><th>规则名称</th><th>触发条件</th><th>告警级别</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody>
+              ${pdAlarmsData.map((a,i) => { const lv = levelMap[a.level] || levelMap.minor; return `<tr>
+                <td style="font-weight:500">${a.name}</td>
+                <td style="color:var(--text-secondary);font-size:12px">${a.condition}</td>
+                <td><span class="${lv.cls}">${lv.label}</span></td>
+                <td><label class="pd-toggle"><input type="checkbox" ${a.enabled!==false?'checked':''} onchange="pdAlarmsData[${i}].enabled=this.checked"><span class="pd-toggle-slider"></span></label></td>
+                <td><div style="display:flex;gap:4px">
+                  <button class="pd-btn" onclick="showToast('编辑告警规则: ${a.name}','info')">编辑</button>
+                  <button class="pd-btn pd-btn-danger" onclick="pdDeleteAlarmRow(${i})">删除</button>
+                </div></td>
+              </tr>`; }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  } else if (tab === 'config') {
+    content = `
+      <div class="drawer-tab-panel active">
+        <div class="pd-card">
+          <div class="pd-card-header"><span class="pd-card-title">⚙️ 其他配置</span></div>
+          <div class="pd-config-list">
+            <div class="pd-config-row">
+              <div style="min-width:160px">
+                <div class="pd-config-title">数据定期删除</div>
+                <div class="pd-config-desc">定期清理过期数据，优化系统性能</div>
+              </div>
+              <div class="pd-config-center">
+                <label class="pd-toggle"><input type="checkbox" onchange="this.nextElementSibling.nextElementSibling.style.display=this.checked?'inline':'none'"><span class="pd-toggle-slider"></span></label>
+                <span style="display:none;font-size:12px;color:var(--text-secondary)">保留 <input class="pd-config-input" style="width:50px" value="3" min="1"> 天</span>
+              </div>
+              <div class="pd-config-right">
+                <button class="pd-btn pd-btn-primary" onclick="showToast('配置已保存','success')">保存</button>
+                <button class="pd-btn pd-btn-success" onclick="showToast('已保存并同步到设备','success')">保存并同步</button>
+              </div>
+            </div>
+            <div class="pd-config-row">
+              <div style="min-width:160px">
+                <div class="pd-config-title">自定义配置</div>
+                <div class="pd-config-desc">自定义配置，作为协议参数传递或解析方法</div>
+              </div>
+              <div class="pd-config-center">
+                <input class="pd-config-input" style="width:260px" placeholder="如IP、端口、设备特殊配置等">
+              </div>
+              <div class="pd-config-right">
+                <button class="pd-btn pd-btn-primary" onclick="showToast('配置已保存','success')">保存</button>
+                <button class="pd-btn pd-btn-success" onclick="showToast('已保存并同步到设备','success')">保存并同步</button>
+              </div>
+            </div>
+            <div class="pd-config-row">
+              <div style="min-width:160px">
+                <div class="pd-config-title">属性修改指令</div>
+                <div class="pd-config-desc">修改属性时默认调用的指令</div>
+              </div>
+              <div class="pd-config-center">
+                <select class="pd-config-select">
+                  <option value="">请选择指令</option>
+                  ${(PRODUCT_DETAIL.commands[p.category]||[]).map(c => `<option value="${c.identifier}">${c.name}</option>`).join('')}
+                </select>
+              </div>
+              <div class="pd-config-right">
+                <button class="pd-btn pd-btn-primary" onclick="showToast('配置已保存','success')">保存</button>
+                <button class="pd-btn pd-btn-success" onclick="showToast('已保存并同步到设备','success')">保存并同步</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById('drawerBody').innerHTML = content;
+}
+
+// ===== 物模型操作 =====
+function pdAddThingRow() {
+  pdThingsData.push({ identifier: '', name: '', dataType: 'float', rw: '只读', unit: '', desc: '' });
+  renderPdContent('things');
+  showToast('已添加新属性行', 'info');
+}
+function pdDeleteThingRow(idx) {
+  pdThingsData.splice(idx, 1);
+  renderPdContent('things');
+  showToast('属性已删除', 'success');
+}
+
+// ===== 指令操作 =====
+function pdAddCommandRow() {
+  pdCommandsData.push({ name: '', identifier: '', input: '', output: '', desc: '' });
+  renderPdContent('commands');
+  showToast('已添加新指令', 'info');
+}
+function pdDeleteCommandRow(idx) {
+  pdCommandsData.splice(idx, 1);
+  renderPdContent('commands');
+  showToast('指令已删除', 'success');
+}
+
+// ===== 告警操作 =====
+function pdAddAlarmRow() {
+  pdAlarmsData.push({ name: '', level: 'critical', condition: '', desc: '', enabled: true });
+  renderPdContent('alarms');
+  showToast('已添加新告警规则', 'info');
+}
+function pdDeleteAlarmRow(idx) {
+  pdAlarmsData.splice(idx, 1);
+  renderPdContent('alarms');
+  showToast('告警规则已删除', 'success');
+}
+
+function closeDrawer() {
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+  selectedProduct = null;
+}
+
+function editProduct(id) {
+  showToast('编辑产品功能开发中', 'info');
+}
+
+function deleteProduct(id) {
+  const product = PRODUCTS.find(p => p.id === id);
+  if (!product) return;
+  deleteTargetId = id;
+  document.getElementById('deleteProductName').textContent = product.name;
+  document.getElementById('deleteModal').classList.add('open');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+  deleteTargetId = null;
+}
+
+function confirmDelete() {
+  if (!deleteTargetId) return;
+  const idx = PRODUCTS.findIndex(p => p.id === deleteTargetId);
+  if (idx !== -1) {
+    PRODUCTS.splice(idx, 1);
+    showToast('产品已删除', 'success');
+    closeDeleteModal();
+    closeDrawer();
+    applyFilters();
+  }
+}
+
+function togglePublish(id) {
+  const product = PRODUCTS.find(p => p.id === id);
+  if (!product) return;
+  product.status = product.status === 'published' ? 'draft' : 'published';
+  const label = product.status === 'published' ? '已发布' : '已下架';
+  showToast(`产品${label}`, 'success');
+  closeDrawer();
+  applyFilters();
+}
+
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+  toast.innerHTML = `<span>${icons[type] || ''}</span><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    if (toast.parentNode) toast.parentNode.removeChild(toast);
+  }, 3000);
+}
+
+// Keyboard shortcut: ESC to close drawer/modal
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeDrawer();
+    closeDeleteModal();
+  }
+});
+
+// Init
+init();
+</script>
+</body>
+</html>
