@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>设备详情 - IoT</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #f0f2f5; color: #333; font-size: 14px; margin: 0; }
+
+/* Sidebar */
+.sidebar {
+  width: 200px;
+  height: 100vh;
+  background: #001529;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.sidebar-logo {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+.sidebar-menu {
+  flex: 1;
+  padding: 8px 0;
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  height: 44px;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.menu-item:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+}
+.menu-item.active {
+  color: #fff;
+  background: #1890ff;
+}
+.menu-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #fff;
+}
+.menu-icon {
+  margin-right: 10px;
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+.menu-text {
+  flex: 1;
+}
+.menu-arrow {
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+.menu-arrow.open {
+  transform: rotate(90deg);
+}
+.menu-group .menu-item.has-submenu {
+  color: rgba(255,255,255,0.65);
+}
+.menu-group .menu-item.has-submenu.expanded {
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+}
+.submenu {
+  display: none;
+  background: rgba(0,0,0,0.15);
+}
+.submenu.open {
+  display: block;
+}
+.submenu-item {
+  display: block;
+  padding: 0 20px 0 50px;
+  height: 40px;
+  line-height: 40px;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.submenu-item:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+}
+.submenu-item.active {
+  color: #1890ff;
+  background: rgba(24,144,255,0.08);
+}
+
+/* Main Container */
+.main-container { padding: 20px 24px 40px; margin-left: 200px; flex: 1; min-height: 100vh; }
+
+/* Breadcrumb */
+.breadcrumb { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 13px; color: #999; }
+.breadcrumb a { color: #008B8B; text-decoration: none; }
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb .separator { color: #ccc; }
+.breadcrumb .current { color: #333; font-weight: 500; }
+
+/* Card */
+.card { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 20px 24px; margin-bottom: 20px; }
+.card-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0; }
+
+/* Product Info Card (reused for device) */
+.product-info-card { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+.product-info-left { display: flex; align-items: center; gap: 16px; }
+.product-icon { width: 56px; height: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #fff; flex-shrink: 0; }
+.product-name { font-size: 20px; font-weight: 600; color: #333; margin-bottom: 6px; }
+.product-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.product-type-tag { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 12px; background: #e6f7f7; color: #008B8B; border: 1px solid #b2e0e0; }
+.product-id { font-size: 12px; color: #999; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+.product-info-right { display: flex; gap: 16px; }
+.stat-card { background: #f8fffe; border: 1px solid #e0f0ef; border-radius: 8px; padding: 16px 28px; text-align: center; min-width: 120px; }
+.stat-card .stat-value { font-size: 28px; font-weight: 700; color: #008B8B; line-height: 1.2; }
+.stat-card .stat-label { font-size: 12px; color: #999; margin-top: 4px; }
+
+/* Description List Grid */
+.desc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+.desc-item { padding: 14px 16px; border-bottom: 1px solid #f5f5f5; display: flex; flex-direction: column; gap: 4px; }
+.desc-item:nth-child(4n+1) { border-left: 1px solid #f5f5f5; }
+.desc-item:nth-child(4n) { border-right: 1px solid #f5f5f5; }
+.desc-item:nth-child(-n+4) { border-top: 1px solid #f5f5f5; }
+.desc-item:nth-last-child(-n+4) { border-bottom: none; }
+.desc-label { font-size: 12px; color: #999; }
+.desc-value { font-size: 14px; color: #333; word-break: break-all; }
+
+/* Tab Navigation */
+.tab-nav { display: flex; border-bottom: 2px solid #f0f0f0; margin-bottom: 0; background: #fff; border-radius: 8px 8px 0 0; padding: 0 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.tab-btn { padding: 14px 20px; font-size: 14px; color: #666; cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.tab-btn:hover { color: #008B8B; }
+.tab-btn.active { color: #008B8B; border-bottom-color: #008B8B; font-weight: 500; }
+
+/* Tab Content */
+.tab-content { background: #fff; border-radius: 0 0 8px 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 20px 24px; margin-bottom: 20px; display: none; }
+.tab-content.active { display: block; }
+
+/* Section Header */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.section-title { font-size: 15px; font-weight: 600; color: #333; padding-left: 10px; border-left: 3px solid #1890ff; line-height: 1; }
+.section-search { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.search-field { display: flex; align-items: center; gap: 6px; }
+.search-label { font-size: 13px; color: #666; white-space: nowrap; }
+
+/* Data Table */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table thead th { background: #fafafa; padding: 10px 12px; text-align: left; font-weight: 600; color: #333; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+.data-table tbody td { padding: 10px 12px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+.data-table tbody tr:hover { background: #fafafa; }
+
+/* Status Badge */
+.badge-online { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+.badge-offline { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #fffbe6; color: #faad14; border: 1px solid #ffe58f; }
+.badge-alarm { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #fff2f0; color: #ff4d4f; border: 1px solid #ffccc7; }
+.badge-warning { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+
+/* Action Buttons */
+.action-btn { padding: 2px 8px; border-radius: 3px; border: 1px solid #d9d9d9; background: #fff; font-size: 12px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 3px; font-weight: 500; white-space: nowrap; }
+.action-btn:hover { border-color: #1890ff; color: #1890ff; }
+.action-btn.primary { color: #1890ff; border-color: #1890ff; }
+.action-btn.primary:hover { background: #1890ff; color: #fff; }
+.action-btn.danger { color: #ff4d4f; border-color: #ff4d4f; }
+.action-btn.danger:hover { background: #ff4d4f; color: #fff; }
+.action-group { display: flex; gap: 4px; align-items: center; }
+
+/* Toggle Switch */
+.toggle-switch { position: relative; width: 36px; height: 20px; cursor: pointer; display: inline-block; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: #ccc; border-radius: 20px; transition: 0.3s; }
+.toggle-slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 2px; bottom: 2px; background: #fff; border-radius: 50%; transition: 0.3s; }
+.toggle-switch input:checked + .toggle-slider { background: #ff4d4f; }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+/* Alarm Level Badges */
+.level-critical { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #fff1f0; color: #ff4d4f; border: 1px solid #ffa39e; }
+.level-major { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #fffbe6; color: #faad14; border: 1px solid #ffe58f; }
+.level-minor { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+.level-normal { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+
+/* Alarm Rule Modal */
+.alarm-modal-overlay {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45); z-index: 1000; align-items: center; justify-content: center;
+}
+.alarm-modal-overlay.open { display: flex; }
+.alarm-modal {
+  background: #fff; border-radius: 12px; width: 580px; max-height: 85vh; overflow-y: auto;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15); animation: modalIn 0.2s ease;
+}
+@keyframes modalIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+.alarm-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px; border-bottom: 1px solid #f0f0f0;
+}
+.alarm-modal-header h3 { font-size: 16px; font-weight: 600; color: #1F2937; margin: 0; }
+.alarm-modal-close {
+  width: 28px; height: 28px; border: none; background: #f5f5f5; border-radius: 6px;
+  cursor: pointer; font-size: 16px; color: #999; display: flex; align-items: center; justify-content: center;
+}
+.alarm-modal-close:hover { background: #e8e8e8; color: #333; }
+.alarm-modal-body { padding: 20px 24px; }
+.alarm-form-group { margin-bottom: 18px; }
+.alarm-form-label {
+  display: block; font-size: 13px; font-weight: 500; color: #374151;
+  margin-bottom: 6px;
+}
+.alarm-form-label .required { color: #EF4444; margin-left: 2px; }
+.alarm-form-input, .alarm-form-select, .alarm-form-textarea {
+  width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 8px;
+  font-size: 13px; color: #1F2937; outline: none; transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+.alarm-form-input:focus, .alarm-form-select:focus, .alarm-form-textarea:focus {
+  border-color: #008B8B; box-shadow: 0 0 0 2px rgba(0,139,139,0.1);
+}
+.alarm-form-textarea { resize: vertical; min-height: 60px; }
+.alarm-form-row { display: flex; gap: 12px; }
+.alarm-form-row .alarm-form-group { flex: 1; }
+.alarm-form-hint { font-size: 11px; color: #9CA3AF; margin-top: 4px; }
+.alarm-condition-block {
+  background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px;
+  margin-bottom: 12px;
+}
+.alarm-condition-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px; font-size: 13px; font-weight: 500; color: #374151;
+}
+.alarm-condition-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.alarm-condition-row select, .alarm-condition-row input {
+  padding: 6px 10px; border: 1px solid #E5E7EB; border-radius: 6px;
+  font-size: 12px; color: #1F2937; outline: none;
+}
+.alarm-condition-row select:focus, .alarm-condition-row input:focus {
+  border-color: #008B8B;
+}
+.alarm-condition-row .arg-select { width: 120px; }
+.alarm-condition-row .op-select { width: 100px; }
+.alarm-condition-row .val-input { flex: 1; }
+.alarm-modal-footer {
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+  padding: 14px 24px; border-top: 1px solid #f0f0f0;
+}
+.alarm-btn {
+  padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 500;
+  cursor: pointer; border: 1px solid #E5E7EB; background: #fff; color: #6B7280;
+  transition: all 0.15s;
+}
+.alarm-btn:hover { border-color: #008B8B; color: #008B8B; }
+.alarm-btn-primary {
+  background: linear-gradient(135deg, #00A0A0 0%, #00B8B8 100%);
+  color: #fff; border-color: #00A0A0; box-shadow: 0 2px 6px rgba(0,160,160,0.2);
+}
+.alarm-btn-primary:hover {
+  background: linear-gradient(135deg, #008B8B 0%, #00A0A0 100%);
+  box-shadow: 0 3px 8px rgba(0,160,160,0.3);
+}
+.alarm-btn-danger { background: #fff; color: #EF4444; border-color: #FCA5A5; }
+.alarm-btn-danger:hover { background: #FEF2F2; border-color: #EF4444; }
+.alarm-btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 6px; }
+.alarm-btn-add {
+  display: flex; align-items: center; gap: 4px; padding: 6px 12px;
+  border: 1px dashed #D1D5DB; border-radius: 6px; background: #fff;
+  color: #6B7280; font-size: 12px; cursor: pointer; transition: all 0.15s;
+}
+.alarm-btn-add:hover { border-color: #008B8B; color: #008B8B; background: #E0F7F7; }
+.alarm-severity-select { display: flex; gap: 8px; }
+.alarm-severity-option {
+  flex: 1; padding: 8px; border: 2px solid #E5E7EB; border-radius: 8px;
+  text-align: center; cursor: pointer; font-size: 12px; font-weight: 500;
+  transition: all 0.15s; background: #fff;
+}
+.alarm-severity-option:hover { border-color: #D1D5DB; }
+.alarm-severity-option.selected { border-color: currentColor; }
+.alarm-severity-option.sev-critical { color: #EF4444; }
+.alarm-severity-option.sev-critical.selected { background: #FEF2F2; border-color: #EF4444; }
+.alarm-severity-option.sev-major { color: #F59E0B; }
+.alarm-severity-option.sev-major.selected { background: #FFFBEB; border-color: #F59E0B; }
+.alarm-severity-option.sev-minor { color: #3B82F6; }
+.alarm-severity-option.sev-minor.selected { background: #EFF6FF; border-color: #3B82F6; }
+.alarm-severity-option.sev-warning { color: #8B5CF6; }
+.alarm-severity-option.sev-warning.selected { background: #F5F3FF; border-color: #8B5CF6; }
+.alarm-severity-option .sev-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  margin-right: 4px; vertical-align: middle;
+}
+.alarm-severity-option.sev-critical .sev-dot { background: #EF4444; }
+.alarm-severity-option.sev-major .sev-dot { background: #F59E0B; }
+.alarm-severity-option.sev-minor .sev-dot { background: #3B82F6; }
+.alarm-severity-option.sev-warning .sev-dot { background: #8B5CF6; }
+
+/* Buttons */
+.btn { padding: 7px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: #333; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; }
+.btn:hover { border-color: #008B8B; color: #008B8B; }
+.btn-primary { background: #008B8B; color: #fff; border-color: #008B8B; }
+.btn-primary:hover { background: #007a7a; border-color: #007a7a; color: #fff; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+.btn-link { border: none; background: none; color: #008B8B; padding: 2px 4px; }
+.btn-link:hover { color: #006666; text-decoration: underline; }
+.btn-link.danger { color: #ff4d4f; }
+.btn-link.danger:hover { color: #d9363e; }
+
+/* Badge */
+.badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 500; }
+.badge-success { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+.badge-default { background: #f5f5f5; color: #999; border: 1px solid #d9d9d9; }
+.badge-warning { background: #fffbe6; color: #faad14; border: 1px solid #ffe58f; }
+.badge-danger { background: #fff2f0; color: #ff4d4f; border: 1px solid #ffccc7; }
+.badge-info { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+
+/* Rule Source Tags */
+.rule-source-tag { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.rule-source-product { background: #e6f7ff; color: #0958d9; border: 1px solid #91d5ff; }
+.rule-source-group { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.rule-source-device { background: #fff2f0; color: #cf1322; border: 1px solid #ffccc7; }
+
+/* View Source Rule Link */
+.view-rule-link { display: inline-flex; align-items: center; gap: 4px; color: #008B8B; font-size: 13px; text-decoration: none; padding: 4px 8px; border-radius: 4px; transition: all 0.2s; }
+.view-rule-link:hover { background: #e6fffb; }
+.view-rule-link svg { width: 14px; height: 14px; }
+
+/* Device Info Cell */
+.device-info { display: flex; align-items: center; gap: 10px; }
+.device-icon { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; flex-shrink: 0; }
+
+/* Empty State */
+.empty-state { text-align: center; padding: 60px 20px; color: #999; }
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state .empty-text { font-size: 14px; }
+
+/* Not Found */
+.not-found { text-align: center; padding: 80px 20px; }
+.not-found .not-found-icon { font-size: 64px; margin-bottom: 16px; }
+.not-found h2 { font-size: 20px; color: #333; margin-bottom: 8px; }
+.not-found p { color: #999; margin-bottom: 20px; }
+
+/* Table wrapper */
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th { background: #fafafa; padding: 12px 16px; text-align: left; font-size: 13px; font-weight: 600; color: #666; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+tbody td { padding: 12px 16px; font-size: 13px; color: #333; border-bottom: 1px solid #f5f5f5; }
+tbody tr:nth-child(even) { background: #fafbfc; }
+tbody tr:hover { background: #e6f7f7; }
+tbody tr:last-child td { border-bottom: none; }
+
+/* Device detail specific styles */
+.detail-section { margin-bottom: 24px; }
+.detail-section-title {
+  font-size: 13px; font-weight: 600; color: #333; margin-bottom: 12px;
+  padding-bottom: 8px; border-bottom: 1px solid #f0f0f0;
+  display: flex; align-items: center; gap: 6px;
+}
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.detail-field { }
+.detail-field .label { font-size: 11px; color: #999; margin-bottom: 3px; }
+.detail-field .value { font-size: 13px; color: #333; font-weight: 500; }
+.detail-field .value.mono { font-family: 'Courier New', monospace; }
+
+/* Trigger card */
+.trigger-card {
+  background: #f8f9fa; border: 1px solid #e8e8e8; border-radius: 8px;
+  padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+  transition: all 0.15s; cursor: pointer;
+}
+.trigger-card:hover { border-color: #008B8B; background: #f0fffe; }
+.trigger-card-icon {
+  width: 40px; height: 40px; border-radius: 8px; display: flex;
+  align-items: center; justify-content: center; font-size: 20px;
+  background: linear-gradient(135deg, #42A5F5, #5BA3F5); flex-shrink: 0;
+}
+.trigger-card-info { flex: 1; }
+.trigger-card-info .name { font-size: 13px; font-weight: 500; color: #333; }
+.trigger-card-info .cond { font-size: 11px; color: #888; font-family: 'Courier New', monospace; }
+.trigger-card-actions { display: flex; gap: 4px; }
+
+.add-trigger-btn {
+  width: 100%; padding: 10px; border: 2px dashed #d0d0d0; border-radius: 8px;
+  background: transparent; cursor: pointer; font-size: 13px; color: #999;
+  transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.add-trigger-btn:hover { border-color: #008B8B; color: #008B8B; background: #f0fffe; }
+
+/* Data chart placeholder */
+.chart-container {
+  background: #fff; border-radius: 8px; padding: 20px;
+  margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  height: 280px; display: flex; flex-direction: column;
+}
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.chart-title { font-size: 14px; font-weight: 600; color: #333; }
+.chart-placeholder {
+  flex: 1; background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+  border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  color: #999; font-size: 13px;
+}
+
+/* Command panel */
+.command-panel {
+  background: #fff; border-radius: 8px; padding: 20px;
+  margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.command-list { display: flex; flex-direction: column; gap: 12px; }
+.command-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px; border: 1px solid #e8e8e8; border-radius: 6px;
+  transition: all 0.2s;
+}
+.command-item:hover { border-color: #008B8B; background: #f0fffe; }
+.command-info { flex: 1; }
+.command-name { font-size: 14px; font-weight: 500; color: #333; margin-bottom: 4px; }
+.command-desc { font-size: 12px; color: #999; }
+.command-btn {
+  padding: 6px 16px; border-radius: 4px; border: 1px solid #008B8B;
+  background: #fff; color: #008B8B; font-size: 13px; cursor: pointer;
+  transition: all 0.2s;
+}
+.command-btn:hover { background: #008B8B; color: #fff; }
+.command-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Device status card */
+.device-status-card {
+  background: #fff; border-radius: 8px; padding: 20px 24px;
+  margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.device-status-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+}
+.device-status-title { font-size: 18px; font-weight: 600; color: #333; }
+.device-status-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+}
+.status-item { text-align: center; padding: 12px; background: #f8f9fa; border-radius: 6px; }
+.status-item-value { font-size: 24px; font-weight: 700; color: #008B8B; }
+.status-item-value.success { color: #52c41a; }
+.status-item-value.warning { color: #faad14; }
+.status-item-value.danger { color: #ff4d4f; }
+.status-item-label { font-size: 12px; color: #999; margin-top: 4px; }
+
+/* Event log */
+.event-log {
+  background: #fff; border-radius: 8px; padding: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.event-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid #f0f0f0;
+}
+.event-item:last-child { border-bottom: none; }
+.event-icon {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 14px;
+}
+.event-icon.online { background: #f6ffed; color: #52c41a; }
+.event-icon.offline { background: #fff2f0; color: #ff4d4f; }
+.event-icon.alarm { background: #fff7e6; color: #fa8c16; }
+.event-icon.command { background: #e6f7ff; color: #1890ff; }
+.event-content { flex: 1; }
+.event-title { font-size: 13px; color: #333; margin-bottom: 2px; }
+.event-time { font-size: 12px; color: #999; }
+.event-tag {
+  padding: 2px 8px; border-radius: 4px; font-size: 12px;
+}
+.event-tag.success { background: #f6ffed; color: #52c41a; }
+.event-tag.error { background: #fff2f0; color: #ff4d4f; }
+
+/* Search input */
+.search-input { padding: 7px 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; width: 240px; outline: none; transition: border-color 0.2s; }
+.search-input:focus { border-color: #008B8B; box-shadow: 0 0 0 2px rgba(0,139,139,0.1); }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .desc-grid { grid-template-columns: repeat(2, 1fr); }
+  .desc-item:nth-child(4n+1) { border-left: none; }
+  .desc-item:nth-child(4n) { border-right: none; }
+  .desc-item:nth-child(odd) { border-left: 1px solid #f5f5f5; }
+  .desc-item:nth-child(even) { border-right: 1px solid #f5f5f5; }
+}
+@media (max-width: 768px) {
+  .main-container { padding: 12px; }
+  .desc-grid { grid-template-columns: 1fr; }
+  .desc-item:nth-child(odd) { border-left: none; }
+  .desc-item:nth-child(even) { border-right: none; }
+  .product-info-card { flex-direction: column; align-items: flex-start; }
+  .product-info-right { width: 100%; }
+  .stat-card { flex: 1; }
+  .tab-nav { overflow-x: auto; padding: 0 12px; }
+  .tab-btn { padding: 12px 14px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">CAT</div>
+  <nav class="sidebar-menu">
+    <div class="menu-group">
+      <div class="menu-item has-submenu expanded" onclick="toggleSubmenu(this)">
+        <span class="menu-icon">&#x1F4CA;</span>
+        <span class="menu-text">设备管理</span>
+        <span class="menu-arrow open">&#x25B6;</span>
+      </div>
+      <div class="submenu open" id="submenuDevice">
+        <a href="product-management.html" class="submenu-item">产品</a>
+        <a href="device-management.html" class="submenu-item active">设备</a>
+      </div>
+    </div>
+    <a href="rule-chain-list.html" class="menu-item">
+      <span class="menu-icon">&#x2699;&#xFE0F;</span>
+      <span class="menu-text">规则链</span>
+    </a>
+    <a href="alarm-management.html" class="menu-item">
+      <span class="menu-icon">&#x1F6A8;</span>
+      <span class="menu-text">告警管理</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- Main Container -->
+<div class="main-container">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="#">首页</a>
+    <span class="separator">/</span>
+    <a href="device-management.html">设备</a>
+    <span class="separator">/</span>
+    <span class="current">设备详情</span>
+  </div>
+
+  <!-- Device Detail Content -->
+  <div id="deviceDetail"></div>
+
+</div>
+
+<!-- Alarm Rule Modal -->
+<div class="alarm-modal-overlay" id="alarmModalOverlay" onclick="if(event.target===this)closeAlarmModal()">
+  <div class="alarm-modal">
+    <div class="alarm-modal-header">
+      <h3 id="alarmModalTitle">添加告警规则</h3>
+      <button class="alarm-modal-close" onclick="closeAlarmModal()">&#x2715;</button>
+    </div>
+    <div class="alarm-modal-body">
+      <div class="alarm-form-group">
+        <label class="alarm-form-label">告警类型 <span class="required">*</span></label>
+        <input type="text" class="alarm-form-input" id="devArmName" placeholder="例如：温度超限告警" autocomplete="off">
+        <div class="alarm-form-hint">告警类型的唯一标识，用于区分不同告警</div>
+      </div>
+      <div class="alarm-form-group">
+        <label class="alarm-form-label">告警级别 <span class="required">*</span></label>
+        <div class="alarm-severity-select" id="devArmSeveritySelect">
+          <div class="alarm-severity-option sev-critical" data-level="critical" onclick="devArmSelectSeverity('critical')"><span class="sev-dot"></span><span>紧急</span></div>
+          <div class="alarm-severity-option sev-major" data-level="major" onclick="devArmSelectSeverity('major')"><span class="sev-dot"></span><span>严重</span></div>
+          <div class="alarm-severity-option sev-minor" data-level="minor" onclick="devArmSelectSeverity('minor')"><span class="sev-dot"></span><span>警告</span></div>
+          <div class="alarm-severity-option sev-warning" data-level="warning" onclick="devArmSelectSeverity('warning')"><span class="sev-dot"></span><span>提示</span></div>
+        </div>
+      </div>
+      <div class="alarm-form-group">
+        <label class="alarm-form-label">触发条件</label>
+        <div id="devArmConditions">
+          <div class="alarm-condition-block" data-idx="0">
+            <div class="alarm-condition-header"><span>条件 1</span></div>
+            <div class="alarm-condition-row">
+              <select class="arg-select" id="devArmCondArg0">
+                <option value="temperature">温度</option><option value="humidity">湿度</option><option value="pressure">压力</option><option value="vibration">振动</option><option value="voltage">电压</option><option value="current">电流</option><option value="power">功率</option><option value="status">状态</option><option value="smoke">烟雾浓度</option><option value="speed">速度</option><option value="liquidLevel">液位</option><option value="healthScore">健康评分</option>
+              </select>
+              <select class="op-select" id="devArmCondOp0">
+                <option value=">">大于 (>)</option><option value=">=">大于等于 (&ge;)</option><option value="<">小于 (<)</option><option value="<=">小于等于 (&le;)</option><option value="==">等于 (=)</option><option value="!=">不等于 (&ne;)</option>
+              </select>
+              <input type="text" class="val-input" id="devArmCondVal0" placeholder="阈值，如 40">
+            </div>
+          </div>
+        </div>
+        <button class="alarm-btn-add" onclick="devArmAddCondition()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          添加条件
+        </button>
+        <div class="alarm-form-hint" style="margin-top:6px">多个条件之间为"且"关系</div>
+      </div>
+      <div class="alarm-form-row">
+        <div class="alarm-form-group">
+          <label class="alarm-form-label">条件类型</label>
+          <select class="alarm-form-select" id="devArmCondType" onchange="devArmToggleCondValueGroup()">
+            <option value="simple">立即触发</option><option value="duration">持续时间</option><option value="repeating">重复次数</option>
+          </select>
+        </div>
+        <div class="alarm-form-group" id="devArmCondValueGroup" style="display:none">
+          <label class="alarm-form-label" id="devArmCondValueLabel">持续时间（秒）</label>
+          <input type="number" class="alarm-form-input" id="devArmCondValue" placeholder="60" min="1">
+        </div>
+      </div>
+      <div class="alarm-form-group">
+        <label class="alarm-form-label">描述</label>
+        <textarea class="alarm-form-textarea" id="devArmDesc" placeholder="告警规则的详细描述（可选）"></textarea>
+      </div>
+    </div>
+    <div class="alarm-modal-footer">
+      <button class="alarm-btn" onclick="closeAlarmModal()">取消</button>
+      <button class="alarm-btn alarm-btn-primary" onclick="saveDevAlarmRule()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleSubmenu(el) {
+  const submenu = el.nextElementSibling;
+  const arrow = el.querySelector('.menu-arrow');
+  el.classList.toggle('expanded');
+  arrow.classList.toggle('open');
+  submenu.classList.toggle('open');
+}
+
+// ==================== 设备数据 ====================
+const DEVICE_TYPES = {
+  hvac: { name: '环境监控设备', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>', color: '#42A5F5', bgColor: '#E3F2FD', tagClass: 'tag-env' },
+  fan: { name: '通风系统', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12c-1.5-3-4.5-4-7-2s-2 5.5 1 7.5c-3 0-5 2-5 5h12c0-3-2-5-5-5 3-2 4-5.5 1-7.5s-5.5-1-7 2c0-3 2-5 5-5s5 2 5 5z"/></svg>', color: '#42A5F5', bgColor: '#E3F2FD', tagClass: 'tag-env' },
+  pump: { name: '排水系统', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>', color: '#42A5F5', bgColor: '#E3F2FD', tagClass: 'tag-env' },
+  door: { name: '屏蔽门系统', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>', color: '#E65100', bgColor: '#FFF3E0', tagClass: 'tag-equip' },
+  escalator: { name: '电扶梯系统', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>', color: '#E65100', bgColor: '#FFF3E0', tagClass: 'tag-equip' },
+  fire: { name: '消防系统', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>', color: '#C62828', bgColor: '#FFEBEE', tagClass: 'tag-safety' },
+  power: { name: '供电系统', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>', color: '#7B1FA2', bgColor: '#F3E5F5', tagClass: 'tag-power' },
+};
+
+const TRIGGER_DEFS = [
+  { id: 'temp_high', name: '站台温度过高', cond: 'temp > 28\u00B0C', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>' },
+  { id: 'co2_high', name: '二氧化碳超标', cond: 'co2 > 1000ppm', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>' },
+  { id: 'fan_fault', name: '风机故障', cond: 'fan_status = fault', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' },
+  { id: 'water_high', name: '集水池水位超高', cond: 'water_level = High', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>' },
+  { id: 'pump_trip', name: '水泵跳闸', cond: 'pump_status = tripped', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>' },
+  { id: 'door_open', name: '屏蔽门未关严', cond: 'door_status = false', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>' },
+  { id: 'escalator_stop', name: '扶梯急停', cond: 'emergency_stop = true', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>' },
+  { id: 'power_fail', name: '供电系统异常', cond: 'power_status = abnormal', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' },
+  { id: 'smoke_detect', name: '烟雾报警', cond: 'smoke_detected = true', icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>' },
+];
+
+let devices = [
+  { id: 'DEV-001', name: '1号站台温度传感器', type: 'hvac', station: '1号线-人民广场', location: 'B1层-1号站台', status: 'online', triggers: ['temp_high', 'co2_high'], updatedAt: '2026-04-23 14:30', params: { temp: '26.5\u00B0C', co2: '680ppm', humidity: '65%' } },
+  { id: 'DEV-002', name: '2号站台温度传感器', type: 'hvac', station: '1号线-人民广场', location: 'B1层-2号站台', status: 'alarm', triggers: ['temp_high'], updatedAt: '2026-04-23 14:28', params: { temp: '29.2\u00B0C', co2: '720ppm', humidity: '58%' } },
+  { id: 'DEV-003', name: 'A出口CO\u2082传感器', type: 'hvac', station: '1号线-人民广场', location: '1F层-A出口', status: 'online', triggers: ['co2_high'], updatedAt: '2026-04-23 14:25', params: { temp: '24.1\u00B0C', co2: '550ppm', humidity: '70%' } },
+  { id: 'DEV-004', name: '1号通风机组', type: 'fan', station: '1号线-人民广场', location: 'B2层-通风机房', status: 'online', triggers: ['fan_fault'], updatedAt: '2026-04-23 14:32', params: { speed: '1450rpm', runtime: '2360h', power: '15kW' } },
+  { id: 'DEV-005', name: '2号通风机组', type: 'fan', station: '1号线-南京东路', location: 'B2层-通风机房', status: 'alarm', triggers: ['fan_fault'], updatedAt: '2026-04-23 14:15', params: { speed: '0rpm', runtime: '3120h', power: '0kW' } },
+  { id: 'DEV-006', name: '3号通风机组', type: 'fan', station: '2号线-中山公园', location: 'B2层-通风机房', status: 'online', triggers: [], updatedAt: '2026-04-23 14:30', params: { speed: '1480rpm', runtime: '1580h', power: '15kW' } },
+  { id: 'DEV-007', name: '1号集水池', type: 'pump', station: '1号线-人民广场', location: 'B3层-排水泵房', status: 'online', triggers: ['water_high'], updatedAt: '2026-04-23 14:20', params: { level: '45%', pump1: '运行', pump2: '待机' } },
+  { id: 'DEV-008', name: '2号集水池', type: 'pump', station: '1号线-南京东路', location: 'B3层-排水泵房', status: 'warning', triggers: ['water_high', 'pump_trip'], updatedAt: '2026-04-23 14:18', params: { level: '82%', pump1: '故障', pump2: '运行' } },
+  { id: 'DEV-009', name: '3号集水池', type: 'pump', station: '2号线-静安寺', location: 'B3层-排水泵房', status: 'online', triggers: [], updatedAt: '2026-04-23 14:30', params: { level: '30%', pump1: '待机', pump2: '待机' } },
+  { id: 'DEV-010', name: '1号站台屏蔽门-上行', type: 'door', station: '1号线-人民广场', location: 'B1层-1号站台上行侧', status: 'online', triggers: ['door_open'], updatedAt: '2026-04-23 14:29', params: { doors: '24扇', status: '全部关闭', lastMaint: '2026-03-15' } },
+  { id: 'DEV-011', name: '1号站台屏蔽门-下行', type: 'door', station: '1号线-人民广场', location: 'B1层-1号站台下行侧', status: 'online', triggers: ['door_open'], updatedAt: '2026-04-23 14:29', params: { doors: '24扇', status: '全部关闭', lastMaint: '2026-03-15' } },
+  { id: 'DEV-012', name: '2号站台屏蔽门', type: 'door', station: '1号线-南京东路', location: 'B1层-2号站台', status: 'alarm', triggers: ['door_open'], updatedAt: '2026-04-23 14:10', params: { doors: '24扇', status: '3扇未关', lastMaint: '2026-02-20' } },
+  { id: 'DEV-013', name: 'A出口电扶梯-上行', type: 'escalator', station: '1号线-人民广场', location: '1F层-A出口', status: 'online', triggers: ['escalator_stop'], updatedAt: '2026-04-23 14:30', params: { speed: '0.5m/s', direction: '上行', runtime: '8920h' } },
+  { id: 'DEV-014', name: 'B出口电扶梯-下行', type: 'escalator', station: '1号线-人民广场', location: '1F层-B出口', status: 'offline', triggers: ['escalator_stop'], updatedAt: '2026-04-23 12:00', params: { speed: '0m/s', direction: '停止', runtime: '12300h' } },
+  { id: 'DEV-015', name: 'C出口电扶梯', type: 'escalator', station: '2号线-中山公园', location: '1F层-C出口', status: 'online', triggers: [], updatedAt: '2026-04-23 14:30', params: { speed: '0.5m/s', direction: '上行', runtime: '5640h' } },
+  { id: 'DEV-016', name: '1号烟感探测器', type: 'fire', station: '1号线-人民广场', location: 'B1层-站厅', status: 'online', triggers: ['smoke_detect'], updatedAt: '2026-04-23 14:30', params: { sensitivity: '标准', battery: '92%', lastTest: '2026-04-01' } },
+  { id: 'DEV-017', name: '2号烟感探测器', type: 'fire', station: '1号线-南京东路', location: 'B1层-站台', status: 'online', triggers: ['smoke_detect'], updatedAt: '2026-04-23 14:30', params: { sensitivity: '高', battery: '88%', lastTest: '2026-04-01' } },
+  { id: 'DEV-018', name: '3号烟感探测器', type: 'fire', station: '2号线-静安寺', location: 'B2层-设备区', status: 'online', triggers: [], updatedAt: '2026-04-23 14:30', params: { sensitivity: '标准', battery: '95%', lastTest: '2026-03-28' } },
+  { id: 'DEV-019', name: '1号配电柜', type: 'power', station: '1号线-人民广场', location: 'B2层-配电室', status: 'online', triggers: ['power_fail'], updatedAt: '2026-04-23 14:30', params: { voltage: '380V', current: '125A', load: '72%' } },
+  { id: 'DEV-020', name: '2号配电柜', type: 'power', station: '1号线-南京东路', location: 'B2层-配电室', status: 'online', triggers: ['power_fail'], updatedAt: '2026-04-23 14:30', params: { voltage: '378V', current: '98A', load: '58%' } },
+  { id: 'DEV-021', name: 'UPS不间断电源', type: 'power', station: '2号线-中山公园', location: 'B2层-配电室', status: 'online', triggers: ['power_fail'], updatedAt: '2026-04-23 14:30', params: { voltage: '380V', battery: '100%', backup: '30min' } },
+  { id: 'DEV-022', name: '4号通风机组', type: 'fan', station: '2号线-静安寺', location: 'B2层-通风机房', status: 'online', triggers: [], updatedAt: '2026-04-23 14:30', params: { speed: '1460rpm', runtime: '890h', power: '15kW' } },
+  { id: 'DEV-023', name: '4号站台温度传感器', type: 'hvac', station: '2号线-静安寺', location: 'B1层-4号站台', status: 'online', triggers: ['temp_high'], updatedAt: '2026-04-23 14:30', params: { temp: '25.8\u00B0C', co2: '620ppm', humidity: '62%' } },
+  { id: 'DEV-024', name: 'D出口电扶梯', type: 'escalator', station: '2号线-静安寺', location: '1F层-D出口', status: 'online', triggers: [], updatedAt: '2026-04-23 14:30', params: { speed: '0.5m/s', direction: '下行', runtime: '7230h' } },
+];
+
+// ==================== 设备告警规则数据 ====================
+const deviceAlarmsData = {};
+
+function getDeviceAlarms(deviceId, deviceType) {
+  if (!deviceAlarmsData[deviceId]) {
+    const defaults = {
+      'hvac': [
+        { name: '温度超限告警', condition: '温度 > 28\u00B0C', level: 'critical', enabled: true },
+        { name: '湿度异常告警', condition: '湿度 > 80%', level: 'major', enabled: true }
+      ],
+      'door': [
+        { name: '非法闯入告警', condition: '未授权刷卡', level: 'critical', enabled: true },
+        { name: '门未关闭告警', condition: '门状态 = 开启 持续10秒', level: 'major', enabled: true }
+      ],
+      'fire': [
+        { name: '烟雾检测告警', condition: '烟雾浓度 > 15%', level: 'critical', enabled: true },
+        { name: '设备故障告警', condition: '自检失败', level: 'major', enabled: true }
+      ],
+      'fan': [
+        { name: '风机停转告警', condition: '转速 = 0', level: 'critical', enabled: true },
+        { name: '功率异常告警', condition: '功率偏差 > 30%', level: 'warning', enabled: true }
+      ],
+      'pump': [
+        { name: '液位超高告警', condition: '液位 > 80%', level: 'major', enabled: true },
+        { name: '水泵故障告警', condition: '水泵启动失败', level: 'critical', enabled: true }
+      ],
+      'escalator': [
+        { name: '急停触发告警', condition: '急停按钮 = 触发', level: 'critical', enabled: true },
+        { name: '速度异常告警', condition: '速度偏差 > 10%', level: 'major', enabled: true }
+      ],
+      'power': [
+        { name: '电压异常告警', condition: '电压 < 370V', level: 'major', enabled: true },
+        { name: '负载过高告警', condition: '负载率 > 90%', level: 'warning', enabled: true }
+      ]
+    };
+    deviceAlarmsData[deviceId] = JSON.parse(JSON.stringify(defaults[deviceType] || []));
+  }
+  return deviceAlarmsData[deviceId];
+}
+
+// ==================== 设备规则链数据 ====================
+function getDeviceRules(deviceId, deviceType) {
+  const typeRules = {
+    'hvac': [
+      { ruleId: 'RULE-001', name: '温度告警联动规则', source: 'product', condition: '温度 > 28\u00B0C', status: '启用', lastTrigger: '2026-04-23 14:25', affectedCount: 4 },
+      { ruleId: 'RULE-008', name: '夜间温度监测规则', source: 'product', condition: '夜间温度 > 28\u00B0C', status: '启用', lastTrigger: '2026-04-22 22:15', affectedCount: 4 },
+      { ruleId: 'RULE-009', name: '一楼车间环境联动', source: 'group', condition: '温度>35\u00B0C且湿度>80%', status: '启用', lastTrigger: '2026-04-21 10:20', affectedCount: 12 }
+    ],
+    'door': [
+      { ruleId: 'RULE-011', name: '非法闯入检测规则', source: 'product', condition: '未授权刷卡', status: '启用', lastTrigger: '2026-04-22 22:10', affectedCount: 3 },
+      { ruleId: 'RULE-012', name: '门禁故障检测规则', source: 'product', condition: '设备响应超时', status: '启用', lastTrigger: '2026-04-18 09:45', affectedCount: 3 },
+      { ruleId: 'RULE-013', name: '北京分公司安全策略', source: 'group', condition: '非工作时间开门', status: '启用', lastTrigger: '2026-04-23 02:30', affectedCount: 15 }
+    ],
+    'fire': [
+      { ruleId: 'RULE-006', name: '消防安全规则', source: 'product', condition: '烟雾浓度 > 15%', status: '启用', lastTrigger: '2026-04-22 18:20', affectedCount: 3 },
+      { ruleId: 'RULE-014', name: '设备自检异常规则', source: 'product', condition: '自检失败', status: '启用', lastTrigger: '\u2014', affectedCount: 3 },
+      { ruleId: 'RULE-013', name: '消防联动策略', source: 'group', condition: '任意烟感触发', status: '启用', lastTrigger: '2026-04-22 18:20', affectedCount: 28 }
+    ],
+    'fan': [
+      { ruleId: 'RULE-002', name: '通风系统故障规则', source: 'product', condition: '转速异常或停转', status: '启用', lastTrigger: '2026-04-23 14:10', affectedCount: 2 },
+      { ruleId: 'RULE-015', name: '功率异常检测规则', source: 'product', condition: '功率偏差 > 30%', status: '启用', lastTrigger: '2026-04-19 11:30', affectedCount: 2 }
+    ],
+    'pump': [
+      { ruleId: 'RULE-003', name: '排水系统告警规则', source: 'product', condition: '液位 > 80%', status: '启用', lastTrigger: '2026-04-23 13:45', affectedCount: 2 },
+      { ruleId: 'RULE-016', name: '水泵故障检测规则', source: 'product', condition: '水泵启动失败', status: '启用', lastTrigger: '2026-04-15 07:20', affectedCount: 2 },
+      { ruleId: 'RULE-009', name: '雨季排水联动策略', source: 'group', condition: '降雨+液位>70%', status: '启用', lastTrigger: '2026-04-10 15:40', affectedCount: 6 }
+    ],
+    'escalator': [
+      { ruleId: 'RULE-005', name: '电扶梯安全规则', source: 'product', condition: '急停按钮触发', status: '启用', lastTrigger: '2026-04-23 12:00', affectedCount: 2 },
+      { ruleId: 'RULE-012', name: '速度异常检测规则', source: 'product', condition: '速度偏差 > 10%', status: '启用', lastTrigger: '2026-04-20 14:15', affectedCount: 2 }
+    ],
+    'power': [
+      { ruleId: 'RULE-007', name: '供电安全规则', source: 'product', condition: '电压 < 370V 或负载 > 90%', status: '启用', lastTrigger: '2026-04-23 10:00', affectedCount: 2 },
+      { ruleId: 'RULE-016', name: '过载检测规则', source: 'product', condition: '负载率 > 90%', status: '启用', lastTrigger: '2026-04-17 16:45', affectedCount: 2 },
+      { ruleId: 'RULE-010', name: '供电安全联动策略', source: 'group', condition: 'UPS切换+负载>80%', status: '启用', lastTrigger: '2026-04-22 15:50', affectedCount: 10 }
+    ]
+  };
+  return typeRules[deviceType] || typeRules['hvac'];
+}
+
+// ==================== 告警规则弹窗函数 ====================
+let devArmEditingIdx = -1;
+let devArmDeviceId = null;
+const devArmArgLabelMap = {
+  temperature: '温度', humidity: '湿度', pressure: '压力', vibration: '振动',
+  voltage: '电压', current: '电流', power: '功率', status: '状态',
+  smoke: '烟雾浓度', speed: '速度', liquidLevel: '液位', healthScore: '健康评分'
+};
+
+function openAlarmModal(deviceId, idx) {
+  devArmDeviceId = deviceId;
+  devArmEditingIdx = (idx !== undefined) ? idx : -1;
+  var modal = document.getElementById('alarmModalOverlay');
+  var title = document.getElementById('alarmModalTitle');
+  var alarms = deviceAlarmsData[deviceId] || [];
+
+  if (devArmEditingIdx >= 0 && alarms[devArmEditingIdx]) {
+    title.textContent = '编辑告警规则';
+    var a = alarms[devArmEditingIdx];
+    document.getElementById('devArmName').value = a.name || '';
+    document.getElementById('devArmDesc').value = a.desc || '';
+    devArmSelectSeverity(a.level || 'critical');
+    document.getElementById('devArmCondType').value = a.condType || 'simple';
+    document.getElementById('devArmCondValue').value = a.condValue || '';
+    devArmToggleCondValueGroup();
+    var conditions = a.conditions || [];
+    if (conditions.length === 0 && a.condition) {
+      conditions = [{ arg: 'temperature', op: '>', value: a.condition.replace(/[^0-9.]/g, '') }];
+    }
+    if (conditions.length === 0) conditions.push({ arg: 'temperature', op: '>', value: '' });
+    devArmRenderConditions(conditions);
+  } else {
+    title.textContent = '添加告警规则';
+    document.getElementById('devArmName').value = '';
+    document.getElementById('devArmDesc').value = '';
+    devArmSelectSeverity('critical');
+    document.getElementById('devArmCondType').value = 'simple';
+    document.getElementById('devArmCondValue').value = '';
+    devArmToggleCondValueGroup();
+    devArmRenderConditions([{ arg: 'temperature', op: '>', value: '' }]);
+  }
+  modal.classList.add('open');
+}
+
+function closeAlarmModal() {
+  document.getElementById('alarmModalOverlay').classList.remove('open');
+  devArmEditingIdx = -1;
+  devArmDeviceId = null;
+}
+
+function devArmSelectSeverity(level) {
+  document.querySelectorAll('#devArmSeveritySelect .alarm-severity-option').forEach(function(el) {
+    el.classList.toggle('selected', el.dataset.level === level);
+  });
+}
+
+function devArmGetSelectedSeverity() {
+  var sel = document.querySelector('#devArmSeveritySelect .alarm-severity-option.selected');
+  return sel ? sel.dataset.level : 'critical';
+}
+
+function devArmRenderConditions(conditions) {
+  var container = document.getElementById('devArmConditions');
+  container.innerHTML = conditions.map(function(c, i) {
+    return '<div class="alarm-condition-block" data-idx="' + i + '">' +
+      '<div class="alarm-condition-header"><span>条件 ' + (i + 1) + '</span>' +
+      (conditions.length > 1 ? '<button class="alarm-btn alarm-btn-danger alarm-btn-sm" onclick="devArmRemoveCondition(' + i + ')">删除</button>' : '') +
+      '</div>' +
+      '<div class="alarm-condition-row">' +
+        '<select class="arg-select" id="devArmCondArg' + i + '">' +
+          Object.keys(devArmArgLabelMap).map(function(k) {
+            return '<option value="' + k + '"' + (k === c.arg ? ' selected' : '') + '>' + devArmArgLabelMap[k] + '</option>';
+          }).join('') +
+        '</select>' +
+        '<select class="op-select" id="devArmCondOp' + i + '">' +
+          ['>', '>=', '<', '<=', '==', '!='].map(function(op) {
+            var labels = {'>':'大于 (>)','>=':'大于等于 (\u2265)','<':'小于 (<)','<=':'小于等于 (\u2264)','==':'等于 (=)','!=':'不等于 (\u2260)'};
+            return '<option value="' + op + '"' + (op === c.op ? ' selected' : '') + '>' + labels[op] + '</option>';
+          }).join('') +
+        '</select>' +
+        '<input type="text" class="val-input" id="devArmCondVal' + i + '" placeholder="阈值，如 40" value="' + (c.value || '') + '">' +
+      '</div></div>';
+  }).join('');
+}
+
+function devArmAddCondition() {
+  var blocks = document.querySelectorAll('#devArmConditions .alarm-condition-block');
+  var conditions = [];
+  blocks.forEach(function(b) {
+    var idx = b.dataset.idx;
+    conditions.push({ arg: document.getElementById('devArmCondArg' + idx).value, op: document.getElementById('devArmCondOp' + idx).value, value: document.getElementById('devArmCondVal' + idx).value });
+  });
+  conditions.push({ arg: 'temperature', op: '>', value: '' });
+  devArmRenderConditions(conditions);
+}
+
+function devArmRemoveCondition(idx) {
+  var blocks = document.querySelectorAll('#devArmConditions .alarm-condition-block');
+  var conditions = [];
+  blocks.forEach(function(b) {
+    var i = b.dataset.idx;
+    if (i != idx) conditions.push({ arg: document.getElementById('devArmCondArg' + i).value, op: document.getElementById('devArmCondOp' + i).value, value: document.getElementById('devArmCondVal' + i).value });
+  });
+  if (conditions.length === 0) conditions.push({ arg: 'temperature', op: '>', value: '' });
+  devArmRenderConditions(conditions);
+}
+
+function devArmToggleCondValueGroup() {
+  var type = document.getElementById('devArmCondType').value;
+  var group = document.getElementById('devArmCondValueGroup');
+  var label = document.getElementById('devArmCondValueLabel');
+  if (type === 'simple') { group.style.display = 'none'; }
+  else { group.style.display = 'block'; label.textContent = type === 'duration' ? '持续时间（秒）' : '重复次数'; }
+}
+
+function saveDevAlarmRule() {
+  var name = document.getElementById('devArmName').value.trim();
+  if (!name) { showToast('请输入告警类型名称', 'error'); document.getElementById('devArmName').focus(); return; }
+  var level = devArmGetSelectedSeverity();
+  var desc = document.getElementById('devArmDesc').value.trim();
+  var condType = document.getElementById('devArmCondType').value;
+  var condValue = document.getElementById('devArmCondValue').value;
+
+  var conditions = [];
+  document.querySelectorAll('#devArmConditions .alarm-condition-block').forEach(function(b) {
+    var idx = b.dataset.idx;
+    var val = document.getElementById('devArmCondVal' + idx).value.trim();
+    if (val) conditions.push({ arg: document.getElementById('devArmCondArg' + idx).value, op: document.getElementById('devArmCondOp' + idx).value, value: val });
+  });
+  if (conditions.length === 0) { showToast('请至少填写一个完整的触发条件', 'error'); return; }
+
+  var conditionDisplay = conditions.map(function(c) { return devArmArgLabelMap[c.arg] + ' ' + c.op + ' ' + c.value; }).join(' 且 ');
+  var condTypeLabel = condType === 'simple' ? '' : (condType === 'duration' ? '（持续' + condValue + '秒）' : '（连续' + condValue + '次）');
+
+  var rule = { name: name, level: level, condition: conditionDisplay, conditions: conditions, condType: condType, condValue: condValue, desc: desc, enabled: true };
+
+  if (!deviceAlarmsData[devArmDeviceId]) deviceAlarmsData[devArmDeviceId] = [];
+
+  if (devArmEditingIdx >= 0) {
+    rule.enabled = deviceAlarmsData[devArmDeviceId][devArmEditingIdx].enabled !== false;
+    deviceAlarmsData[devArmDeviceId][devArmEditingIdx] = rule;
+    showToast('告警规则已更新', 'success');
+  } else {
+    deviceAlarmsData[devArmDeviceId].push(rule);
+    showToast('告警规则已添加', 'success');
+  }
+
+  closeAlarmModal();
+  renderAlarmsTab();
+}
+
+function toggleDevAlarm(deviceId, idx, enabled) {
+  if (deviceAlarmsData[deviceId]) {
+    deviceAlarmsData[deviceId][idx].enabled = enabled;
+    showToast(enabled ? '告警规则已启用' : '告警规则已禁用', enabled ? 'success' : 'warning');
+  }
+}
+
+function deleteDevAlarm(deviceId, idx) {
+  if (!confirm('确定删除此告警规则？')) return;
+  if (deviceAlarmsData[deviceId]) {
+    deviceAlarmsData[deviceId].splice(idx, 1);
+    showToast('告警规则已删除', 'success');
+    renderAlarmsTab();
+  }
+}
+
+// ==================== Toast提示 ====================
+function showToast(msg, type) {
+  var colors = { success: '#52c41a', error: '#ff4d4f', info: '#1890ff', warning: '#faad14' };
+  var el = document.createElement('div');
+  el.style.cssText = 'position:fixed;top:20px;right:20px;padding:10px 20px;background:#fff;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-size:13px;z-index:9999;border-left:4px solid ' + (colors[type] || colors.info) + ';transition:opacity 0.3s';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(function() { el.style.opacity = '0'; setTimeout(function() { el.remove(); }, 300); }, 2500);
+}
+
+// ==================== 获取URL参数 ====================
+function getQueryParam(name) {
+  const params = new URLSearchParams(window.location.search);
+  return params.get(name);
+}
+
+// ==================== 当前设备 ====================
+let currentDevice = null;
+
+// ==================== Tab切换 ====================
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(el) { el.classList.remove('active'); });
+  document.getElementById('tab-' + tabId).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ==================== 渲染告警Tab ====================
+function renderAlarmsTab() {
+  if (!currentDevice) return;
+  var d = currentDevice;
+  var deviceAlarms = getDeviceAlarms(d.id, d.type);
+  var tbody = document.getElementById('alarmsTableBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = deviceAlarms.map(function(a, i) {
+    var levelClass = 'level-' + (a.level || 'critical');
+    var levelLabel = { critical: '紧急', major: '严重', minor: '警告', warning: '提示' }[a.level] || '紧急';
+    return '<tr>' +
+      '<td style="font-weight:500;color:#333">' + a.name + '</td>' +
+      '<td style="color:#666;font-size:12px">' + a.condition + '</td>' +
+      '<td><span class="' + levelClass + '">' + levelLabel + '</span></td>' +
+      '<td><label class="toggle-switch"><input type="checkbox" ' + (a.enabled !== false ? 'checked' : '') + ' onchange="toggleDevAlarm(\'' + d.id + '\', ' + i + ', this.checked)"><span class="toggle-slider"></span></label></td>' +
+      '<td><div class="action-group">' +
+        '<button class="action-btn primary" onclick="openAlarmModal(\'' + d.id + '\', ' + i + ')">编辑</button>' +
+        '<button class="action-btn danger" onclick="deleteDevAlarm(\'' + d.id + '\', ' + i + ')">删除</button>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('');
+}
+
+// ==================== 渲染页面 ====================
+function renderPage() {
+  var deviceId = getQueryParam('id');
+  var device = devices.find(function(d) { return d.id === deviceId; });
+  var container = document.getElementById('deviceDetail');
+
+  if (!device) {
+    container.innerHTML = '<div class="card not-found"><div class="not-found-icon">&#x1F50D;</div><h2>设备未找到</h2><p>未找到ID为 "' + (deviceId || '空') + '" 的设备，请检查设备ID是否正确。</p><a href="device-management.html" class="btn btn-primary">返回设备列表</a></div>';
+    return;
+  }
+
+  currentDevice = device;
+  var typeInfo = DEVICE_TYPES[device.type];
+  var statusText = { online: '在线运行', offline: '已离线', alarm: '告警中', warning: '预警' };
+  var statusBadgeClass = { online: 'badge-online', offline: 'badge-offline', alarm: 'badge-alarm', warning: 'badge-warning' };
+
+  var statusBadge = '<span class="' + statusBadgeClass[device.status] + '">' + statusText[device.status] + '</span>';
+
+  container.innerHTML = '\
+    <!-- 设备信息卡片 -->\
+    <div class="card">\
+      <div class="product-info-card">\
+        <div class="product-info-left">\
+          <div class="product-icon" style="background:' + typeInfo.bgColor + ';color:' + typeInfo.color + '">' + typeInfo.icon + '</div>\
+          <div>\
+            <div class="product-name">' + device.name + '</div>\
+            <div class="product-meta">\
+              <span class="product-type-tag">' + typeInfo.name + '</span>\
+              <span class="product-id">' + device.id + '</span>\
+              ' + statusBadge + '\
+            </div>\
+          </div>\
+        </div>\
+        <div class="product-info-right">\
+          <div class="stat-card">\
+            <div class="stat-value">' + device.triggers.length + '</div>\
+            <div class="stat-label">关联触发器</div>\
+          </div>\
+          <div class="stat-card">\
+            <div class="stat-value" style="color:' + (device.status === 'online' ? '#52c41a' : '#ff4d4f') + '">' + (device.status === 'online' ? '正常' : '异常') + '</div>\
+            <div class="stat-label">运行状态</div>\
+          </div>\
+        </div>\
+      </div>\
+    </div>\
+\
+    <!-- 设备属性网格 -->\
+    <div class="card">\
+      <div class="card-title">设备属性</div>\
+      <div class="desc-grid">\
+        <div class="desc-item">\
+          <span class="desc-label">设备编码</span>\
+          <span class="desc-value">' + device.id + '</span>\
+        </div>\
+        <div class="desc-item">\
+          <span class="desc-label">设备类型</span>\
+          <span class="desc-value">' + typeInfo.name + '</span>\
+        </div>\
+        <div class="desc-item">\
+          <span class="desc-label">所属站点</span>\
+          <span class="desc-value">' + device.station + '</span>\
+        </div>\
+        <div class="desc-item">\
+          <span class="desc-label">安装位置</span>\
+          <span class="desc-value">' + device.location + '</span>\
+        </div>\
+        <div class="desc-item">\
+          <span class="desc-label">运行状态</span>\
+          <span class="desc-value">' + statusBadge + '</span>\
+        </div>\
+        <div class="desc-item">\
+          <span class="desc-label">最近更新</span>\
+          <span class="desc-value">' + device.updatedAt + '</span>\
+        </div>\
+        <div class="desc-item">\
+          <span class="desc-label">关联触发器数</span>\
+          <span class="desc-value">' + device.triggers.length + ' 个</span>\
+        </div>\
+        <div class="desc-item">\
+          <span class="desc-label">设备名称</span>\
+          <span class="desc-value">' + device.name + '</span>\
+        </div>\
+      </div>\
+    </div>\
+\
+    <!-- Tab导航 -->\
+    <div class="tab-nav">\
+      <button class="tab-btn active" onclick="switchTab(\'overview\', this)">&#x1F4CA; 概览</button>\
+      <button class="tab-btn" onclick="switchTab(\'realtime\', this)">&#x1F4C8; 实时数据</button>\
+      <button class="tab-btn" onclick="switchTab(\'history\', this)">&#x1F4DC; 历史数据</button>\
+      <button class="tab-btn" onclick="switchTab(\'command\', this)">&#x1F4E1; 指令下发</button>\
+      <button class="tab-btn" onclick="switchTab(\'events\', this)">&#x1F4CB; 事件日志</button>\
+      <button class="tab-btn" onclick="switchTab(\'alarms\', this)">&#x1F6A8; 告警规则配置</button>\
+      <button class="tab-btn" onclick="switchTab(\'rules\', this)">&#x1F517; 关联规则链</button>\
+    </div>\
+\
+    <!-- Tab1: 概览 -->\
+    <div class="tab-content active" id="tab-overview">\
+      ' + renderOverviewTab(device) + '\
+    </div>\
+\
+    <!-- Tab2: 实时数据 -->\
+    <div class="tab-content" id="tab-realtime">\
+      ' + renderRealtimeTab(device) + '\
+    </div>\
+\
+    <!-- Tab3: 历史数据 -->\
+    <div class="tab-content" id="tab-history">\
+      ' + renderHistoryTab(device) + '\
+    </div>\
+\
+    <!-- Tab4: 指令下发 -->\
+    <div class="tab-content" id="tab-command">\
+      ' + renderCommandTab(device) + '\
+    </div>\
+\
+    <!-- Tab5: 事件日志 -->\
+    <div class="tab-content" id="tab-events">\
+      ' + renderEventsTab(device) + '\
+    </div>\
+\
+    <!-- Tab6: 告警规则配置 -->\
+    <div class="tab-content" id="tab-alarms">\
+      ' + renderAlarmsTabContent(device) + '\
+    </div>\
+\
+    <!-- Tab7: 关联规则链 -->\
+    <div class="tab-content" id="tab-rules">\
+      ' + renderRulesTab(device) + '\
+    </div>\
+  ';
+
+  // 渲染告警表格
+  renderAlarmsTab();
+}
+
+// ==================== Tab内容渲染函数 ====================
+function renderOverviewTab(d) {
+  var typeInfo = DEVICE_TYPES[d.type];
+  var statusText = { online: '在线运行', offline: '已离线', alarm: '告警中', warning: '预警' };
+  var statusBadgeClass = { online: 'badge-online', offline: 'badge-offline', alarm: 'badge-alarm', warning: 'badge-warning' };
+
+  // 触发器卡片
+  var triggerCards = d.triggers.map(function(tid) {
+    var t = TRIGGER_DEFS.find(function(x) { return x.id === tid; });
+    if (!t) return '';
+    return '<div class="trigger-card" onclick="showToast(\'查看触发器: ' + t.name + '\', \'info\')">' +
+      '<div class="trigger-card-icon">' + t.icon + '</div>' +
+      '<div class="trigger-card-info">' +
+        '<div class="name">' + t.name + '</div>' +
+        '<div class="cond">' + t.cond + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  // 实时参数
+  var paramLabels = {
+    temp: '当前温度', co2: 'CO\u2082浓度', humidity: '湿度', speed: '转速',
+    runtime: '累计运行', power: '功率', level: '水位', pump1: '水泵1', pump2: '水泵2',
+    doors: '门数量', status: '状态', lastMaint: '上次维护', direction: '方向',
+    sensitivity: '灵敏度', battery: '电池电量', lastTest: '上次测试',
+    voltage: '电压', current: '电流', load: '负载率', backup: '备用时间',
+  };
+  var paramsHtml = Object.entries(d.params).map(function(entry) {
+    return '<div class="detail-field"><div class="label">' + (paramLabels[entry[0]] || entry[0]) + '</div><div class="value mono">' + entry[1] + '</div></div>';
+  }).join('');
+
+  return '\
+    <div class="detail-section">\
+      <div class="detail-section-title">&#x1F4CB; 基本信息</div>\
+      <div class="detail-grid">\
+        <div class="detail-field"><div class="label">设备编码</div><div class="value mono">' + d.id + '</div></div>\
+        <div class="detail-field"><div class="label">设备类型</div><div class="value">' + typeInfo.name + '</div></div>\
+        <div class="detail-field"><div class="label">所属站点</div><div class="value">' + d.station + '</div></div>\
+        <div class="detail-field"><div class="label">安装位置</div><div class="value">' + d.location + '</div></div>\
+        <div class="detail-field"><div class="label">运行状态</div><div class="value"><span class="' + statusBadgeClass[d.status] + '">' + statusText[d.status] + '</span></div></div>\
+        <div class="detail-field"><div class="label">最近更新</div><div class="value">' + d.updatedAt + '</div></div>\
+      </div>\
+    </div>\
+    <div class="detail-section">\
+      <div class="detail-section-title">&#x1F4C8; 实时参数</div>\
+      <div class="detail-grid">' + paramsHtml + '</div>\
+    </div>\
+    <div class="detail-section">\
+      <div class="detail-section-title">&#x26A1; 关联触发器 (' + d.triggers.length + ')</div>\
+      ' + (triggerCards || '<p style="color:#999;font-size:13px;padding:12px 0">未关联任何触发器</p>') + '\
+    </div>';
+}
+
+function renderRealtimeTab(d) {
+  var paramLabels = { temp: '温度', co2: 'CO\u2082', humidity: '湿度', speed: '转速', runtime: '运行时长', power: '功率', level: '水位', pump1: '水泵1', pump2: '水泵2', doors: '门数', status: '状态', lastMaint: '维护', direction: '方向', sensitivity: '灵敏度', battery: '电量', lastTest: '测试', voltage: '电压', current: '电流', load: '负载', backup: '备用' };
+  var statusItems = Object.entries(d.params).map(function(entry) {
+    return '<div class="status-item"><div class="status-item-value">' + entry[1] + '</div><div class="status-item-label">' + (paramLabels[entry[0]] || entry[0]) + '</div></div>';
+  }).join('');
+
+  return '\
+    <div class="device-status-card">\
+      <div class="device-status-header">\
+        <span class="device-status-title">实时数据监控</span>\
+        <span style="font-size:12px;color:#999">数据每30秒自动刷新</span>\
+      </div>\
+      <div class="device-status-grid">' + statusItems + '</div>\
+    </div>\
+    <div class="chart-container">\
+      <div class="chart-header">\
+        <span class="chart-title">&#x1F4CA; 趋势图表（近24小时）</span>\
+        <select style="padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px;font-size:12px">\
+          <option>温度</option><option>湿度</option><option>CO\u2082浓度</option>\
+        </select>\
+      </div>\
+      <div class="chart-placeholder">\
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d9d9d9" stroke-width="1.5" style="margin-right:12px">\
+          <path d="M3 3v18h18"/>\
+          <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>\
+        </svg>\
+        图表区域 - 可集成 ECharts 等图表库\
+      </div>\
+    </div>';
+}
+
+function renderHistoryTab(d) {
+  return '\
+    <div class="command-panel">\
+      <div class="chart-header">\
+        <span class="chart-title">&#x1F4DC; 历史数据查询</span>\
+        <div style="display:flex;gap:8px">\
+          <input type="date" value="2026-05-01" style="padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px;font-size:12px">\
+          <input type="date" value="2026-06-01" style="padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px;font-size:12px">\
+          <button class="command-btn" onclick="showToast(\'查询中...\',\'info\')">查询</button>\
+        </div>\
+      </div>\
+      <div class="table-wrapper" style="margin-top:16px">\
+        <table class="data-table">\
+          <thead>\
+            <tr><th>时间</th><th>温度</th><th>湿度</th><th>CO\u2082</th><th>状态</th></tr>\
+          </thead>\
+          <tbody>\
+            <tr><td>2026-06-01 14:30</td><td>26.5\u00B0C</td><td>65%</td><td>680ppm</td><td><span class="badge badge-success">正常</span></td></tr>\
+            <tr><td>2026-06-01 14:00</td><td>26.2\u00B0C</td><td>64%</td><td>675ppm</td><td><span class="badge badge-success">正常</span></td></tr>\
+            <tr><td>2026-06-01 13:30</td><td>25.8\u00B0C</td><td>63%</td><td>660ppm</td><td><span class="badge badge-success">正常</span></td></tr>\
+            <tr><td>2026-06-01 13:00</td><td>25.5\u00B0C</td><td>62%</td><td>650ppm</td><td><span class="badge badge-success">正常</span></td></tr>\
+            <tr><td>2026-06-01 12:30</td><td>25.1\u00B0C</td><td>61%</td><td>640ppm</td><td><span class="badge badge-success">正常</span></td></tr>\
+            <tr><td>2026-06-01 12:00</td><td>24.8\u00B0C</td><td>60%</td><td>635ppm</td><td><span class="badge badge-success">正常</span></td></tr>\
+          </tbody>\
+        </table>\
+      </div>\
+    </div>';
+}
+
+function renderCommandTab(d) {
+  var commands = [
+    { name: '远程重启', desc: '重启设备并恢复初始状态', icon: '&#x1F504;' },
+    { name: '参数配置', desc: '修改设备运行参数', icon: '&#x2699;&#xFE0F;' },
+    { name: '固件升级', desc: 'OTA远程升级设备固件', icon: '&#x2B06;&#xFE0F;' },
+    { name: '数据同步', desc: '强制同步设备缓存数据', icon: '&#x1F4E4;' },
+  ];
+  var cmdList = commands.map(function(cmd) {
+    return '<div class="command-item">' +
+      '<div class="command-info">' +
+        '<div class="command-name">' + cmd.icon + ' ' + cmd.name + '</div>' +
+        '<div class="command-desc">' + cmd.desc + '</div>' +
+      '</div>' +
+      '<button class="command-btn" onclick="showToast(\'指令已发送: ' + cmd.name + '\',\'success\')">执行</button>' +
+    '</div>';
+  }).join('');
+
+  return '\
+    <div class="command-panel">\
+      <div class="chart-header">\
+        <span class="chart-title">&#x1F4E1; 指令下发</span>\
+        <span style="font-size:12px;color:#52c41a">&#x25CF; 设备' + (d.status === 'online' ? '在线，可下发指令' : '离线，无法下发指令') + '</span>\
+      </div>\
+      <div class="command-list">' + cmdList + '</div>\
+    </div>\
+    <div class="command-panel">\
+      <div class="chart-title" style="margin-bottom:12px">&#x1F4DD; 自定义指令</div>\
+      <div style="display:flex;gap:8px;margin-bottom:12px">\
+        <input type="text" placeholder="指令名称" style="flex:1;padding:8px 12px;border:1px solid #d9d9d9;border-radius:4px;font-size:13px">\
+        <input type="text" placeholder="参数(JSON格式)" style="flex:2;padding:8px 12px;border:1px solid #d9d9d9;border-radius:4px;font-size:13px">\
+      </div>\
+      <button class="command-btn" onclick="showToast(\'自定义指令已发送\',\'success\')">发送指令</button>\
+    </div>';
+}
+
+function renderEventsTab(d) {
+  var events = [
+    { type: 'online', icon: '&#x1F7E2;', title: '设备上线', time: '2026-06-01 14:30:25', tag: '成功', tagClass: 'success' },
+    { type: 'command', icon: '&#x1F4E1;', title: '参数配置指令已执行', time: '2026-06-01 14:25:10', tag: '成功', tagClass: 'success' },
+    { type: 'alarm', icon: '&#x1F6A8;', title: '温度超限告警触发', time: '2026-06-01 13:15:33', tag: '告警', tagClass: 'error' },
+    { type: 'offline', icon: '&#x1F534;', title: '设备离线', time: '2026-06-01 12:00:00', tag: '异常', tagClass: 'error' },
+    { type: 'online', icon: '&#x1F7E2;', title: '设备上线', time: '2026-06-01 08:30:15', tag: '成功', tagClass: 'success' },
+    { type: 'command', icon: '&#x1F4E1;', title: '远程重启指令已执行', time: '2026-05-31 22:10:00', tag: '成功', tagClass: 'success' },
+  ];
+  var eventList = events.map(function(e) {
+    return '<div class="event-item">' +
+      '<div class="event-icon ' + e.type + '">' + e.icon + '</div>' +
+      '<div class="event-content">' +
+        '<div class="event-title">' + e.title + '</div>' +
+        '<div class="event-time">' + e.time + '</div>' +
+      '</div>' +
+      '<span class="event-tag ' + e.tagClass + '">' + e.tag + '</span>' +
+    '</div>';
+  }).join('');
+
+  return '\
+    <div class="event-log">\
+      <div class="chart-header" style="margin-bottom:16px">\
+        <span class="chart-title">&#x1F4CB; 事件日志</span>\
+        <button class="command-btn" onclick="showToast(\'日志已导出\',\'success\')">导出日志</button>\
+      </div>\
+      ' + eventList + '\
+    </div>';
+}
+
+function renderAlarmsTabContent(d) {
+  return '\
+    <div class="section-header">\
+      <div class="section-title">告警规则配置</div>\
+      <div style="display:flex;gap:8px">\
+        <button class="btn btn-primary" onclick="openAlarmModal(\'' + d.id + '\')">+ 添加告警规则</button>\
+        <button class="btn" style="color:#1890ff;border-color:#1890ff" onclick="showToast(\'已同步到设备\',\'success\')">同步到设备</button>\
+      </div>\
+    </div>\
+    <div class="table-wrapper">\
+      <table class="data-table">\
+        <thead>\
+          <tr>\
+            <th style="width:16%">规则名称</th>\
+            <th style="width:30%">触发条件</th>\
+            <th style="width:12%">告警级别</th>\
+            <th style="width:10%">状态</th>\
+            <th style="width:auto">操作</th>\
+          </tr>\
+        </thead>\
+        <tbody id="alarmsTableBody"></tbody>\
+      </table>\
+    </div>';
+}
+
+function renderRulesTab(d) {
+  var deviceRules = getDeviceRules(d.id, d.type);
+  var RULE_ID_MAP = { 'RULE-001':1,'RULE-002':2,'RULE-003':3,'RULE-004':4,'RULE-005':5,'RULE-006':6,'RULE-007':7,'RULE-008':8,'RULE-009':9,'RULE-010':10,'RULE-011':11,'RULE-012':12,'RULE-013':13,'RULE-014':14,'RULE-015':15,'RULE-016':16 };
+
+  var rows = deviceRules.map(function(r) {
+    var sourceClass = r.source === 'product' ? 'rule-source-product' : (r.source === 'group' ? 'rule-source-group' : 'rule-source-device');
+    var sourceLabel = r.source === 'product' ? '产品全局' : (r.source === 'group' ? '群组全局' : '设备独立');
+    var chainId = RULE_ID_MAP[r.ruleId] || '';
+    var jumpUrl = chainId ? 'rule-chain-editor.html?chainId=' + chainId + '&from=device&deviceId=' + d.id + '&tab=rules' : '#';
+    return '<tr>' +
+      '<td style="font-weight:500;color:#333">' + r.name + '</td>' +
+      '<td><span class="rule-source-tag ' + sourceClass + '">' + sourceLabel + '</span></td>' +
+      '<td style="font-size:12px;color:#666">' + r.condition + '</td>' +
+      '<td><span class="badge badge-success">' + r.status + '</span></td>' +
+      '<td style="font-size:12px;color:#666;white-space:nowrap">' + r.lastTrigger + '</td>' +
+      '<td>' +
+        '<a href="' + jumpUrl + '" class="view-rule-link">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
+          '查看源规则' +
+        '</a>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+
+  return '\
+    <div class="section-header">\
+      <div class="section-title">关联规则链</div>\
+      <div style="font-size:12px;color:#666;">此设备受 ' + deviceRules.length + ' 条规则链管控</div>\
+    </div>\
+    <div style="background:#fff7e6;border:1px solid #ffd591;border-radius:4px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#d46b08;">\
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>\
+      提示：全局规则请在对应管理页面修改。此处仅支持查看，点击"查看源规则"将跳转至全局配置。\
+    </div>\
+    <div class="table-wrapper">\
+      <table class="data-table">\
+        <thead>\
+          <tr>\
+            <th>规则名称</th>\
+            <th>规则来源</th>\
+            <th>触发条件简述</th>\
+            <th>当前状态</th>\
+            <th>最近一次触发</th>\
+            <th>操作</th>\
+          </tr>\
+        </thead>\
+        <tbody>' + rows + '</tbody>\
+      </table>\
+    </div>';
+}
+
+// ==================== 初始化 ====================
+document.addEventListener('DOMContentLoaded', function() {
+  renderPage();
+
+  // 处理URL参数：自动切换Tab
+  var params = new URLSearchParams(window.location.search);
+  var tab = params.get('tab');
+  if (tab) {
+    setTimeout(function() {
+      var tabBtn = document.querySelector('.tab-btn[onclick*="' + tab + '"]');
+      if (tabBtn) {
+        switchTab(tab, tabBtn);
+      }
+    }, 100);
+  }
+});
+</script>
+
+</body>
+</html>

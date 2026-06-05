@@ -234,6 +234,117 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .level-minor { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
 .level-normal { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
 
+/* Alarm Rule Modal */
+.alarm-modal-overlay {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45); z-index: 1000; align-items: center; justify-content: center;
+}
+.alarm-modal-overlay.open { display: flex; }
+.alarm-modal {
+  background: #fff; border-radius: 12px; width: 580px; max-height: 85vh; overflow-y: auto;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15); animation: modalIn 0.2s ease;
+}
+@keyframes modalIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+.alarm-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px; border-bottom: 1px solid #f0f0f0;
+}
+.alarm-modal-header h3 { font-size: 16px; font-weight: 600; color: #1F2937; margin: 0; }
+.alarm-modal-close {
+  width: 28px; height: 28px; border: none; background: #f5f5f5; border-radius: 6px;
+  cursor: pointer; font-size: 16px; color: #999; display: flex; align-items: center; justify-content: center;
+}
+.alarm-modal-close:hover { background: #e8e8e8; color: #333; }
+.alarm-modal-body { padding: 20px 24px; }
+.alarm-form-group { margin-bottom: 18px; }
+.alarm-form-label {
+  display: block; font-size: 13px; font-weight: 500; color: #374151;
+  margin-bottom: 6px;
+}
+.alarm-form-label .required { color: #EF4444; margin-left: 2px; }
+.alarm-form-input, .alarm-form-select, .alarm-form-textarea {
+  width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 8px;
+  font-size: 13px; color: #1F2937; outline: none; transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+.alarm-form-input:focus, .alarm-form-select:focus, .alarm-form-textarea:focus {
+  border-color: #008B8B; box-shadow: 0 0 0 2px rgba(0,139,139,0.1);
+}
+.alarm-form-textarea { resize: vertical; min-height: 60px; }
+.alarm-form-row { display: flex; gap: 12px; }
+.alarm-form-row .alarm-form-group { flex: 1; }
+.alarm-form-hint { font-size: 11px; color: #9CA3AF; margin-top: 4px; }
+.alarm-condition-block {
+  background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px;
+  margin-bottom: 12px;
+}
+.alarm-condition-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px; font-size: 13px; font-weight: 500; color: #374151;
+}
+.alarm-condition-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.alarm-condition-row select, .alarm-condition-row input {
+  padding: 6px 10px; border: 1px solid #E5E7EB; border-radius: 6px;
+  font-size: 12px; color: #1F2937; outline: none;
+}
+.alarm-condition-row select:focus, .alarm-condition-row input:focus {
+  border-color: #008B8B;
+}
+.alarm-condition-row .arg-select { width: 120px; }
+.alarm-condition-row .op-select { width: 100px; }
+.alarm-condition-row .val-input { flex: 1; }
+.alarm-modal-footer {
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+  padding: 14px 24px; border-top: 1px solid #f0f0f0;
+}
+.alarm-btn {
+  padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 500;
+  cursor: pointer; border: 1px solid #E5E7EB; background: #fff; color: #6B7280;
+  transition: all 0.15s;
+}
+.alarm-btn:hover { border-color: #008B8B; color: #008B8B; }
+.alarm-btn-primary {
+  background: linear-gradient(135deg, #00A0A0 0%, #00B8B8 100%);
+  color: #fff; border-color: #00A0A0; box-shadow: 0 2px 6px rgba(0,160,160,0.2);
+}
+.alarm-btn-primary:hover {
+  background: linear-gradient(135deg, #008B8B 0%, #00A0A0 100%);
+  box-shadow: 0 3px 8px rgba(0,160,160,0.3);
+}
+.alarm-btn-danger { background: #fff; color: #EF4444; border-color: #FCA5A5; }
+.alarm-btn-danger:hover { background: #FEF2F2; border-color: #EF4444; }
+.alarm-btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 6px; }
+.alarm-btn-add {
+  display: flex; align-items: center; gap: 4px; padding: 6px 12px;
+  border: 1px dashed #D1D5DB; border-radius: 6px; background: #fff;
+  color: #6B7280; font-size: 12px; cursor: pointer; transition: all 0.15s;
+}
+.alarm-btn-add:hover { border-color: #008B8B; color: #008B8B; background: #E0F7F7; }
+.alarm-severity-select { display: flex; gap: 8px; }
+.alarm-severity-option {
+  flex: 1; padding: 8px; border: 2px solid #E5E7EB; border-radius: 8px;
+  text-align: center; cursor: pointer; font-size: 12px; font-weight: 500;
+  transition: all 0.15s; background: #fff;
+}
+.alarm-severity-option:hover { border-color: #D1D5DB; }
+.alarm-severity-option.selected { border-color: currentColor; }
+.alarm-severity-option.sev-critical { color: #EF4444; }
+.alarm-severity-option.sev-critical.selected { background: #FEF2F2; border-color: #EF4444; }
+.alarm-severity-option.sev-major { color: #F59E0B; }
+.alarm-severity-option.sev-major.selected { background: #FFFBEB; border-color: #F59E0B; }
+.alarm-severity-option.sev-minor { color: #3B82F6; }
+.alarm-severity-option.sev-minor.selected { background: #EFF6FF; border-color: #3B82F6; }
+.alarm-severity-option.sev-warning { color: #8B5CF6; }
+.alarm-severity-option.sev-warning.selected { background: #F5F3FF; border-color: #8B5CF6; }
+.alarm-severity-option .sev-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  margin-right: 4px; vertical-align: middle;
+}
+.alarm-severity-option.sev-critical .sev-dot { background: #EF4444; }
+.alarm-severity-option.sev-major .sev-dot { background: #F59E0B; }
+.alarm-severity-option.sev-minor .sev-dot { background: #3B82F6; }
+.alarm-severity-option.sev-warning .sev-dot { background: #8B5CF6; }
+
 /* Config Rows */
 .config-list { display: flex; flex-direction: column; gap: 0; }
 .config-row { display: flex; align-items: center; padding: 16px 24px; border-bottom: 1px solid #f0f0f0; }
@@ -753,9 +864,9 @@ function renderPage() {
       <button class="tab-btn active" onclick="switchTab('devices', this)">📋 设备列表</button>
       <button class="tab-btn" onclick="switchTab('things', this)">🔧 物模型</button>
       <button class="tab-btn" onclick="switchTab('commands', this)">📡 指令配置</button>
-      <button class="tab-btn" onclick="switchTab('alarms', this)">🚨 告警配置</button>
-      <button class="tab-btn" onclick="switchTab('config', this)">⚙️ 其他配置</button>
+      <button class="tab-btn" onclick="switchTab('alarms', this)">🚨 告警规则配置</button>
       <button class="tab-btn" onclick="switchTab('rules', this)">🔗 关联规则链</button>
+      <button class="tab-btn" onclick="switchTab('config', this)">⚙️ 其他配置</button>
     </div>
 
     <!-- Tab1: 设备列表 -->
@@ -851,7 +962,7 @@ function renderPage() {
       <div class="section-header">
         <div class="section-title">告警规则配置</div>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-primary" onclick="addAlarmRow()">+ 添加告警规则</button>
+          <button class="btn btn-primary" onclick="openAlarmModal()">+ 添加告警规则</button>
           <button class="btn" style="color:#1890ff;border-color:#1890ff" onclick="showToast('已同步到所有设备','success')">同步到所有设备</button>
         </div>
       </div>
@@ -872,7 +983,136 @@ function renderPage() {
       </div>
     </div>
 
-    <!-- Tab5: 其他配置 -->
+    <!-- Alarm Rule Modal -->
+    <div class="alarm-modal-overlay" id="alarmModalOverlay" onclick="if(event.target===this)closeAlarmModal()">
+      <div class="alarm-modal">
+        <div class="alarm-modal-header">
+          <h3 id="alarmModalTitle">添加告警规则</h3>
+          <button class="alarm-modal-close" onclick="closeAlarmModal()">✕</button>
+        </div>
+        <div class="alarm-modal-body">
+          <!-- 告警类型 -->
+          <div class="alarm-form-group">
+            <label class="alarm-form-label">告警类型 <span class="required">*</span></label>
+            <input type="text" class="alarm-form-input" id="alarmFormName" placeholder="例如：高温告警" autocomplete="off">
+            <div class="alarm-form-hint">告警类型的唯一标识，用于区分不同告警</div>
+          </div>
+          <!-- 告警级别 -->
+          <div class="alarm-form-group">
+            <label class="alarm-form-label">告警级别 <span class="required">*</span></label>
+            <div class="alarm-severity-select" id="alarmSeveritySelect">
+              <div class="alarm-severity-option sev-critical" data-level="critical" onclick="selectSeverity('critical')">
+                <span class="sev-dot"></span><span>紧急</span>
+              </div>
+              <div class="alarm-severity-option sev-major" data-level="major" onclick="selectSeverity('major')">
+                <span class="sev-dot"></span><span>严重</span>
+              </div>
+              <div class="alarm-severity-option sev-minor" data-level="minor" onclick="selectSeverity('minor')">
+                <span class="sev-dot"></span><span>警告</span>
+              </div>
+              <div class="alarm-severity-option sev-warning" data-level="warning" onclick="selectSeverity('warning')">
+                <span class="sev-dot"></span><span>提示</span>
+              </div>
+            </div>
+          </div>
+          <!-- 触发条件 -->
+          <div class="alarm-form-group">
+            <label class="alarm-form-label">触发条件</label>
+            <div id="alarmConditions">
+              <div class="alarm-condition-block" data-idx="0">
+                <div class="alarm-condition-header">
+                  <span>条件 1</span>
+                  <button class="alarm-btn alarm-btn-danger alarm-btn-sm" onclick="removeCondition(0)">删除</button>
+                </div>
+                <div class="alarm-condition-row">
+                  <select class="arg-select" id="condArg0">
+                    <option value="temperature">温度</option>
+                    <option value="humidity">湿度</option>
+                    <option value="pressure">压力</option>
+                    <option value="vibration">振动</option>
+                    <option value="voltage">电压</option>
+                    <option value="current">电流</option>
+                    <option value="power">功率</option>
+                    <option value="status">状态</option>
+                    <option value="smoke">烟雾浓度</option>
+                    <option value="speed">速度</option>
+                    <option value="liquidLevel">液位</option>
+                    <option value="healthScore">健康评分</option>
+                  </select>
+                  <select class="op-select" id="condOp0">
+                    <option value=">">大于 (>)</option>
+                    <option value=">=">大于等于 (≥)</option>
+                    <option value="<">小于 (<)</option>
+                    <option value="<=">小于等于 (≤)</option>
+                    <option value="==">等于 (=)</option>
+                    <option value="!=">不等于 (≠)</option>
+                  </select>
+                  <input type="text" class="val-input" id="condVal0" placeholder="阈值，如 40">
+                </div>
+              </div>
+            </div>
+            <button class="alarm-btn-add" onclick="addCondition()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              添加条件
+            </button>
+            <div class="alarm-form-hint" style="margin-top:6px">多个条件之间为"且"关系，即所有条件同时满足时触发告警</div>
+          </div>
+          <!-- 条件类型 -->
+          <div class="alarm-form-row">
+            <div class="alarm-form-group">
+              <label class="alarm-form-label">条件类型</label>
+              <select class="alarm-form-select" id="alarmCondType">
+                <option value="simple">立即触发</option>
+                <option value="duration">持续时间</option>
+                <option value="repeating">重复次数</option>
+              </select>
+            </div>
+            <div class="alarm-form-group" id="alarmCondValueGroup" style="display:none">
+              <label class="alarm-form-label" id="alarmCondValueLabel">持续时间（秒）</label>
+              <input type="number" class="alarm-form-input" id="alarmCondValue" placeholder="60" min="1">
+            </div>
+          </div>
+          <!-- 描述 -->
+          <div class="alarm-form-group">
+            <label class="alarm-form-label">描述</label>
+            <textarea class="alarm-form-textarea" id="alarmFormDesc" placeholder="告警规则的详细描述（可选）"></textarea>
+          </div>
+        </div>
+        <div class="alarm-modal-footer">
+          <button class="alarm-btn" onclick="closeAlarmModal()">取消</button>
+          <button class="alarm-btn alarm-btn-primary" onclick="saveAlarmRule()">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab5: 关联规则链 -->
+    <div class="tab-content" id="tab-rules">
+      <div class="section-header">
+        <div class="section-title">关联规则链</div>
+        <div style="font-size:12px;color:#666;">此产品关联的规则链，修改将影响 <strong>${allDevices.length}</strong> 台设备</div>
+      </div>
+      <div class="rules-hint" style="background:#fff7e6;border:1px solid #ffd591;border-radius:4px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#d46b08;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        提示：全局规则请在对应管理页面修改。设备详情页仅支持查看，点击"查看源规则"将跳转至全局配置页面。
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>规则名称</th>
+            <th>规则来源</th>
+            <th>触发条件简述</th>
+            <th>当前设备状态</th>
+            <th>最近一次触发</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="rulesTableBody">
+          <!-- 动态渲染 -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tab6: 其他配置 -->
     <div class="tab-content" id="tab-config">
       <div class="section-header">
         <div class="section-title">其他配置</div>
@@ -930,33 +1170,6 @@ function renderPage() {
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Tab6: 关联规则链 -->
-    <div class="tab-content" id="tab-rules">
-      <div class="section-header">
-        <div class="section-title">关联规则链</div>
-        <div style="font-size:12px;color:#666;">此产品关联的规则链，修改将影响 <strong>${allDevices.length}</strong> 台设备</div>
-      </div>
-      <div class="rules-hint" style="background:#fff7e6;border:1px solid #ffd591;border-radius:4px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#d46b08;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        提示：全局规则请在对应管理页面修改。设备详情页仅支持查看，点击"查看源规则"将跳转至全局配置页面。
-      </div>
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>规则名称</th>
-            <th>规则来源</th>
-            <th>触发条件简述</th>
-            <th>当前设备状态</th>
-            <th>最近一次触发</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody id="rulesTableBody">
-          <!-- 动态渲染 -->
-        </tbody>
-      </table>
     </div>
   `;
   renderDeviceTable(allDevices);
@@ -1115,12 +1328,20 @@ function deleteCommandRow(idx) {
 
 // ==================== 告警配置管理 ====================
 let alarmsData = [];
+let editingAlarmIdx = -1; // -1 表示新增，>=0 表示编辑
 
 const alarmLevelMap = {
   critical: { label: '紧急', cls: 'level-critical' },
   major: { label: '严重', cls: 'level-major' },
   minor: { label: '警告', cls: 'level-minor' },
+  warning: { label: '提示', cls: 'level-minor' },
   normal: { label: '正常', cls: 'level-normal' }
+};
+
+const argLabelMap = {
+  temperature: '温度', humidity: '湿度', pressure: '压力', vibration: '振动',
+  voltage: '电压', current: '电流', power: '功率', status: '状态',
+  smoke: '烟雾浓度', speed: '速度', liquidLevel: '液位', healthScore: '健康评分'
 };
 
 function renderAlarmsTable(alarms) {
@@ -1130,28 +1351,212 @@ function renderAlarmsTable(alarms) {
     var lv = alarmLevelMap[a.level] || alarmLevelMap.normal;
     return '<tr>' +
       '<td style="font-weight:500">' + a.name + '</td>' +
-      '<td style="color:#666;font-size:12px">' + a.condition + '</td>' +
+      '<td style="color:#666;font-size:12px">' + (a.conditionDisplay || a.condition) + '</td>' +
       '<td><span class="' + lv.cls + '">' + lv.label + '</span></td>' +
       '<td><label class="toggle-switch"><input type="checkbox" ' + (a.enabled !== false ? 'checked' : '') + ' onchange="alarmsData[' + i + '].enabled=this.checked"><span class="toggle-slider"></span></label></td>' +
       '<td><div class="action-group">' +
-        '<button class="action-btn" style="background:#1890ff;color:#fff" onclick="showToast(\'编辑告警规则: ' + a.name + '\',\'info\')">编辑</button>' +
+        '<button class="action-btn" style="background:#008B8B;color:#fff" onclick="openAlarmModal(' + i + ')">编辑</button>' +
         '<button class="action-btn" style="background:#ff4d4f;color:#fff" onclick="deleteAlarmRow(' + i + ')">删除</button>' +
       '</div></td>' +
     '</tr>';
   }).join('');
 }
 
-function addAlarmRow() {
-  alarmsData.push({ name: '', level: 'critical', condition: '', desc: '', enabled: true });
+function openAlarmModal(idx) {
+  editingAlarmIdx = (idx !== undefined) ? idx : -1;
+  var modal = document.getElementById('alarmModalOverlay');
+  var title = document.getElementById('alarmModalTitle');
+
+  if (editingAlarmIdx >= 0) {
+    title.textContent = '编辑告警规则';
+    var a = alarmsData[editingAlarmIdx];
+    document.getElementById('alarmFormName').value = a.name || '';
+    document.getElementById('alarmFormDesc').value = a.desc || '';
+    selectSeverity(a.level || 'critical');
+    document.getElementById('alarmCondType').value = a.condType || 'simple';
+    document.getElementById('alarmCondValue').value = a.condValue || '';
+    toggleCondValueGroup();
+    // 解析条件
+    var conditions = a.conditions || [];
+    if (conditions.length === 0 && a.condition) {
+      conditions = [{ arg: 'temperature', op: '>', value: a.condition.replace(/[^0-9.]/g, '') }];
+    }
+    renderConditions(conditions);
+  } else {
+    title.textContent = '添加告警规则';
+    document.getElementById('alarmFormName').value = '';
+    document.getElementById('alarmFormDesc').value = '';
+    selectSeverity('critical');
+    document.getElementById('alarmCondType').value = 'simple';
+    document.getElementById('alarmCondValue').value = '';
+    toggleCondValueGroup();
+    renderConditions([{ arg: 'temperature', op: '>', value: '' }]);
+  }
+
+  modal.classList.add('open');
+}
+
+function closeAlarmModal() {
+  document.getElementById('alarmModalOverlay').classList.remove('open');
+  editingAlarmIdx = -1;
+}
+
+function selectSeverity(level) {
+  document.querySelectorAll('.alarm-severity-option').forEach(function(el) {
+    el.classList.toggle('selected', el.dataset.level === level);
+  });
+}
+
+function getSelectedSeverity() {
+  var sel = document.querySelector('.alarm-severity-option.selected');
+  return sel ? sel.dataset.level : 'critical';
+}
+
+function renderConditions(conditions) {
+  var container = document.getElementById('alarmConditions');
+  container.innerHTML = conditions.map(function(c, i) {
+    return '<div class="alarm-condition-block" data-idx="' + i + '">' +
+      '<div class="alarm-condition-header">' +
+        '<span>条件 ' + (i + 1) + '</span>' +
+        (conditions.length > 1 ? '<button class="alarm-btn alarm-btn-danger alarm-btn-sm" onclick="removeCondition(' + i + ')">删除</button>' : '') +
+      '</div>' +
+      '<div class="alarm-condition-row">' +
+        '<select class="arg-select" id="condArg' + i + '">' +
+          Object.keys(argLabelMap).map(function(k) {
+            return '<option value="' + k + '"' + (k === c.arg ? ' selected' : '') + '>' + argLabelMap[k] + '</option>';
+          }).join('') +
+        '</select>' +
+        '<select class="op-select" id="condOp' + i + '">' +
+          ['>', '>=', '<', '<=', '==', '!='].map(function(op) {
+            var labels = {'>':'大于 (>)','>=':'大于等于 (≥)','<':'小于 (<)','<=':'小于等于 (≤)','==':'等于 (=)','!=':'不等于 (≠)'};
+            return '<option value="' + op + '"' + (op === c.op ? ' selected' : '') + '>' + labels[op] + '</option>';
+          }).join('') +
+        '</select>' +
+        '<input type="text" class="val-input" id="condVal' + i + '" placeholder="阈值，如 40" value="' + (c.value || '') + '">' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function addCondition() {
+  var blocks = document.querySelectorAll('.alarm-condition-block');
+  var conditions = [];
+  blocks.forEach(function(b) {
+    var idx = b.dataset.idx;
+    conditions.push({
+      arg: document.getElementById('condArg' + idx).value,
+      op: document.getElementById('condOp' + idx).value,
+      value: document.getElementById('condVal' + idx).value
+    });
+  });
+  conditions.push({ arg: 'temperature', op: '>', value: '' });
+  renderConditions(conditions);
+}
+
+function removeCondition(idx) {
+  var blocks = document.querySelectorAll('.alarm-condition-block');
+  var conditions = [];
+  blocks.forEach(function(b) {
+    var i = b.dataset.idx;
+    if (i != idx) {
+      conditions.push({
+        arg: document.getElementById('condArg' + i).value,
+        op: document.getElementById('condOp' + i).value,
+        value: document.getElementById('condVal' + i).value
+      });
+    }
+  });
+  if (conditions.length === 0) conditions.push({ arg: 'temperature', op: '>', value: '' });
+  renderConditions(conditions);
+}
+
+function toggleCondValueGroup() {
+  var type = document.getElementById('alarmCondType').value;
+  var group = document.getElementById('alarmCondValueGroup');
+  var label = document.getElementById('alarmCondValueLabel');
+  if (type === 'simple') {
+    group.style.display = 'none';
+  } else {
+    group.style.display = 'block';
+    label.textContent = type === 'duration' ? '持续时间（秒）' : '重复次数';
+  }
+}
+
+function saveAlarmRule() {
+  var name = document.getElementById('alarmFormName').value.trim();
+  if (!name) {
+    showToast('请输入告警类型名称', 'error');
+    document.getElementById('alarmFormName').focus();
+    return;
+  }
+
+  var level = getSelectedSeverity();
+  var desc = document.getElementById('alarmFormDesc').value.trim();
+  var condType = document.getElementById('alarmCondType').value;
+  var condValue = document.getElementById('alarmCondValue').value;
+
+  // 收集条件
+  var conditions = [];
+  var blocks = document.querySelectorAll('.alarm-condition-block');
+  blocks.forEach(function(b) {
+    var idx = b.dataset.idx;
+    var arg = document.getElementById('condArg' + idx).value;
+    var op = document.getElementById('condOp' + idx).value;
+    var val = document.getElementById('condVal' + idx).value.trim();
+    if (val) {
+      conditions.push({ arg: arg, op: op, value: val });
+    }
+  });
+
+  if (conditions.length === 0) {
+    showToast('请至少填写一个完整的触发条件', 'error');
+    return;
+  }
+
+  // 生成条件显示文本
+  var conditionDisplay = conditions.map(function(c) {
+    return argLabelMap[c.arg] + ' ' + c.op + ' ' + c.value;
+  }).join(' 且 ');
+
+  var condTypeLabel = condType === 'simple' ? '' : (condType === 'duration' ? '（持续' + condValue + '秒）' : '（连续' + condValue + '次）');
+
+  var rule = {
+    name: name,
+    level: level,
+    condition: conditions.map(function(c) { return argLabelMap[c.arg] + c.op + c.value; }).join(' 且 '),
+    conditionDisplay: conditionDisplay + condTypeLabel,
+    conditions: conditions,
+    condType: condType,
+    condValue: condValue,
+    desc: desc,
+    enabled: true
+  };
+
+  if (editingAlarmIdx >= 0) {
+    rule.enabled = alarmsData[editingAlarmIdx].enabled !== false;
+    alarmsData[editingAlarmIdx] = rule;
+    showToast('告警规则已更新', 'success');
+  } else {
+    alarmsData.push(rule);
+    showToast('告警规则已添加', 'success');
+  }
+
   renderAlarmsTable(alarmsData);
-  showToast('已添加新告警规则', 'info');
+  closeAlarmModal();
 }
 
 function deleteAlarmRow(idx) {
+  var name = alarmsData[idx].name || '该告警规则';
+  if (!confirm('确定删除告警规则"' + name + '"？')) return;
   alarmsData.splice(idx, 1);
   renderAlarmsTable(alarmsData);
   showToast('告警规则已删除', 'success');
 }
+
+// 条件类型切换
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'alarmCondType') toggleCondValueGroup();
+});
 
 // ==================== 其他配置 ====================
 function toggleDataClean(checked) {
@@ -1226,7 +1631,7 @@ function renderProductRulesTable(product) {
       '<td><span class="badge badge-success">' + r.status + '</span></td>' +
       '<td style="font-size:12px;color:#666;white-space:nowrap">' + r.lastTrigger + '</td>' +
       '<td>' +
-        '<a href="' + jumpUrl + '" class="view-rule-link" onclick="alert(\'' + jumpHint + '\\n\\n即将跳转到规则管理页面\'); return true;">' +
+        '<a href="' + jumpUrl + '" class="view-rule-link">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
           '查看源规则' +
         '</a>' +

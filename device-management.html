@@ -258,6 +258,7 @@
   .device-card-avatar {
     width: 44px; height: 44px; border-radius: 10px; display: flex;
     align-items: center; justify-content: center; font-size: 22px;
+    font-weight: normal;
   }
   .device-card-info { flex: 1; min-width: 0; }
   .device-card-name { font-size: 14px; font-weight: 600; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -314,7 +315,7 @@
   .device-avatar {
     width: 36px; height: 36px; border-radius: 8px; display: flex;
     align-items: center; justify-content: center; font-size: 18px;
-    flex-shrink: 0;
+    flex-shrink: 0; font-weight: normal;
   }
   .device-name-text .name { font-weight: 500; color: #333; }
   .device-name-text .code { font-size: 11px; color: #aaa; font-family: 'Courier New', monospace; }
@@ -372,59 +373,12 @@
   .page-btn.active { background: #008B8B; color: #fff; border-color: #008B8B; }
 
   /* ===== DEVICE DETAIL DRAWER ===== */
-  .drawer-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.3); z-index: 200; display: none;
-    animation: fadeIn 0.2s ease;
-  }
-  .drawer-overlay.open { display: block; }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-  .drawer {
-    position: fixed; top: 0; right: -720px; width: 720px; height: 100%;
-    background: #f5f7fa; z-index: 201; box-shadow: -4px 0 24px rgba(0,0,0,0.15);
-    transition: right 0.3s ease; display: flex; flex-direction: column;
-  }
-  .drawer.open { right: 0; }
-
-  .drawer-header {
-    padding: 16px 24px; border-bottom: 1px solid #e8e8e8;
-    display: flex; align-items: center; justify-content: space-between;
-    flex-shrink: 0; background: #fff;
-  }
-  .drawer-header h3 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-  .drawer-close {
-    width: 32px; height: 32px; border-radius: 8px; border: none;
-    background: #f5f5f5; cursor: pointer; font-size: 16px; color: #666;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .drawer-close:hover { background: #eee; }
-
-  .drawer-body { flex: 1; overflow-y: auto; padding: 0; background: #f5f7fa; }
-  .drawer-body::-webkit-scrollbar { width: 4px; }
-  .drawer-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
-
-  /* Drawer Tabs */
-  .drawer-tabs {
-    display: flex; flex-wrap: nowrap; overflow-x: auto; background: #fff; border-bottom: 1px solid #e8e8e8;
-    padding: 0 24px; position: sticky; top: 0; z-index: 10;
-  }
-  .drawer-tabs::-webkit-scrollbar { display: none; }
-  .drawer-tab {
-    padding: 14px 16px; font-size: 13px; color: #666; cursor: pointer; white-space: nowrap;
-    border-bottom: 2px solid transparent; transition: all 0.2s; flex-shrink: 0;
-    background: none; border-top: none; border-left: none; border-right: none;
-  }
-  .drawer-tab:hover { color: #1890ff; }
-  .drawer-tab.active { color: #1890ff; border-bottom-color: #1890ff; font-weight: 500; }
-
-  .drawer-tab-content { display: none; padding: 20px 24px; }
-  .drawer-tab-content.active { display: block; }
+  /* ===== ADD TRIGGER MODAL ===== */
 
   /* Device Status Card */
   .device-status-card {
     background: #fff; border-radius: 8px; padding: 20px 24px;
-    margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
   }
   .device-status-header {
     display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
@@ -435,7 +389,7 @@
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
   }
   .status-item { text-align: center; padding: 12px; background: #f8f9fa; border-radius: 6px; }
-  .status-item-value { font-size: 24px; font-weight: 700; color: #1890ff; }
+  .status-item-value { font-size: 24px; font-weight: 700; color: #008B8B; }
   .status-item-value.success { color: #52c41a; }
   .status-item-value.warning { color: #faad14; }
   .status-item-value.danger { color: #ff4d4f; }
@@ -444,7 +398,7 @@
   /* Data Chart Placeholder */
   .chart-container {
     background: #fff; border-radius: 8px; padding: 20px;
-    margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     height: 280px; display: flex; flex-direction: column;
   }
   .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
@@ -458,7 +412,7 @@
   /* Command Panel */
   .command-panel {
     background: #fff; border-radius: 8px; padding: 20px;
-    margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
   }
   .command-list { display: flex; flex-direction: column; gap: 12px; }
   .command-item {
@@ -466,16 +420,16 @@
     padding: 16px; border: 1px solid #e8e8e8; border-radius: 6px;
     transition: all 0.2s;
   }
-  .command-item:hover { border-color: #1890ff; background: #f6fffe; }
+  .command-item:hover { border-color: #008B8B; background: #f0fffe; }
   .command-info { flex: 1; }
   .command-name { font-size: 14px; font-weight: 500; color: #333; margin-bottom: 4px; }
   .command-desc { font-size: 12px; color: #999; }
   .command-btn {
-    padding: 6px 16px; border-radius: 4px; border: 1px solid #1890ff;
-    background: #fff; color: #1890ff; font-size: 13px; cursor: pointer;
+    padding: 6px 16px; border-radius: 4px; border: 1px solid #008B8B;
+    background: #fff; color: #008B8B; font-size: 13px; cursor: pointer;
     transition: all 0.2s;
   }
-  .command-btn:hover { background: #1890ff; color: #fff; }
+  .command-btn:hover { background: #008B8B; color: #fff; }
   .command-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
   /* Rule Source Tags for Device Drawer */
@@ -483,14 +437,14 @@
   .pd-source-product { background: #e6f7ff; color: #0958d9; border: 1px solid #91d5ff; }
   .pd-source-group { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
   .pd-source-device { background: #fff2f0; color: #cf1322; border: 1px solid #ffccc7; }
-  .pd-view-rule-link { display: inline-flex; align-items: center; gap: 4px; color: #1890ff; font-size: 12px; text-decoration: none; padding: 4px 8px; border-radius: 4px; transition: all 0.2s; }
-  .pd-view-rule-link:hover { background: #e6f7ff; }
+  .pd-view-rule-link { display: inline-flex; align-items: center; gap: 4px; color: #008B8B; font-size: 12px; text-decoration: none; padding: 4px 8px; border-radius: 4px; transition: all 0.2s; }
+  .pd-view-rule-link:hover { background: #E0F7F7; }
   .pd-view-rule-link svg { width: 12px; height: 12px; }
 
   /* Event Log */
   .event-log {
     background: #fff; border-radius: 8px; padding: 20px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
   }
   .event-item {
     display: flex; align-items: flex-start; gap: 12px;
@@ -764,24 +718,6 @@
   </div>
 </div>
 
-<!-- DRAWER -->
-<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
-<div class="drawer" id="drawer">
-  <div class="drawer-header">
-    <h3 id="drawerTitle">设备详情</h3>
-    <button class="drawer-close" onclick="closeDrawer()">✕</button>
-  </div>
-  <div class="drawer-tabs" id="drawerTabs">
-    <button class="drawer-tab active" data-tab="overview" onclick="switchDrawerTab('overview')">📊 概览</button>
-    <button class="drawer-tab" data-tab="data" onclick="switchDrawerTab('data')">📈 实时数据</button>
-    <button class="drawer-tab" data-tab="history" onclick="switchDrawerTab('history')">📜 历史数据</button>
-    <button class="drawer-tab" data-tab="command" onclick="switchDrawerTab('command')">📡 指令下发</button>
-    <button class="drawer-tab" data-tab="events" onclick="switchDrawerTab('events')">📋 事件日志</button>
-    <button class="drawer-tab" data-tab="rules" onclick="switchDrawerTab('rules')">🔗 关联规则链</button>
-  </div>
-  <div class="drawer-body" id="drawerBody"></div>
-</div>
-
 <!-- ADD TRIGGER MODAL -->
 <div class="modal-overlay" id="triggerModal">
   <div class="modal">
@@ -864,30 +800,6 @@ function init() {
   filterDevices();
   updateStats();
   
-  // 处理URL参数：自动打开设备抽屉并切换到关联规则链Tab
-  const params = new URLSearchParams(window.location.search);
-  const deviceId = params.get('device');
-  const tab = params.get('tab');
-  if (deviceId) {
-    setTimeout(function() {
-      const device = devices.find(d => d.id === deviceId);
-      if (device) {
-        // 打开抽屉（不渲染内容）
-        currentDeviceId = deviceId;
-        currentDrawerTab = tab || 'overview';
-        document.getElementById('drawerTitle').innerHTML = DEVICE_TYPES[device.type].icon + ' ' + device.name + ' <span class="status-badge ' + device.status + '" style="font-size:12px">' + ({online:'在线运行',offline:'已离线',alarm:'告警中',warning:'预警'}[device.status]) + '</span>';
-        document.getElementById('drawerOverlay').classList.add('open');
-        document.getElementById('drawer').classList.add('open');
-        // 设置Tab状态
-        document.querySelectorAll('.drawer-tab').forEach(t => t.classList.remove('active'));
-        const targetTab = document.querySelector('.drawer-tab[data-tab="' + (tab || 'overview') + '"]');
-        if (targetTab) targetTab.classList.add('active');
-        // 渲染内容
-        renderDrawerContent(tab || 'overview');
-        renderSidebar();
-      }
-    }, 300);
-  }
 }
 
 // ===== SIDEBAR =====
@@ -912,7 +824,7 @@ function renderSidebar() {
       </div>
       <div class="tree-children" style="max-height:500px">
         ${g.devices.map(d => `
-          <div class="tree-item ${currentDeviceId === d.id ? 'active' : ''}" onclick="openDrawer('${d.id}')">
+          <div class="tree-item ${currentDeviceId === d.id ? 'active' : ''}" onclick="location.href='device-detail.html?id=${d.id}'">
             <span class="item-dot" style="background:${d.status === 'online' ? '#4CAF50' : d.status === 'alarm' ? '#f44336' : d.status === 'warning' ? '#FF9800' : '#9E9E9E'}"></span>
             ${d.name}
             <span class="item-status status-${d.status}">${d.status === 'online' ? '在线' : d.status === 'alarm' ? '告警' : d.status === 'warning' ? '预警' : '离线'}</span>
@@ -969,7 +881,7 @@ function renderTable(data) {
       return t ? t : null;
     }).filter(Boolean);
 
-    return `<tr onclick="openDrawer('${d.id}')">
+    return `<tr onclick="location.href='device-detail.html?id=${d.id}'">
       <td><input type="checkbox" onclick="event.stopPropagation()" /></td>
       <td>
         <div class="device-name-cell">
@@ -992,7 +904,7 @@ function renderTable(data) {
       <td style="font-size:12px;color:#999">${d.updatedAt}</td>
       <td>
         <div class="action-btns">
-          <button class="action-btn" onclick="event.stopPropagation();openDrawer('${d.id}')">详情</button>
+          <button class="action-btn" onclick="event.stopPropagation();location.href='device-detail.html?id=${d.id}'">详情</button>
           <button class="action-btn" onclick="event.stopPropagation();openAddTriggerForDevice('${d.id}')">关联</button>
           <button class="action-btn danger" onclick="event.stopPropagation();showToast('设备已停用','warning')">停用</button>
         </div>
@@ -1011,326 +923,6 @@ function updateStats() {
 }
 
 // ===== DRAWER =====
-let currentDrawerTab = 'overview';
-
-function openDrawer(deviceId) {
-  currentDeviceId = deviceId;
-  currentDrawerTab = 'overview';
-  const d = devices.find(x => x.id === deviceId);
-  if (!d) return;
-  const typeInfo = DEVICE_TYPES[d.type];
-  const statusText = { online: '在线运行', offline: '已离线', alarm: '告警中', warning: '预警' };
-
-  document.getElementById('drawerTitle').innerHTML = `${typeInfo.icon} ${d.name} <span class="status-badge ${d.status}" style="font-size:12px">${statusText[d.status]}</span>`;
-  
-  // Reset tabs
-  document.querySelectorAll('.drawer-tab').forEach(t => t.classList.remove('active'));
-  document.querySelector('.drawer-tab[data-tab="overview"]').classList.add('active');
-  
-  renderDrawerContent('overview');
-
-  document.getElementById('drawerOverlay').classList.add('open');
-  document.getElementById('drawer').classList.add('open');
-  renderSidebar();
-}
-
-function switchDrawerTab(tab) {
-  currentDrawerTab = tab;
-  document.querySelectorAll('.drawer-tab').forEach(t => t.classList.remove('active'));
-  document.querySelector(`.drawer-tab[data-tab="${tab}"]`).classList.add('active');
-  renderDrawerContent(tab);
-}
-
-function renderDrawerContent(tab) {
-  const d = devices.find(x => x.id === currentDeviceId);
-  if (!d) return;
-  const typeInfo = DEVICE_TYPES[d.type];
-  const statusText = { online: '在线运行', offline: '已离线', alarm: '告警中', warning: '预警' };
-
-  let content = '';
-
-  if (tab === 'overview') {
-    const triggerCards = d.triggers.map(tid => {
-      const t = TRIGGER_DEFS.find(x => x.id === tid);
-      if (!t) return '';
-      return `<div class="trigger-card" onclick="showToast('查看触发器: ${t.name}', 'info')">
-        <div class="trigger-card-icon">${t.icon}</div>
-        <div class="trigger-card-info">
-          <div class="name">${t.name}</div>
-          <div class="cond">${t.cond}</div>
-        </div>
-        <div class="trigger-card-actions">
-          <button class="action-btn danger" onclick="event.stopPropagation();removeTriggerFromDevice('${d.id}','${tid}')">解除</button>
-        </div>
-      </div>`;
-    }).join('');
-
-    const paramsHtml = Object.entries(d.params).map(([k, v]) => {
-      const labels = {
-        temp: '当前温度', co2: 'CO₂浓度', humidity: '湿度', speed: '转速',
-        runtime: '累计运行', power: '功率', level: '水位', pump1: '水泵1', pump2: '水泵2',
-        doors: '门数量', status: '状态', lastMaint: '上次维护', direction: '方向',
-        sensitivity: '灵敏度', battery: '电池电量', lastTest: '上次测试',
-        voltage: '电压', current: '电流', load: '负载率', backup: '备用时间',
-      };
-      return `<div class="detail-field"><div class="label">${labels[k] || k}</div><div class="value mono">${v}</div></div>`;
-    }).join('');
-
-    content = `
-      <div class="detail-section">
-        <div class="detail-section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>基本信息</div>
-        <div class="detail-grid">
-          <div class="detail-field"><div class="label">设备编码</div><div class="value mono">${d.id}</div></div>
-          <div class="detail-field"><div class="label">设备类型</div><div class="value"><span class="tag ${typeInfo.tagClass}">${typeInfo.name}</span></div></div>
-          <div class="detail-field"><div class="label">所属站点</div><div class="value">${d.station}</div></div>
-          <div class="detail-field"><div class="label">安装位置</div><div class="value">${d.location}</div></div>
-          <div class="detail-field"><div class="label">运行状态</div><div class="value"><span class="status-badge ${d.status}">${statusText[d.status]}</span></div></div>
-          <div class="detail-field"><div class="label">最近更新</div><div class="value">${d.updatedAt}</div></div>
-        </div>
-      </div>
-
-      <div class="detail-section">
-        <div class="detail-section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>实时参数</div>
-        <div class="detail-grid">${paramsHtml}</div>
-      </div>
-
-      <div class="detail-section">
-        <div class="detail-section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>关联触发器 (${d.triggers.length})</div>
-        ${triggerCards || '<p style="color:#999;font-size:13px;padding:12px 0">未关联任何触发器</p>'}
-        <button class="add-trigger-btn" onclick="openAddTriggerForDevice('${d.id}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>添加触发器关联</button>
-      </div>
-    `;
-  } else if (tab === 'data') {
-    content = `
-      <div class="device-status-card">
-        <div class="device-status-header">
-          <span class="device-status-title">实时数据监控</span>
-          <span style="font-size:12px;color:#999">数据每30秒自动刷新</span>
-        </div>
-        <div class="device-status-grid">
-          ${Object.entries(d.params).map(([k, v]) => {
-            const labels = { temp: '温度', co2: 'CO₂', humidity: '湿度', speed: '转速', runtime: '运行时长', power: '功率', level: '水位', pump1: '水泵1', pump2: '水泵2', doors: '门数', status: '状态', lastMaint: '维护', direction: '方向', sensitivity: '灵敏度', battery: '电量', lastTest: '测试', voltage: '电压', current: '电流', load: '负载', backup: '备用' };
-            return `<div class="status-item"><div class="status-item-value">${v}</div><div class="status-item-label">${labels[k] || k}</div></div>`;
-          }).join('')}
-        </div>
-      </div>
-      <div class="chart-container">
-        <div class="chart-header">
-          <span class="chart-title">📊 趋势图表（近24小时）</span>
-          <select style="padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px;font-size:12px">
-            <option>温度</option>
-            <option>湿度</option>
-            <option>CO₂浓度</option>
-          </select>
-        </div>
-        <div class="chart-placeholder">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d9d9d9" stroke-width="1.5" style="margin-right:12px">
-            <path d="M3 3v18h18"/>
-            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
-          </svg>
-          图表区域 - 可集成 ECharts 等图表库
-        </div>
-      </div>
-    `;
-  } else if (tab === 'history') {
-    content = `
-      <div class="command-panel">
-        <div class="chart-header">
-          <span class="chart-title">📜 历史数据查询</span>
-          <div style="display:flex;gap:8px">
-            <input type="date" value="2026-05-01" style="padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px;font-size:12px">
-            <input type="date" value="2026-06-01" style="padding:4px 8px;border:1px solid #d9d9d9;border-radius:4px;font-size:12px">
-            <button class="command-btn" onclick="showToast('查询中...','info')">查询</button>
-          </div>
-        </div>
-        <table class="data-table" style="margin-top:16px">
-          <thead>
-            <tr><th>时间</th><th>温度</th><th>湿度</th><th>CO₂</th><th>状态</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>2026-06-01 14:30</td><td>26.5°C</td><td>65%</td><td>680ppm</td><td><span class="badge badge-success">正常</span></td></tr>
-            <tr><td>2026-06-01 14:00</td><td>26.2°C</td><td>64%</td><td>675ppm</td><td><span class="badge badge-success">正常</span></td></tr>
-            <tr><td>2026-06-01 13:30</td><td>25.8°C</td><td>63%</td><td>660ppm</td><td><span class="badge badge-success">正常</span></td></tr>
-            <tr><td>2026-06-01 13:00</td><td>25.5°C</td><td>62%</td><td>650ppm</td><td><span class="badge badge-success">正常</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-    `;
-  } else if (tab === 'command') {
-    const commands = [
-      { name: '远程重启', desc: '重启设备并恢复初始状态', icon: '🔄' },
-      { name: '参数配置', desc: '修改设备运行参数', icon: '⚙️' },
-      { name: '固件升级', desc: 'OTA远程升级设备固件', icon: '⬆️' },
-      { name: '数据同步', desc: '强制同步设备缓存数据', icon: '📤' },
-    ];
-    content = `
-      <div class="command-panel">
-        <div class="chart-header">
-          <span class="chart-title">📡 指令下发</span>
-          <span style="font-size:12px;color:#52c41a">● 设备在线，可下发指令</span>
-        </div>
-        <div class="command-list">
-          ${commands.map(cmd => `
-            <div class="command-item">
-              <div class="command-info">
-                <div class="command-name">${cmd.icon} ${cmd.name}</div>
-                <div class="command-desc">${cmd.desc}</div>
-              </div>
-              <button class="command-btn" onclick="showToast('指令已发送: ${cmd.name}','success')">执行</button>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      <div class="command-panel">
-        <div class="chart-title" style="margin-bottom:12px">📝 自定义指令</div>
-        <div style="display:flex;gap:8px;margin-bottom:12px">
-          <input type="text" placeholder="指令名称" style="flex:1;padding:8px 12px;border:1px solid #d9d9d9;border-radius:4px;font-size:13px">
-          <input type="text" placeholder="参数(JSON格式)" style="flex:2;padding:8px 12px;border:1px solid #d9d9d9;border-radius:4px;font-size:13px">
-        </div>
-        <button class="command-btn" onclick="showToast('自定义指令已发送','success')">发送指令</button>
-      </div>
-    `;
-  } else if (tab === 'events') {
-    const events = [
-      { type: 'online', icon: '🟢', title: '设备上线', time: '2026-06-01 14:30:25', tag: '成功', tagClass: 'success' },
-      { type: 'command', icon: '📡', title: '参数配置指令已执行', time: '2026-06-01 14:25:10', tag: '成功', tagClass: 'success' },
-      { type: 'alarm', icon: '🚨', title: '温度超限告警触发', time: '2026-06-01 13:15:33', tag: '告警', tagClass: 'error' },
-      { type: 'offline', icon: '🔴', title: '设备离线', time: '2026-06-01 12:00:00', tag: '异常', tagClass: 'error' },
-      { type: 'online', icon: '🟢', title: '设备上线', time: '2026-06-01 08:30:15', tag: '成功', tagClass: 'success' },
-    ];
-    content = `
-      <div class="event-log">
-        <div class="chart-header" style="margin-bottom:16px">
-          <span class="chart-title">📋 事件日志</span>
-          <button class="command-btn" onclick="showToast('日志已导出','success')">导出日志</button>
-        </div>
-        ${events.map(e => `
-          <div class="event-item">
-            <div class="event-icon ${e.type}">${e.icon}</div>
-            <div class="event-content">
-              <div class="event-title">${e.title}</div>
-              <div class="event-time">${e.time}</div>
-            </div>
-            <span class="event-tag ${e.tagClass}">${e.tag}</span>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  } else if (tab === 'rules') {
-    // 获取当前设备关联的规则链（模拟数据）
-    const deviceRules = getDeviceRules(d.id, d.type);
-    content = `
-      <div class="drawer-tab-panel active">
-        <div class="pd-card">
-          <div class="pd-card-header">
-            <span class="pd-card-title">🔗 关联规则链</span>
-            <span style="font-size:12px;color:#666;">此设备受 ${deviceRules.length} 条规则链管控</span>
-          </div>
-          <div style="background:#fff7e6;border:1px solid #ffd591;border-radius:4px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#d46b08;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            提示：全局规则请在对应管理页面修改。此处仅支持查看，点击"查看源规则"将跳转至全局配置。
-          </div>
-          <table class="pd-table">
-            <thead>
-              <tr><th>规则名称</th><th>规则来源</th><th>触发条件简述</th><th>当前状态</th><th>最近一次触发</th><th>操作</th></tr>
-            </thead>
-            <tbody>
-              ${deviceRules.map(r => {
-                const sourceClass = r.source === 'product' ? 'pd-source-product' : (r.source === 'group' ? 'pd-source-group' : 'pd-source-device');
-                const sourceLabel = r.source === 'product' ? '产品全局' : (r.source === 'group' ? '群组全局' : '设备独立');
-                const jumpHint = r.source === 'product' 
-                  ? `您正在修改产品全局规则，此修改将影响同属于该产品的 ${r.affectedCount} 台设备`
-                  : (r.source === 'group' ? `您正在修改群组全局规则，此修改将影响同属于该群组的 ${r.affectedCount} 台设备` : '您正在修改设备独立规则，仅影响当前设备');
-                // 跳转到规则链编辑器页面，直接打开对应规则链
-                const RULE_ID_MAP = { 'RULE-001':1,'RULE-002':2,'RULE-003':3,'RULE-004':4,'RULE-005':5,'RULE-006':6,'RULE-007':7,'RULE-008':8,'RULE-009':9,'RULE-010':10,'RULE-011':11,'RULE-012':12,'RULE-013':13,'RULE-014':14,'RULE-015':15,'RULE-016':16 };
-                const chainId = RULE_ID_MAP[r.ruleId] || '';
-                const jumpUrl = chainId ? 'rule-chain-editor.html?chainId=' + chainId + '&from=device&deviceId=' + d.id + '&tab=rules' : '#';
-                return `<tr>
-                  <td style="font-weight:500;color:#333">${r.name}</td>
-                  <td><span class="pd-source-tag ${sourceClass}">${sourceLabel}</span></td>
-                  <td style="font-size:12px;color:#666">${r.condition}</td>
-                  <td><span class="pd-badge-online">${r.status}</span></td>
-                  <td style="font-size:12px;color:#666;white-space:nowrap">${r.lastTrigger}</td>
-                  <td>
-                    <a href="${jumpUrl}" class="pd-view-rule-link">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                      查看源规则
-                    </a>
-                  </td>
-                </tr>`;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-  }
-
-  document.getElementById('drawerBody').innerHTML = content;
-}
-
-// ===== 设备规则链数据（模拟） =====
-// 规则ID映射到 rule-chain-list.html 中的规则链ID (1-16)
-function getDeviceRules(deviceId, deviceType) {
-  // 根据设备类型返回关联的规则链
-  const typeMap = {
-    'hvac': 'PRD-001',
-    'door': 'PRD-002',
-    'fire': 'PRD-003',
-    'fan': 'PRD-004',
-    'pump': 'PRD-005',
-    'escalator': 'PRD-006',
-    'power': 'PRD-007'
-  };
-  const productId = typeMap[deviceType] || 'PRD-001';
-  
-  // 根据设备类型返回对应的规则链（映射到1-16）
-  const typeRules = {
-    'hvac': [
-      { ruleId: 'RULE-001', name: '温度告警联动规则', source: 'product', sourceId: productId, condition: '温度 > 28°C', status: '启用', lastTrigger: '2026-04-23 14:25', affectedCount: 4 },
-      { ruleId: 'RULE-008', name: '夜间温度监测规则', source: 'product', sourceId: productId, condition: '夜间温度 > 28°C', status: '启用', lastTrigger: '2026-04-22 22:15', affectedCount: 4 },
-      { ruleId: 'RULE-009', name: '一楼车间环境联动', source: 'group', sourceName: '一楼车间', condition: '温度>35°C且湿度>80%', status: '启用', lastTrigger: '2026-04-21 10:20', affectedCount: 12 }
-    ],
-    'door': [
-      { ruleId: 'RULE-011', name: '非法闯入检测规则', source: 'product', sourceId: productId, condition: '未授权刷卡', status: '启用', lastTrigger: '2026-04-22 22:10', affectedCount: 3 },
-      { ruleId: 'RULE-012', name: '门禁故障检测规则', source: 'product', sourceId: productId, condition: '设备响应超时', status: '启用', lastTrigger: '2026-04-18 09:45', affectedCount: 3 },
-      { ruleId: 'RULE-013', name: '北京分公司安全策略', source: 'group', sourceName: '北京分公司', condition: '非工作时间开门', status: '启用', lastTrigger: '2026-04-23 02:30', affectedCount: 15 }
-    ],
-    'fire': [
-      { ruleId: 'RULE-006', name: '消防安全规则', source: 'product', sourceId: productId, condition: '烟雾浓度 > 15%', status: '启用', lastTrigger: '2026-04-22 18:20', affectedCount: 3 },
-      { ruleId: 'RULE-014', name: '设备自检异常规则', source: 'product', sourceId: productId, condition: '自检失败', status: '启用', lastTrigger: '—', affectedCount: 3 },
-      { ruleId: 'RULE-013', name: '消防联动策略', source: 'group', sourceName: '消防组', condition: '任意烟感触发', status: '启用', lastTrigger: '2026-04-22 18:20', affectedCount: 28 }
-    ],
-    'fan': [
-      { ruleId: 'RULE-002', name: '通风系统故障规则', source: 'product', sourceId: productId, condition: '转速异常或停转', status: '启用', lastTrigger: '2026-04-23 14:10', affectedCount: 2 },
-      { ruleId: 'RULE-015', name: '功率异常检测规则', source: 'product', sourceId: productId, condition: '功率偏差 > 30%', status: '启用', lastTrigger: '2026-04-19 11:30', affectedCount: 2 }
-    ],
-    'pump': [
-      { ruleId: 'RULE-003', name: '排水系统告警规则', source: 'product', sourceId: productId, condition: '液位 > 80%', status: '启用', lastTrigger: '2026-04-23 13:45', affectedCount: 2 },
-      { ruleId: 'RULE-016', name: '水泵故障检测规则', source: 'product', sourceId: productId, condition: '水泵启动失败', status: '启用', lastTrigger: '2026-04-15 07:20', affectedCount: 2 },
-      { ruleId: 'RULE-009', name: '雨季排水联动策略', source: 'group', sourceName: '排水组', condition: '降雨+液位>70%', status: '启用', lastTrigger: '2026-04-10 15:40', affectedCount: 6 }
-    ],
-    'escalator': [
-      { ruleId: 'RULE-005', name: '电扶梯安全规则', source: 'product', sourceId: productId, condition: '急停按钮触发', status: '启用', lastTrigger: '2026-04-23 12:00', affectedCount: 2 },
-      { ruleId: 'RULE-012', name: '速度异常检测规则', source: 'product', sourceId: productId, condition: '速度偏差 > 10%', status: '启用', lastTrigger: '2026-04-20 14:15', affectedCount: 2 }
-    ],
-    'power': [
-      { ruleId: 'RULE-007', name: '供电安全规则', source: 'product', sourceId: productId, condition: '电压 < 370V 或负载 > 90%', status: '启用', lastTrigger: '2026-04-23 10:00', affectedCount: 2 },
-      { ruleId: 'RULE-016', name: '过载检测规则', source: 'product', sourceId: productId, condition: '负载率 > 90%', status: '启用', lastTrigger: '2026-04-17 16:45', affectedCount: 2 },
-      { ruleId: 'RULE-010', name: '供电安全联动策略', source: 'group', sourceName: '供电组', condition: 'UPS切换+负载>80%', status: '启用', lastTrigger: '2026-04-22 15:50', affectedCount: 10 }
-    ]
-  };
-  
-  return typeRules[deviceType] || typeRules['hvac'];
-}
-
-function closeDrawer() {
-  document.getElementById('drawerOverlay').classList.remove('open');
-  document.getElementById('drawer').classList.remove('open');
-  currentDeviceId = null;
-  renderSidebar();
-}
-
 // ===== TRIGGER ASSOCIATION =====
 function openAddTriggerForDevice(deviceId) {
   currentDeviceId = deviceId;
@@ -1376,9 +968,6 @@ function confirmTriggerAssociation() {
   closeTriggerModal();
   filterDevices();
   updateStats();
-  if (document.getElementById('drawer').classList.contains('open')) {
-    openDrawer(currentDeviceId);
-  }
   showToast(`已更新 ${d.name} 的触发器关联 (${d.triggers.length}个)`, 'success');
 }
 
@@ -1387,7 +976,6 @@ function removeTriggerFromDevice(deviceId, triggerId) {
   if (!d) return;
   d.triggers = d.triggers.filter(t => t !== triggerId);
   const t = TRIGGER_DEFS.find(x => x.id === triggerId);
-  openDrawer(deviceId);
   filterDevices();
   updateStats();
   showToast(`已解除触发器: ${t?.name || triggerId}`, 'warning');
@@ -1419,7 +1007,7 @@ function renderCards(data) {
       const t = TRIGGER_DEFS.find(x => x.id === tid);
       return t ? t : null;
     }).filter(Boolean);
-    return '<div class="device-card" onclick="openDrawer(\'' + d.id + '\')">' +
+    return '<div class="device-card" onclick="location.href=\'device-detail.html?id=' + d.id + '\'"' +
       '<div class="device-card-status"><span class="status-badge ' + d.status + '">' + statusText[d.status] + '</span></div>' +
       '<div class="device-card-header">' +
         '<div class="device-card-avatar" style="background:' + typeInfo.bgColor + '">' + typeInfo.icon + '</div>' +
@@ -1469,5 +1057,6 @@ function toggleNavSubmenu(el) {
 // ===== START =====
 init();
 </script>
+
 </body>
 </html>

@@ -860,6 +860,98 @@ tbody tr:hover {
 .pd-level-major { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: var(--warning-bg); color: var(--warning); border: 1px solid #fcd34d; }
 .pd-level-minor { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: var(--info-bg); color: var(--info); border: 1px solid #93c5fd; }
 
+/* Alarm Rule Modal */
+.pd-alarm-overlay {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45); z-index: 1000; align-items: center; justify-content: center;
+}
+.pd-alarm-overlay.open { display: flex; }
+.pd-alarm-modal {
+  background: #fff; border-radius: 12px; width: 580px; max-height: 85vh; overflow-y: auto;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15); animation: pdModalIn 0.2s ease;
+}
+@keyframes pdModalIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+.pd-alarm-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px; border-bottom: 1px solid var(--border-light);
+}
+.pd-alarm-modal-header h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); margin: 0; }
+.pd-alarm-modal-close {
+  width: 28px; height: 28px; border: none; background: var(--bg); border-radius: 6px;
+  cursor: pointer; font-size: 16px; color: var(--text-muted); display: flex; align-items: center; justify-content: center;
+}
+.pd-alarm-modal-close:hover { background: var(--border); color: var(--text-primary); }
+.pd-alarm-modal-body { padding: 20px 24px; }
+.pd-alarm-form-group { margin-bottom: 18px; }
+.pd-alarm-form-label {
+  display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.pd-alarm-form-label .required { color: var(--danger); margin-left: 2px; }
+.pd-alarm-form-input, .pd-alarm-form-select, .pd-alarm-form-textarea {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 13px; color: var(--text-primary); outline: none; transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+.pd-alarm-form-input:focus, .pd-alarm-form-select:focus, .pd-alarm-form-textarea:focus {
+  border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0,139,139,0.1);
+}
+.pd-alarm-form-textarea { resize: vertical; min-height: 60px; }
+.pd-alarm-form-row { display: flex; gap: 12px; }
+.pd-alarm-form-row .pd-alarm-form-group { flex: 1; }
+.pd-alarm-form-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+.pd-alarm-condition-block {
+  background: var(--border-light); border: 1px solid var(--border); border-radius: 8px; padding: 14px;
+  margin-bottom: 12px;
+}
+.pd-alarm-condition-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px; font-size: 13px; font-weight: 500; color: var(--text-secondary);
+}
+.pd-alarm-condition-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.pd-alarm-condition-row select, .pd-alarm-condition-row input {
+  padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 12px; color: var(--text-primary); outline: none;
+}
+.pd-alarm-condition-row select:focus, .pd-alarm-condition-row input:focus { border-color: var(--primary); }
+.pd-alarm-condition-row .arg-select { width: 120px; }
+.pd-alarm-condition-row .op-select { width: 100px; }
+.pd-alarm-condition-row .val-input { flex: 1; }
+.pd-alarm-modal-footer {
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+  padding: 14px 24px; border-top: 1px solid var(--border-light);
+}
+.pd-alarm-severity-select { display: flex; gap: 8px; }
+.pd-alarm-severity-option {
+  flex: 1; padding: 8px; border: 2px solid var(--border); border-radius: 8px;
+  text-align: center; cursor: pointer; font-size: 12px; font-weight: 500;
+  transition: all 0.15s; background: #fff;
+}
+.pd-alarm-severity-option:hover { border-color: var(--text-muted); }
+.pd-alarm-severity-option.selected { border-color: currentColor; }
+.pd-alarm-severity-option.sev-critical { color: var(--danger); }
+.pd-alarm-severity-option.sev-critical.selected { background: var(--danger-bg); }
+.pd-alarm-severity-option.sev-major { color: var(--warning); }
+.pd-alarm-severity-option.sev-major.selected { background: var(--warning-bg); }
+.pd-alarm-severity-option.sev-minor { color: var(--info); }
+.pd-alarm-severity-option.sev-minor.selected { background: var(--info-bg); }
+.pd-alarm-severity-option.sev-warning { color: #8B5CF6; }
+.pd-alarm-severity-option.sev-warning.selected { background: #F5F3FF; }
+.pd-alarm-severity-option .sev-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  margin-right: 4px; vertical-align: middle;
+}
+.pd-alarm-severity-option.sev-critical .sev-dot { background: var(--danger); }
+.pd-alarm-severity-option.sev-major .sev-dot { background: var(--warning); }
+.pd-alarm-severity-option.sev-minor .sev-dot { background: var(--info); }
+.pd-alarm-severity-option.sev-warning .sev-dot { background: #8B5CF6; }
+.pd-alarm-btn-add {
+  display: flex; align-items: center; gap: 4px; padding: 6px 12px;
+  border: 1px dashed var(--border); border-radius: 6px; background: #fff;
+  color: var(--text-secondary); font-size: 12px; cursor: pointer; transition: all 0.15s;
+}
+.pd-alarm-btn-add:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-lighter); }
+
 /* Status badges */
 .pd-badge-online { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: var(--success-bg); color: var(--success); border: 1px solid #6ee7b7; }
 .pd-badge-offline { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; background: var(--warning-bg); color: var(--warning); border: 1px solid #fcd34d; }
@@ -1234,7 +1326,7 @@ tbody tr:hover {
     <button class="drawer-tab active" data-tab="overview" onclick="switchPdTab('overview')">📋 设备列表</button>
     <button class="drawer-tab" data-tab="things" onclick="switchPdTab('things')">🔧 物模型</button>
     <button class="drawer-tab" data-tab="commands" onclick="switchPdTab('commands')">📡 指令配置</button>
-    <button class="drawer-tab" data-tab="alarms" onclick="switchPdTab('alarms')">🚨 告警配置</button>
+    <button class="drawer-tab" data-tab="alarms" onclick="switchPdTab('alarms')">🚨 告警规则配置</button>
     <button class="drawer-tab" data-tab="config" onclick="switchPdTab('config')">⚙️ 其他配置</button>
   </div>
   <div class="drawer-body" id="drawerBody">
@@ -1828,7 +1920,7 @@ function renderPdContent(tab) {
           <div class="pd-card-header">
             <span class="pd-card-title">🚨 告警规则配置</span>
             <div class="pd-card-actions">
-              <button class="pd-btn pd-btn-primary" onclick="pdAddAlarmRow()">+ 添加告警规则</button>
+              <button class="pd-btn pd-btn-primary" onclick="pdOpenAlarmModal()">+ 添加告警规则</button>
               <button class="pd-btn" style="color:var(--info);border-color:var(--info)" onclick="showToast('已同步到所有设备','success')">同步到所有设备</button>
             </div>
           </div>
@@ -1837,12 +1929,12 @@ function renderPdContent(tab) {
             <tbody>
               ${pdAlarmsData.map((a,i) => { const lv = levelMap[a.level] || levelMap.minor; return `<tr>
                 <td style="font-weight:500">${a.name}</td>
-                <td style="color:var(--text-secondary);font-size:12px">${a.condition}</td>
+                <td style="color:var(--text-secondary);font-size:12px">${a.conditionDisplay || a.condition}</td>
                 <td><span class="${lv.cls}">${lv.label}</span></td>
                 <td><label class="pd-toggle"><input type="checkbox" ${a.enabled!==false?'checked':''} onchange="pdAlarmsData[${i}].enabled=this.checked"><span class="pd-toggle-slider"></span></label></td>
                 <td><div style="display:flex;gap:4px">
-                  <button class="pd-btn" onclick="showToast('编辑告警规则: ${a.name}','info')">编辑</button>
-                  <button class="pd-btn pd-btn-danger" onclick="pdDeleteAlarmRow(${i})">删除</button>
+                  <button class="pd-btn" onclick="pdOpenAlarmModal(${i})">编辑</button>
+                  <button class="pd-btn pd-btn-danger" onclick="pdAlarmsData.splice(${i},1);renderPdContent('alarms');showToast('告警规则已删除','success')">删除</button>
                 </div></td>
               </tr>`; }).join('')}
             </tbody>
@@ -1933,15 +2025,141 @@ function pdDeleteCommandRow(idx) {
 }
 
 // ===== 告警操作 =====
-function pdAddAlarmRow() {
-  pdAlarmsData.push({ name: '', level: 'critical', condition: '', desc: '', enabled: true });
-  renderPdContent('alarms');
-  showToast('已添加新告警规则', 'info');
+let pdEditingAlarmIdx = -1;
+const pdArgLabelMap = {
+  temperature: '温度', humidity: '湿度', pressure: '压力', vibration: '振动',
+  voltage: '电压', current: '电流', power: '功率', status: '状态',
+  smoke: '烟雾浓度', speed: '速度', liquidLevel: '液位', healthScore: '健康评分'
+};
+
+function pdOpenAlarmModal(idx) {
+  pdEditingAlarmIdx = (idx !== undefined) ? idx : -1;
+  var modal = document.getElementById('pdAlarmModalOverlay');
+  var title = document.getElementById('pdAlarmModalTitle');
+  if (pdEditingAlarmIdx >= 0) {
+    title.textContent = '编辑告警规则';
+    var a = pdAlarmsData[pdEditingAlarmIdx];
+    document.getElementById('pdAlarmFormName').value = a.name || '';
+    document.getElementById('pdAlarmFormDesc').value = a.desc || '';
+    pdSelectSeverity(a.level || 'critical');
+    document.getElementById('pdAlarmCondType').value = a.condType || 'simple';
+    document.getElementById('pdAlarmCondValue').value = a.condValue || '';
+    pdToggleCondValueGroup();
+    var conditions = a.conditions || [];
+    if (conditions.length === 0 && a.condition) {
+      conditions = [{ arg: 'temperature', op: '>', value: a.condition.replace(/[^0-9.]/g, '') }];
+    }
+    pdRenderConditions(conditions);
+  } else {
+    title.textContent = '添加告警规则';
+    document.getElementById('pdAlarmFormName').value = '';
+    document.getElementById('pdAlarmFormDesc').value = '';
+    pdSelectSeverity('critical');
+    document.getElementById('pdAlarmCondType').value = 'simple';
+    document.getElementById('pdAlarmCondValue').value = '';
+    pdToggleCondValueGroup();
+    pdRenderConditions([{ arg: 'temperature', op: '>', value: '' }]);
+  }
+  modal.classList.add('open');
 }
-function pdDeleteAlarmRow(idx) {
-  pdAlarmsData.splice(idx, 1);
+
+function closePdAlarmModal() {
+  document.getElementById('pdAlarmModalOverlay').classList.remove('open');
+  pdEditingAlarmIdx = -1;
+}
+
+function pdSelectSeverity(level) {
+  document.querySelectorAll('.pd-alarm-severity-option').forEach(function(el) {
+    el.classList.toggle('selected', el.dataset.level === level);
+  });
+}
+
+function pdGetSelectedSeverity() {
+  var sel = document.querySelector('.pd-alarm-severity-option.selected');
+  return sel ? sel.dataset.level : 'critical';
+}
+
+function pdRenderConditions(conditions) {
+  var container = document.getElementById('pdAlarmConditions');
+  container.innerHTML = conditions.map(function(c, i) {
+    return '<div class="pd-alarm-condition-block" data-idx="' + i + '">' +
+      '<div class="pd-alarm-condition-header"><span>条件 ' + (i + 1) + '</span>' +
+      (conditions.length > 1 ? '<button class="pd-btn pd-btn-danger" style="padding:2px 8px;font-size:11px" onclick="pdRemoveCondition(' + i + ')">删除</button>' : '') +
+      '</div>' +
+      '<div class="pd-alarm-condition-row">' +
+        '<select class="arg-select" id="pdCondArg' + i + '">' +
+          Object.keys(pdArgLabelMap).map(function(k) {
+            return '<option value="' + k + '"' + (k === c.arg ? ' selected' : '') + '>' + pdArgLabelMap[k] + '</option>';
+          }).join('') +
+        '</select>' +
+        '<select class="op-select" id="pdCondOp' + i + '">' +
+          ['>', '>=', '<', '<=', '==', '!='].map(function(op) {
+            var labels = {'>':'大于 (>)','>=':'大于等于 (≥)','<':'小于 (<)','<=':'小于等于 (≤)','==':'等于 (=)','!=':'不等于 (≠)'};
+            return '<option value="' + op + '"' + (op === c.op ? ' selected' : '') + '>' + labels[op] + '</option>';
+          }).join('') +
+        '</select>' +
+        '<input type="text" class="val-input" id="pdCondVal' + i + '" placeholder="阈值，如 40" value="' + (c.value || '') + '">' +
+      '</div></div>';
+  }).join('');
+}
+
+function pdAddCondition() {
+  var blocks = document.querySelectorAll('.pd-alarm-condition-block');
+  var conditions = [];
+  blocks.forEach(function(b) {
+    var idx = b.dataset.idx;
+    conditions.push({ arg: document.getElementById('pdCondArg' + idx).value, op: document.getElementById('pdCondOp' + idx).value, value: document.getElementById('pdCondVal' + idx).value });
+  });
+  conditions.push({ arg: 'temperature', op: '>', value: '' });
+  pdRenderConditions(conditions);
+}
+
+function pdRemoveCondition(idx) {
+  var blocks = document.querySelectorAll('.pd-alarm-condition-block');
+  var conditions = [];
+  blocks.forEach(function(b) {
+    var i = b.dataset.idx;
+    if (i != idx) conditions.push({ arg: document.getElementById('pdCondArg' + i).value, op: document.getElementById('pdCondOp' + i).value, value: document.getElementById('pdCondVal' + i).value });
+  });
+  if (conditions.length === 0) conditions.push({ arg: 'temperature', op: '>', value: '' });
+  pdRenderConditions(conditions);
+}
+
+function pdToggleCondValueGroup() {
+  var type = document.getElementById('pdAlarmCondType').value;
+  var group = document.getElementById('pdAlarmCondValueGroup');
+  var label = document.getElementById('pdAlarmCondValueLabel');
+  if (type === 'simple') { group.style.display = 'none'; }
+  else { group.style.display = 'block'; label.textContent = type === 'duration' ? '持续时间（秒）' : '重复次数'; }
+}
+
+function pdSaveAlarmRule() {
+  var name = document.getElementById('pdAlarmFormName').value.trim();
+  if (!name) { showToast('请输入告警类型名称', 'error'); return; }
+  var level = pdGetSelectedSeverity();
+  var desc = document.getElementById('pdAlarmFormDesc').value.trim();
+  var condType = document.getElementById('pdAlarmCondType').value;
+  var condValue = document.getElementById('pdAlarmCondValue').value;
+  var conditions = [];
+  document.querySelectorAll('.pd-alarm-condition-block').forEach(function(b) {
+    var idx = b.dataset.idx;
+    var val = document.getElementById('pdCondVal' + idx).value.trim();
+    if (val) conditions.push({ arg: document.getElementById('pdCondArg' + idx).value, op: document.getElementById('pdCondOp' + idx).value, value: val });
+  });
+  if (conditions.length === 0) { showToast('请至少填写一个完整的触发条件', 'error'); return; }
+  var conditionDisplay = conditions.map(function(c) { return pdArgLabelMap[c.arg] + ' ' + c.op + ' ' + c.value; }).join(' 且 ');
+  var condTypeLabel = condType === 'simple' ? '' : (condType === 'duration' ? '（持续' + condValue + '秒）' : '（连续' + condValue + '次）');
+  var rule = { name: name, level: level, condition: conditionDisplay, conditionDisplay: conditionDisplay + condTypeLabel, conditions: conditions, condType: condType, condValue: condValue, desc: desc, enabled: true };
+  if (pdEditingAlarmIdx >= 0) {
+    rule.enabled = pdAlarmsData[pdEditingAlarmIdx].enabled !== false;
+    pdAlarmsData[pdEditingAlarmIdx] = rule;
+    showToast('告警规则已更新', 'success');
+  } else {
+    pdAlarmsData.push(rule);
+    showToast('告警规则已添加', 'success');
+  }
   renderPdContent('alarms');
-  showToast('告警规则已删除', 'success');
+  closePdAlarmModal();
 }
 
 function closeDrawer() {
@@ -2012,5 +2230,74 @@ document.addEventListener('keydown', (e) => {
 // Init
 init();
 </script>
+
+<!-- Alarm Rule Modal -->
+<div class="pd-alarm-overlay" id="pdAlarmModalOverlay" onclick="if(event.target===this)closePdAlarmModal()">
+  <div class="pd-alarm-modal">
+    <div class="pd-alarm-modal-header">
+      <h3 id="pdAlarmModalTitle">添加告警规则</h3>
+      <button class="pd-alarm-modal-close" onclick="closePdAlarmModal()">✕</button>
+    </div>
+    <div class="pd-alarm-modal-body">
+      <div class="pd-alarm-form-group">
+        <label class="pd-alarm-form-label">告警类型 <span class="required">*</span></label>
+        <input type="text" class="pd-alarm-form-input" id="pdAlarmFormName" placeholder="例如：高温告警" autocomplete="off">
+        <div class="pd-alarm-form-hint">告警类型的唯一标识，用于区分不同告警</div>
+      </div>
+      <div class="pd-alarm-form-group">
+        <label class="pd-alarm-form-label">告警级别 <span class="required">*</span></label>
+        <div class="pd-alarm-severity-select" id="pdAlarmSeveritySelect">
+          <div class="pd-alarm-severity-option sev-critical" data-level="critical" onclick="pdSelectSeverity('critical')"><span class="sev-dot"></span><span>紧急</span></div>
+          <div class="pd-alarm-severity-option sev-major" data-level="major" onclick="pdSelectSeverity('major')"><span class="sev-dot"></span><span>严重</span></div>
+          <div class="pd-alarm-severity-option sev-minor" data-level="minor" onclick="pdSelectSeverity('minor')"><span class="sev-dot"></span><span>警告</span></div>
+          <div class="pd-alarm-severity-option sev-warning" data-level="warning" onclick="pdSelectSeverity('warning')"><span class="sev-dot"></span><span>提示</span></div>
+        </div>
+      </div>
+      <div class="pd-alarm-form-group">
+        <label class="pd-alarm-form-label">触发条件</label>
+        <div id="pdAlarmConditions">
+          <div class="pd-alarm-condition-block" data-idx="0">
+            <div class="pd-alarm-condition-header"><span>条件 1</span></div>
+            <div class="pd-alarm-condition-row">
+              <select class="arg-select" id="pdCondArg0">
+                <option value="temperature">温度</option><option value="humidity">湿度</option><option value="pressure">压力</option><option value="vibration">振动</option><option value="voltage">电压</option><option value="current">电流</option><option value="power">功率</option><option value="status">状态</option><option value="smoke">烟雾浓度</option><option value="speed">速度</option><option value="liquidLevel">液位</option><option value="healthScore">健康评分</option>
+              </select>
+              <select class="op-select" id="pdCondOp0">
+                <option value=">">大于 (>)</option><option value=">=">大于等于 (≥)</option><option value="<">小于 (<)</option><option value="<=">小于等于 (≤)</option><option value="==">等于 (=)</option><option value="!=">不等于 (≠)</option>
+              </select>
+              <input type="text" class="val-input" id="pdCondVal0" placeholder="阈值，如 40">
+            </div>
+          </div>
+        </div>
+        <button class="pd-alarm-btn-add" onclick="pdAddCondition()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          添加条件
+        </button>
+        <div class="pd-alarm-form-hint" style="margin-top:6px">多个条件之间为"且"关系</div>
+      </div>
+      <div class="pd-alarm-form-row">
+        <div class="pd-alarm-form-group">
+          <label class="pd-alarm-form-label">条件类型</label>
+          <select class="pd-alarm-form-select" id="pdAlarmCondType" onchange="pdToggleCondValueGroup()">
+            <option value="simple">立即触发</option><option value="duration">持续时间</option><option value="repeating">重复次数</option>
+          </select>
+        </div>
+        <div class="pd-alarm-form-group" id="pdAlarmCondValueGroup" style="display:none">
+          <label class="pd-alarm-form-label" id="pdAlarmCondValueLabel">持续时间（秒）</label>
+          <input type="number" class="pd-alarm-form-input" id="pdAlarmCondValue" placeholder="60" min="1">
+        </div>
+      </div>
+      <div class="pd-alarm-form-group">
+        <label class="pd-alarm-form-label">描述</label>
+        <textarea class="pd-alarm-form-textarea" id="pdAlarmFormDesc" placeholder="告警规则的详细描述（可选）"></textarea>
+      </div>
+    </div>
+    <div class="pd-alarm-modal-footer">
+      <button class="pd-btn" onclick="closePdAlarmModal()">取消</button>
+      <button class="pd-btn pd-btn-primary" onclick="pdSaveAlarmRule()">保存</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

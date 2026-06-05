@@ -305,6 +305,76 @@
     background: rgba(0,0,0,0.3); z-index: 200; display: none;
   }
   .drawer-overlay.open { display: block; }
+
+  /* Alarm Rule Modal */
+  .alarm-modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.45); z-index: 300; align-items: center; justify-content: center;
+  }
+  .alarm-modal-overlay.open { display: flex; }
+  .alarm-modal {
+    background: #fff; border-radius: 12px; width: 600px; max-height: 85vh; overflow-y: auto;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15); animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  .alarm-modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px; border-bottom: 1px solid #f0f0f0;
+  }
+  .alarm-modal-header h3 { font-size: 16px; font-weight: 600; color: #1F2937; margin: 0; }
+  .alarm-modal-close {
+    width: 28px; height: 28px; border: none; background: #f5f5f5; border-radius: 6px;
+    cursor: pointer; font-size: 16px; color: #999; display: flex; align-items: center; justify-content: center;
+  }
+  .alarm-modal-close:hover { background: #e8e8e8; color: #333; }
+  .alarm-modal-body { padding: 20px 24px; }
+  .alarm-form-group { margin-bottom: 18px; }
+  .alarm-form-label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
+  .alarm-form-label .required { color: #EF4444; margin-left: 2px; }
+  .alarm-form-input, .alarm-form-select, .alarm-form-textarea {
+    width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 8px;
+    font-size: 13px; color: #1F2937; outline: none; transition: border-color 0.15s; box-sizing: border-box;
+  }
+  .alarm-form-input:focus, .alarm-form-select:focus, .alarm-form-textarea:focus { border-color: #008B8B; box-shadow: 0 0 0 2px rgba(0,139,139,0.1); }
+  .alarm-form-textarea { resize: vertical; min-height: 60px; }
+  .alarm-form-row { display: flex; gap: 12px; }
+  .alarm-form-row .alarm-form-group { flex: 1; }
+  .alarm-form-hint { font-size: 11px; color: #9CA3AF; margin-top: 4px; }
+  .alarm-condition-block { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+  .alarm-condition-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 13px; font-weight: 500; color: #374151; }
+  .alarm-condition-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .alarm-condition-row select, .alarm-condition-row input { padding: 6px 10px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 12px; color: #1F2937; outline: none; }
+  .alarm-condition-row select:focus, .alarm-condition-row input:focus { border-color: #008B8B; }
+  .alarm-condition-row .arg-select { width: 120px; }
+  .alarm-condition-row .op-select { width: 100px; }
+  .alarm-condition-row .val-input { flex: 1; }
+  .alarm-modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 14px 24px; border-top: 1px solid #f0f0f0; }
+  .alarm-severity-select { display: flex; gap: 8px; }
+  .alarm-severity-option { flex: 1; padding: 8px; border: 2px solid #E5E7EB; border-radius: 8px; text-align: center; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.15s; background: #fff; }
+  .alarm-severity-option:hover { border-color: #D1D5DB; }
+  .alarm-severity-option.selected { border-color: currentColor; }
+  .alarm-severity-option.sev-critical { color: #EF4444; }
+  .alarm-severity-option.sev-critical.selected { background: #FEF2F2; }
+  .alarm-severity-option.sev-major { color: #F59E0B; }
+  .alarm-severity-option.sev-major.selected { background: #FFFBEB; }
+  .alarm-severity-option.sev-minor { color: #3B82F6; }
+  .alarm-severity-option.sev-minor.selected { background: #EFF6FF; }
+  .alarm-severity-option.sev-warning { color: #8B5CF6; }
+  .alarm-severity-option.sev-warning.selected { background: #F5F3FF; }
+  .alarm-severity-option .sev-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+  .alarm-severity-option.sev-critical .sev-dot { background: #EF4444; }
+  .alarm-severity-option.sev-major .sev-dot { background: #F59E0B; }
+  .alarm-severity-option.sev-minor .sev-dot { background: #3B82F6; }
+  .alarm-severity-option.sev-warning .sev-dot { background: #8B5CF6; }
+  .alarm-btn-add { display: flex; align-items: center; gap: 4px; padding: 6px 12px; border: 1px dashed #D1D5DB; border-radius: 6px; background: #fff; color: #6B7280; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  .alarm-btn-add:hover { border-color: #008B8B; color: #008B8B; background: #E0F7F7; }
+  .alarm-modal-btn { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid #E5E7EB; background: #fff; color: #6B7280; transition: all 0.15s; }
+  .alarm-modal-btn:hover { border-color: #008B8B; color: #008B8B; }
+  .alarm-modal-btn.primary { background: linear-gradient(135deg, #00A0A0 0%, #00B8B8 100%); color: #fff; border-color: #00A0A0; box-shadow: 0 2px 6px rgba(0,160,160,0.2); }
+  .alarm-modal-btn.primary:hover { background: linear-gradient(135deg, #008B8B 0%, #00A0A0 100%); box-shadow: 0 3px 8px rgba(0,160,160,0.3); }
+  .alarm-modal-btn.danger { background: #fff; color: #EF4444; border-color: #FCA5A5; }
+  .alarm-modal-btn.danger:hover { background: #FEF2F2; border-color: #EF4444; }
+  .alarm-modal-btn.sm { padding: 4px 10px; font-size: 12px; border-radius: 6px; }
   .drawer {
     position: fixed; top: 0; right: -580px; width: 580px; height: 100%;
     background: #fff; z-index: 201; box-shadow: -4px 0 24px rgba(0,0,0,0.15);
@@ -440,8 +510,7 @@
       <span class="tab-badge blue" id="tabRuleCount">8</span>
     </div>
     <div style="margin-left:auto;display:flex;gap:10px;align-items:center;">
-      <button class="toolbar-btn" style="border-color:#ddd;color:#555" onclick="exportData()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:middle"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 导出</button>
-      <button class="toolbar-btn" style="background:#008B8B;color:#fff;border-color:#008B8B" id="headerActionBtn" onclick="createNew()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:middle"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新建规则</button>
+      <button class="toolbar-btn" style="background:#008B8B;color:#fff;border-color:#008B8B" id="headerActionBtn" onclick="createNew()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:middle"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新建告警规则</button>
     </div>
   </div>
 
@@ -607,6 +676,101 @@
   <div class="drawer-body" id="drawerBody"></div>
 </div>
 
+<!-- Alarm Rule Modal -->
+<div class="alarm-modal-overlay" id="alarmRuleModalOverlay" onclick="if(event.target===this)closeAlarmRuleModal()">
+  <div class="alarm-modal">
+    <div class="alarm-modal-header">
+      <h3 id="alarmRuleModalTitle">添加告警规则</h3>
+      <button class="alarm-modal-close" onclick="closeAlarmRuleModal()">✕</button>
+    </div>
+    <div class="alarm-modal-body">
+      <div class="alarm-form-group">
+        <label class="alarm-form-label">告警类型 <span class="required">*</span></label>
+        <input type="text" class="alarm-form-input" id="armName" placeholder="例如：温度超限告警">
+        <div class="alarm-form-hint">告警类型的唯一标识，用于区分不同告警</div>
+      </div>
+      <div class="alarm-form-row">
+        <div class="alarm-form-group">
+          <label class="alarm-form-label">适用范围 <span class="required">*</span></label>
+          <select class="alarm-form-select" id="armTargetType" onchange="armUpdateTargetList()">
+            <option value="product">产品</option>
+            <option value="device">设备</option>
+          </select>
+        </div>
+        <div class="alarm-form-group">
+          <label class="alarm-form-label" id="armTargetLabel">选择产品 <span class="required">*</span></label>
+          <select class="alarm-form-select" id="armTargetId">
+            <option value="">请选择产品</option>
+            <option value="PRD-001">环境监控系统</option>
+            <option value="PRD-002">屏蔽门系统</option>
+            <option value="PRD-003">消防系统</option>
+            <option value="PRD-004">通风系统</option>
+            <option value="PRD-005">排水系统</option>
+            <option value="PRD-006">电扶梯系统</option>
+            <option value="PRD-007">供电系统</option>
+          </select>
+        </div>
+      </div>
+      <div class="alarm-form-group">
+        <label class="alarm-form-label">告警级别 <span class="required">*</span></label>
+        <div class="alarm-severity-select" id="armSeveritySelect">
+          <div class="alarm-severity-option sev-critical" data-level="critical" onclick="armSelectSeverity('critical')"><span class="sev-dot"></span><span>紧急</span></div>
+          <div class="alarm-severity-option sev-major" data-level="major" onclick="armSelectSeverity('major')"><span class="sev-dot"></span><span>严重</span></div>
+          <div class="alarm-severity-option sev-minor" data-level="minor" onclick="armSelectSeverity('minor')"><span class="sev-dot"></span><span>警告</span></div>
+          <div class="alarm-severity-option sev-warning" data-level="warning" onclick="armSelectSeverity('warning')"><span class="sev-dot"></span><span>提示</span></div>
+        </div>
+      </div>
+      <div class="alarm-form-group">
+        <label class="alarm-form-label">触发条件</label>
+        <div id="armConditions">
+          <div class="alarm-condition-block" data-idx="0">
+            <div class="alarm-condition-header"><span>条件 1</span></div>
+            <div class="alarm-condition-row">
+              <select class="arg-select" id="armCondArg0">
+                <option value="temperature">温度</option><option value="humidity">湿度</option><option value="pressure">压力</option><option value="vibration">振动</option><option value="voltage">电压</option><option value="current">电流</option><option value="power">功率</option><option value="status">状态</option><option value="smoke">烟雾浓度</option><option value="speed">速度</option><option value="liquidLevel">液位</option><option value="healthScore">健康评分</option>
+              </select>
+              <select class="op-select" id="armCondOp0">
+                <option value=">">大于 (>)</option><option value=">=">大于等于 (≥)</option><option value="<">小于 (<)</option><option value="<=">小于等于 (≤)</option><option value="==">等于 (=)</option><option value="!=">不等于 (≠)</option>
+              </select>
+              <input type="text" class="val-input" id="armCondVal0" placeholder="阈值，如 40">
+            </div>
+          </div>
+        </div>
+        <button class="alarm-btn-add" onclick="armAddCondition()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          添加条件
+        </button>
+        <div class="alarm-form-hint" style="margin-top:6px">多个条件之间为"且"关系</div>
+      </div>
+      <div class="alarm-form-row">
+        <div class="alarm-form-group">
+          <label class="alarm-form-label">条件类型</label>
+          <select class="alarm-form-select" id="armCondType" onchange="armToggleCondValueGroup()">
+            <option value="simple">立即触发</option><option value="duration">持续时间</option><option value="repeating">重复次数</option>
+          </select>
+        </div>
+        <div class="alarm-form-group" id="armCondValueGroup" style="display:none">
+          <label class="alarm-form-label" id="armCondValueLabel">持续时间（秒）</label>
+          <input type="number" class="alarm-form-input" id="armCondValue" placeholder="60" min="1">
+        </div>
+      </div>
+      <div class="alarm-form-group">
+        <label class="alarm-form-label">清除条件</label>
+        <input type="text" class="alarm-form-input" id="armClearRule" placeholder="例如：温度 ≤ 27°C">
+        <div class="alarm-form-hint">告警自动清除的条件，留空则不会自动清除</div>
+      </div>
+      <div class="alarm-form-group">
+        <label class="alarm-form-label">描述</label>
+        <textarea class="alarm-form-textarea" id="armDesc" placeholder="告警规则的详细描述（可选）"></textarea>
+      </div>
+    </div>
+    <div class="alarm-modal-footer">
+      <button class="alarm-modal-btn" onclick="closeAlarmRuleModal()">取消</button>
+      <button class="alarm-modal-btn primary" onclick="saveAlarmRuleModal()">保存</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast-container" id="toastContainer"></div>
 
@@ -684,6 +848,47 @@ let rules = [
   { id:'RULE-008', name:'夜间温度监测规则', type:'环境监控', deviceType:'hvac', condition:'temp > 28°C AND 22:00-06:00', devices:['DEV-001','DEV-023'], severity:'warning', enabled:false, description:'夜间时段(22:00-06:00)温度超标时告警（非运营时段）', createRule:'temp > 28°C AND time in 22:00-06:00', clearRule:'temp ≤ 27°C', triggerCount:2, lastTrigger:'2026-04-22 22:15', lastTriggerBy:'DEV-023', createdAt:'2026-04-01', updatedBy:'张工', actions:['发送告警通知','记录事件日志'] },
 ];
 
+// ===== 产品和设备数据（与系统保持一致）=====
+const alarmProducts = [
+  { id: 'PRD-001', name: '智能温控器', category: 'hvac' },
+  { id: 'PRD-002', name: 'CO₂浓度传感器', category: 'hvac' },
+  { id: 'PRD-003', name: '智能风机控制器', category: 'fan' },
+  { id: 'PRD-004', name: '液位传感器', category: 'pump' },
+  { id: 'PRD-005', name: '排水泵控制器', category: 'pump' },
+  { id: 'PRD-006', name: '屏蔽门控制器', category: 'door' },
+  { id: 'PRD-007', name: '扶梯监测终端', category: 'escalator' },
+  { id: 'PRD-008', name: '烟雾探测器', category: 'fire' },
+  { id: 'PRD-009', name: '电力监测仪', category: 'power' },
+  { id: 'PRD-010', name: '温湿度传感器', category: 'hvac' }
+];
+
+const alarmDevices = [
+  { id: 'DEV-001', name: '1号站台温度传感器', type: 'hvac' },
+  { id: 'DEV-002', name: '2号站台温度传感器', type: 'hvac' },
+  { id: 'DEV-003', name: 'A出口CO₂传感器', type: 'hvac' },
+  { id: 'DEV-004', name: '1号通风机组', type: 'fan' },
+  { id: 'DEV-005', name: '2号通风机组', type: 'fan' },
+  { id: 'DEV-006', name: '3号通风机组', type: 'fan' },
+  { id: 'DEV-007', name: '1号集水池', type: 'pump' },
+  { id: 'DEV-008', name: '2号集水池', type: 'pump' },
+  { id: 'DEV-009', name: '3号集水池', type: 'pump' },
+  { id: 'DEV-010', name: '1号站台屏蔽门-上行', type: 'door' },
+  { id: 'DEV-011', name: '1号站台屏蔽门-下行', type: 'door' },
+  { id: 'DEV-012', name: '2号站台屏蔽门', type: 'door' },
+  { id: 'DEV-013', name: 'A出口电扶梯-上行', type: 'escalator' },
+  { id: 'DEV-014', name: 'B出口电扶梯-下行', type: 'escalator' },
+  { id: 'DEV-015', name: 'C出口电扶梯', type: 'escalator' },
+  { id: 'DEV-016', name: '1号烟感探测器', type: 'fire' },
+  { id: 'DEV-017', name: '2号烟感探测器', type: 'fire' },
+  { id: 'DEV-018', name: '3号烟感探测器', type: 'fire' },
+  { id: 'DEV-019', name: '1号配电柜', type: 'power' },
+  { id: 'DEV-020', name: '2号配电柜', type: 'power' },
+  { id: 'DEV-021', name: 'UPS不间断电源', type: 'power' },
+  { id: 'DEV-022', name: '4号通风机组', type: 'fan' },
+  { id: 'DEV-023', name: '4号站台温度传感器', type: 'hvac' },
+  { id: 'DEV-024', name: 'D出口电扶梯', type: 'escalator' }
+];
+
 let currentTab = 'alarms';
 let currentAlarmId = null;
 let currentRuleId = null;
@@ -693,6 +898,8 @@ function init() {
   filterAlarms(); 
   filterRules(); 
   updateStats(); 
+  // 初始化按钮状态（默认告警列表页显示导出按钮）
+  switchTab('alarms', document.querySelector('.top-tab.active'));
   // 处理URL参数：自动切换Tab和高亮规则
   const params = new URLSearchParams(window.location.search);
   const tab = params.get('tab');
@@ -716,8 +923,16 @@ function switchTab(tab, el) {
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   document.getElementById(tab === 'alarms' ? 'tabAlarms' : 'tabRules').classList.add('active');
   // Update header button
-  document.getElementById('headerActionBtn').innerHTML = tab === 'alarms' ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:middle"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 导出' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:middle"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新建规则';
-  document.getElementById('headerActionBtn').onclick = tab === 'alarms' ? exportData : createNew;
+  var headerBtn = document.getElementById('headerActionBtn');
+  if (tab === 'alarms') {
+    headerBtn.style.display = 'inline-flex';
+    headerBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:middle"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 导出';
+    headerBtn.onclick = exportData;
+  } else {
+    headerBtn.style.display = 'inline-flex';
+    headerBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:middle"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新建告警规则';
+    headerBtn.onclick = createNew;
+  }
 }
 
 // ===== ALARM FILTER & PAGINATION =====
@@ -885,16 +1100,189 @@ function toggleRule(id, enabled) {
   r.enabled = enabled; filterRules(); updateStats();
   showToast(enabled?'规则已启用':'规则已禁用', enabled?'success':'warning');
 }
-function editRule(id) { showToast('编辑规则: '+id,'info'); }
+function editRule(id) { openAlarmRuleModal(id); }
 function deleteRule(id) {
   rules = rules.filter(r=>r.id!==id); filterRules(); updateStats();
   showToast('规则已删除','warning');
 }
 function createNew() {
-  if(currentTab==='rules') showToast('新建规则功能演示','info');
+  if(currentTab==='rules') openAlarmRuleModal();
   else exportData();
 }
 function exportData() { showToast('数据已导出','info'); }
+
+// ===== ALARM RULE MODAL =====
+let armEditingId = null;
+const armArgLabelMap = {
+  temperature: '温度', humidity: '湿度', pressure: '压力', vibration: '振动',
+  voltage: '电压', current: '电流', power: '功率', status: '状态',
+  smoke: '烟雾浓度', speed: '速度', liquidLevel: '液位', healthScore: '健康评分'
+};
+
+function openAlarmRuleModal(id) {
+  armEditingId = id || null;
+  var modal = document.getElementById('alarmRuleModalOverlay');
+  var title = document.getElementById('alarmRuleModalTitle');
+  if (armEditingId) {
+    title.textContent = '编辑告警规则';
+    var r = rules.find(x=>x.id===armEditingId);
+    document.getElementById('armName').value = r.name || '';
+    document.getElementById('armTargetType').value = r.targetType || 'product';
+    armUpdateTargetList();
+    document.getElementById('armTargetId').value = r.targetId || '';
+    document.getElementById('armDesc').value = r.description || '';
+    document.getElementById('armClearRule').value = r.clearRule || '';
+    armSelectSeverity(r.severity || 'critical');
+    // 解析条件
+    var conds = [];
+    if (r.condition) {
+      var parts = r.condition.split(/\s+AND\s+|\s+&\s+/i);
+      parts.forEach(function(p) {
+        var m = p.match(/(\w+)\s*(>|>=|<|<=|==|!=)\s*(.+)/);
+        if (m) conds.push({ arg: m[1], op: m[2], value: m[3] });
+      });
+    }
+    if (conds.length === 0) conds.push({ arg: 'temperature', op: '>', value: '' });
+    armRenderConditions(conds);
+  } else {
+    title.textContent = '添加告警规则';
+    document.getElementById('armName').value = '';
+    document.getElementById('armTargetType').value = 'product';
+    armUpdateTargetList();
+    document.getElementById('armTargetId').value = '';
+    document.getElementById('armDesc').value = '';
+    document.getElementById('armClearRule').value = '';
+    armSelectSeverity('critical');
+    armRenderConditions([{ arg: 'temperature', op: '>', value: '' }]);
+  }
+  modal.classList.add('open');
+}
+
+function closeAlarmRuleModal() {
+  document.getElementById('alarmRuleModalOverlay').classList.remove('open');
+  armEditingId = null;
+}
+
+function armSelectSeverity(level) {
+  document.querySelectorAll('#armSeveritySelect .alarm-severity-option').forEach(function(el) {
+    el.classList.toggle('selected', el.dataset.level === level);
+  });
+}
+function armGetSelectedSeverity() {
+  var sel = document.querySelector('#armSeveritySelect .alarm-severity-option.selected');
+  return sel ? sel.dataset.level : 'critical';
+}
+
+function armRenderConditions(conditions) {
+  var container = document.getElementById('armConditions');
+  container.innerHTML = conditions.map(function(c, i) {
+    return '<div class="alarm-condition-block" data-idx="' + i + '">' +
+      '<div class="alarm-condition-header"><span>条件 ' + (i + 1) + '</span>' +
+      (conditions.length > 1 ? '<button class="alarm-modal-btn danger sm" onclick="armRemoveCondition(' + i + ')">删除</button>' : '') +
+      '</div>' +
+      '<div class="alarm-condition-row">' +
+        '<select class="arg-select" id="armCondArg' + i + '">' +
+          Object.keys(armArgLabelMap).map(function(k) {
+            return '<option value="' + k + '"' + (k === c.arg ? ' selected' : '') + '>' + armArgLabelMap[k] + '</option>';
+          }).join('') +
+        '</select>' +
+        '<select class="op-select" id="armCondOp' + i + '">' +
+          ['>', '>=', '<', '<=', '==', '!='].map(function(op) {
+            var labels = {'>':'大于 (>)','>=':'大于等于 (≥)','<':'小于 (<)','<=':'小于等于 (≤)','==':'等于 (=)','!=':'不等于 (≠)'};
+            return '<option value="' + op + '"' + (op === c.op ? ' selected' : '') + '>' + labels[op] + '</option>';
+          }).join('') +
+        '</select>' +
+        '<input type="text" class="val-input" id="armCondVal' + i + '" placeholder="阈值，如 40" value="' + (c.value || '') + '">' +
+      '</div></div>';
+  }).join('');
+}
+
+function armAddCondition() {
+  var blocks = document.querySelectorAll('#armConditions .alarm-condition-block');
+  var conditions = [];
+  blocks.forEach(function(b) {
+    var idx = b.dataset.idx;
+    conditions.push({ arg: document.getElementById('armCondArg' + idx).value, op: document.getElementById('armCondOp' + idx).value, value: document.getElementById('armCondVal' + idx).value });
+  });
+  conditions.push({ arg: 'temperature', op: '>', value: '' });
+  armRenderConditions(conditions);
+}
+
+function armRemoveCondition(idx) {
+  var blocks = document.querySelectorAll('#armConditions .alarm-condition-block');
+  var conditions = [];
+  blocks.forEach(function(b) {
+    var i = b.dataset.idx;
+    if (i != idx) conditions.push({ arg: document.getElementById('armCondArg' + i).value, op: document.getElementById('armCondOp' + i).value, value: document.getElementById('armCondVal' + i).value });
+  });
+  if (conditions.length === 0) conditions.push({ arg: 'temperature', op: '>', value: '' });
+  armRenderConditions(conditions);
+}
+
+function armToggleCondValueGroup() {
+  var type = document.getElementById('armCondType').value;
+  var group = document.getElementById('armCondValueGroup');
+  var label = document.getElementById('armCondValueLabel');
+  if (type === 'simple') { group.style.display = 'none'; }
+  else { group.style.display = 'block'; label.textContent = type === 'duration' ? '持续时间（秒）' : '重复次数'; }
+}
+
+function armUpdateTargetList() {
+  var targetType = document.getElementById('armTargetType').value;
+  var label = document.getElementById('armTargetLabel');
+  var select = document.getElementById('armTargetId');
+  if (targetType === 'product') {
+    label.innerHTML = '选择产品 <span class="required">*</span>';
+    select.innerHTML = '<option value="">请选择产品</option>' +
+      alarmProducts.map(function(p) { return '<option value="' + p.id + '">' + p.name + ' (' + p.id + ')</option>'; }).join('');
+  } else {
+    label.innerHTML = '选择设备 <span class="required">*</span>';
+    select.innerHTML = '<option value="">请选择设备</option>' +
+      alarmDevices.map(function(d) { return '<option value="' + d.id + '">' + d.name + ' (' + d.id + ')</option>'; }).join('');
+  }
+}
+
+function saveAlarmRuleModal() {
+  var name = document.getElementById('armName').value.trim();
+  if (!name) { showToast('请输入告警类型名称', 'error'); document.getElementById('armName').focus(); return; }
+  var targetType = document.getElementById('armTargetType').value;
+  var targetId = document.getElementById('armTargetId').value;
+  if (!targetId) { showToast('请选择' + (targetType === 'product' ? '产品' : '设备'), 'error'); return; }
+  var severity = armGetSelectedSeverity();
+  var desc = document.getElementById('armDesc').value.trim();
+  var clearRule = document.getElementById('armClearRule').value.trim();
+
+  var conditions = [];
+  document.querySelectorAll('#armConditions .alarm-condition-block').forEach(function(b) {
+    var idx = b.dataset.idx;
+    var val = document.getElementById('armCondVal' + idx).value.trim();
+    if (val) conditions.push({ arg: document.getElementById('armCondArg' + idx).value, op: document.getElementById('armCondOp' + idx).value, value: val });
+  });
+  if (conditions.length === 0) { showToast('请至少填写一个完整的触发条件', 'error'); return; }
+
+  var conditionStr = conditions.map(function(c) { return c.arg + ' ' + c.op + ' ' + c.value; }).join(' AND ');
+
+  if (armEditingId) {
+    var r = rules.find(x=>x.id===armEditingId);
+    r.name = name; r.severity = severity;
+    r.condition = conditionStr; r.description = desc; r.clearRule = clearRule;
+    r.targetType = targetType; r.targetId = targetId;
+    showToast('告警规则已更新', 'success');
+  } else {
+    var newId = 'RULE-' + String(rules.length + 1).padStart(3, '0');
+    rules.push({
+      id: newId, name: name, type: targetType === 'product' ? '产品级' : '设备级', deviceType: targetId, condition: conditionStr,
+      devices: [], severity: severity, enabled: true, description: desc,
+      createRule: conditionStr, clearRule: clearRule, triggerCount: 0,
+      lastTrigger: null, lastTriggerBy: null, createdAt: new Date().toISOString().slice(0,10),
+      updatedBy: '当前用户', actions: ['发送告警通知'],
+      targetType: targetType, targetId: targetId
+    });
+    showToast('告警规则已添加', 'success');
+  }
+  filterRules(); updateStats();
+  closeAlarmRuleModal();
+}
 
 // ===== ALARM DRAWER =====
 function openAlarmDrawer(id) {
