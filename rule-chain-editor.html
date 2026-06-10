@@ -1181,11 +1181,11 @@ function openConfig(nodeId) {
           <div style="display:flex;gap:16px">
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#444">
               <input type="radio" name="assocDim_${node.id}" value="product" ${assocDim==='product'?'checked':''} onchange="updateNodeConfig(${node.id},'assocDimension','product');toggleAssocMode('${node.id}','product')">
-              🔘 按产品（物模型）
+              按产品（物模型）
             </label>
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#444">
               <input type="radio" name="assocDim_${node.id}" value="device" ${assocDim==='device'?'checked':''} onchange="updateNodeConfig(${node.id},'assocDimension','device');toggleAssocMode('${node.id}','device')">
-              ⚪ 按特定设备
+              按特定设备
             </label>
           </div>
         </div>
