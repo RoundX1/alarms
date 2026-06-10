@@ -521,10 +521,10 @@
       <div class="toolbar-right">
         <select class="toolbar-select" id="severityFilter" onchange="filterAlarms()">
           <option value="all">全部严重程度</option>
-          <option value="critical">临界</option>
-          <option value="major">重要</option>
-          <option value="minor">次要</option>
-          <option value="warning">警告</option>
+          <option value="critical">紧急</option>
+          <option value="major">严重</option>
+          <option value="minor">警告</option>
+          <option value="warning">提示</option>
           <option value="indeterminate">未确定</option>
         </select>
         <select class="toolbar-select" id="sourceFilter" onchange="filterAlarms()">
@@ -685,30 +685,42 @@
     </div>
     <div class="alarm-modal-body">
       <div class="alarm-form-group">
-        <label class="alarm-form-label">告警类型 <span class="required">*</span></label>
+        <label class="alarm-form-label">告警规则名称 <span class="required">*</span></label>
         <input type="text" class="alarm-form-input" id="armName" placeholder="例如：温度超限告警">
-        <div class="alarm-form-hint">告警类型的唯一标识，用于区分不同告警</div>
+        <div class="alarm-form-hint">告警规则名称的唯一标识，用于区分不同告警规则</div>
       </div>
-      <div class="alarm-form-row">
-        <div class="alarm-form-group">
-          <label class="alarm-form-label">适用范围 <span class="required">*</span></label>
-          <select class="alarm-form-select" id="armTargetType" onchange="armUpdateTargetList()">
-            <option value="product">产品</option>
-            <option value="device">设备</option>
-          </select>
+      <div class="alarm-form-group">
+        <label class="alarm-form-label">适用范围 <span class="required">*</span></label>
+        <div style="display:flex;gap:16px;margin-top:6px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#444">
+            <input type="radio" name="armTargetType" id="armTargetTypeProduct" value="product" checked onchange="armUpdateTargetList()">
+            <span>🔘 按产品（物模型）</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#444">
+            <input type="radio" name="armTargetType" id="armTargetTypeDevice" value="device" onchange="armUpdateTargetList()">
+            <span>⚪ 按特定设备</span>
+          </label>
         </div>
-        <div class="alarm-form-group">
-          <label class="alarm-form-label" id="armTargetLabel">选择产品 <span class="required">*</span></label>
-          <select class="alarm-form-select" id="armTargetId">
-            <option value="">请选择产品</option>
-            <option value="PRD-001">环境监控系统</option>
-            <option value="PRD-002">屏蔽门系统</option>
-            <option value="PRD-003">消防系统</option>
-            <option value="PRD-004">通风系统</option>
-            <option value="PRD-005">排水系统</option>
-            <option value="PRD-006">电扶梯系统</option>
-            <option value="PRD-007">供电系统</option>
-          </select>
+      </div>
+      <div class="alarm-form-group" id="armProductSelectGroup">
+        <label class="alarm-form-label">选择产品 <span class="required">*</span></label>
+        <select class="alarm-form-select" id="armTargetIdProduct" onchange="armRefreshFilterTags()">
+          <option value="">请选择产品</option>
+        </select>
+      </div>
+      <div class="alarm-form-group" id="armFilterSection" style="display:none">
+        <label class="alarm-form-label">数据过滤</label>
+        <div style="font-size:11px;color:#999;margin-bottom:8px">默认该产品下所有设备的数据都会触发告警。勾选可按设备分组过滤。</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px" id="armFilterTags"></div>
+        <div id="armFilterSummary" style="margin-top:8px;font-size:11px;color:#008B8B;display:none"></div>
+      </div>
+      <div class="alarm-form-group" id="armDeviceSelectGroup" style="display:none">
+        <label class="alarm-form-label">选择设备 <span class="required">*</span></label>
+        <div style="position:relative;margin-bottom:8px">
+          <input class="alarm-form-input" type="text" placeholder="搜索设备名称或 ID ..." id="armDeviceSearch" oninput="armFilterDeviceList(this.value)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" style="position:absolute;right:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div id="armDeviceList" style="max-height:180px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px">
         </div>
       </div>
       <div class="alarm-form-group">
@@ -785,10 +797,10 @@ function toggleSubmenu(el) {
 
 // ===== CONSTANTS =====
 const SEVERITY_MAP = {
-  critical: { label: '临界', class: 'severity-critical', icon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/></svg>' },
-  major: { label: '重要', class: 'severity-major', icon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;color:#FF9800"><circle cx="12" cy="12" r="10"/></svg>' },
-  minor: { label: '次要', class: 'severity-minor', icon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;color:#FBC02D"><circle cx="12" cy="12" r="10"/></svg>' },
-  warning: { label: '警告', class: 'severity-warning', icon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;color:#2196F3"><circle cx="12" cy="12" r="10"/></svg>' },
+  critical: { label: '紧急', class: 'severity-critical', icon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/></svg>' },
+  major: { label: '严重', class: 'severity-major', icon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;color:#F59E0B"><circle cx="12" cy="12" r="10"/></svg>' },
+  minor: { label: '警告', class: 'severity-minor', icon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;color:#3B82F6"><circle cx="12" cy="12" r="10"/></svg>' },
+  warning: { label: '提示', class: 'severity-warning', icon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;color:#8B5CF6"><circle cx="12" cy="12" r="10"/></svg>' },
   indeterminate: { label: '未确定', class: 'severity-indeterminate', icon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;color:#9E9E9E"><circle cx="12" cy="12" r="10"/></svg>' },
 };
 const STATUS_MAP = {
@@ -1113,6 +1125,7 @@ function exportData() { showToast('数据已导出','info'); }
 
 // ===== ALARM RULE MODAL =====
 let armEditingId = null;
+let armSelectedDevices = [];
 const armArgLabelMap = {
   temperature: '温度', humidity: '湿度', pressure: '压力', vibration: '振动',
   voltage: '电压', current: '电流', power: '功率', status: '状态',
@@ -1127,9 +1140,16 @@ function openAlarmRuleModal(id) {
     title.textContent = '编辑告警规则';
     var r = rules.find(x=>x.id===armEditingId);
     document.getElementById('armName').value = r.name || '';
-    document.getElementById('armTargetType').value = r.targetType || 'product';
+    var isProduct = r.targetType === 'product';
+    document.getElementById('armTargetTypeProduct').checked = isProduct;
+    document.getElementById('armTargetTypeDevice').checked = !isProduct;
     armUpdateTargetList();
-    document.getElementById('armTargetId').value = r.targetId || '';
+    if (isProduct) {
+      document.getElementById('armTargetIdProduct').value = r.targetId || '';
+    } else {
+      armSelectedDevices = r.devices || [];
+      armRenderDeviceList();
+    }
     document.getElementById('armDesc').value = r.description || '';
     document.getElementById('armClearRule').value = r.clearRule || '';
     armSelectSeverity(r.severity || 'critical');
@@ -1147,9 +1167,12 @@ function openAlarmRuleModal(id) {
   } else {
     title.textContent = '添加告警规则';
     document.getElementById('armName').value = '';
-    document.getElementById('armTargetType').value = 'product';
+    document.getElementById('armTargetTypeProduct').checked = true;
+    document.getElementById('armTargetTypeDevice').checked = false;
+    armSelectedDevices = [];
     armUpdateTargetList();
-    document.getElementById('armTargetId').value = '';
+    document.getElementById('armTargetIdProduct').value = '';
+    document.getElementById('armDeviceSearch').value = '';
     document.getElementById('armDesc').value = '';
     document.getElementById('armClearRule').value = '';
     armSelectSeverity('critical');
@@ -1228,26 +1251,137 @@ function armToggleCondValueGroup() {
 }
 
 function armUpdateTargetList() {
-  var targetType = document.getElementById('armTargetType').value;
-  var label = document.getElementById('armTargetLabel');
-  var select = document.getElementById('armTargetId');
-  if (targetType === 'product') {
-    label.innerHTML = '选择产品 <span class="required">*</span>';
+  var isProduct = document.getElementById('armTargetTypeProduct').checked;
+  document.getElementById('armProductSelectGroup').style.display = isProduct ? 'block' : 'none';
+  document.getElementById('armDeviceSelectGroup').style.display = isProduct ? 'none' : 'block';
+  document.getElementById('armFilterSection').style.display = 'none';
+  if (isProduct) {
+    var select = document.getElementById('armTargetIdProduct');
     select.innerHTML = '<option value="">请选择产品</option>' +
-      alarmProducts.map(function(p) { return '<option value="' + p.id + '">' + p.name + ' (' + p.id + ')</option>'; }).join('');
+      alarmProducts.map(function(p) { return '<option value="' + p.id + '">' + p.name + '（' + p.category + '）</option>'; }).join('');
   } else {
-    label.innerHTML = '选择设备 <span class="required">*</span>';
-    select.innerHTML = '<option value="">请选择设备</option>' +
-      alarmDevices.map(function(d) { return '<option value="' + d.id + '">' + d.name + ' (' + d.id + ')</option>'; }).join('');
+    armRenderDeviceList();
+  }
+}
+
+var armDeviceGroups = [
+  { id: 'g1', label: '一期车间', count: 12 },
+  { id: 'g2', label: '二期车间', count: 8 },
+  { id: 'g3', label: '三期车间', count: 15 },
+  { id: 'g4', label: '控制中心', count: 3 }
+];
+var armSelectedFilters = [];
+
+function armRefreshFilterTags() {
+  var productId = document.getElementById('armTargetIdProduct').value;
+  var section = document.getElementById('armFilterSection');
+  var container = document.getElementById('armFilterTags');
+  var summary = document.getElementById('armFilterSummary');
+  if (!productId) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  container.innerHTML = armDeviceGroups.map(function(g) {
+    var checked = armSelectedFilters.indexOf(g.id) >= 0;
+    return '<label style="display:flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid ' + (checked ? '#008B8B' : '#ddd') + ';border-radius:20px;cursor:pointer;font-size:12px;color:' + (checked ? '#008B8B' : '#666') + ';background:' + (checked ? '#E0F7F7' : '#fff') + ';transition:all 0.2s;user-select:none" onclick="armToggleFilter(\'' + g.id + '\', this)">' +
+      '<input type="checkbox" ' + (checked ? 'checked' : '') + ' style="display:none">' +
+      g.label + '<span style="font-size:10px;color:#999;margin-left:2px">(' + g.count + ')</span>' +
+    '</label>';
+  }).join('');
+  if (armSelectedFilters.length > 0) {
+    summary.style.display = 'block';
+    summary.textContent = '已选择 ' + armSelectedFilters.length + ' 个分组：' + armSelectedFilters.map(function(fid) { var g = armDeviceGroups.find(function(d){return d.id===fid;}); return g ? g.label : fid; }).join('、');
+  } else {
+    summary.style.display = 'none';
+  }
+}
+
+function armToggleFilter(groupId, labelEl) {
+  var idx = armSelectedFilters.indexOf(groupId);
+  var checkbox = labelEl.querySelector('input[type="checkbox"]');
+  if (idx >= 0) {
+    armSelectedFilters.splice(idx, 1);
+    checkbox.checked = false;
+    labelEl.style.borderColor = '#ddd';
+    labelEl.style.color = '#666';
+    labelEl.style.background = '#fff';
+  } else {
+    armSelectedFilters.push(groupId);
+    checkbox.checked = true;
+    labelEl.style.borderColor = '#008B8B';
+    labelEl.style.color = '#008B8B';
+    labelEl.style.background = '#E0F7F7';
+  }
+  var summary = document.getElementById('armFilterSummary');
+  if (armSelectedFilters.length > 0) {
+    summary.style.display = 'block';
+    summary.textContent = '已选择 ' + armSelectedFilters.length + ' 个分组：' + armSelectedFilters.map(function(fid) { var g = armDeviceGroups.find(function(d){return d.id===fid;}); return g ? g.label : fid; }).join('、');
+  } else {
+    summary.style.display = 'none';
+  }
+}
+
+function armRenderDeviceList() {
+  var container = document.getElementById('armDeviceList');
+  var selected = armSelectedDevices || [];
+  var statusColors = { online: '#4CAF50', alarm: '#f44336', offline: '#9e9e9e', warning: '#FF9800' };
+  var statusLabels = { online: '在线', alarm: '告警', offline: '离线', warning: '预警' };
+  container.innerHTML = alarmDevices.map(function(d) {
+    var checked = selected.indexOf(d.id) >= 0;
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid #f5f5f5;cursor:pointer;' + (checked ? 'background:#E0F7F7' : '') + '" onclick="armToggleDeviceSelect(\'' + d.id + '\', this)">' +
+      '<input type="checkbox" ' + (checked ? 'checked' : '') + ' style="accent-color:#008B8B">' +
+      '<span style="width:8px;height:8px;border-radius:50%;background:' + (statusColors[d.status] || '#9e9e9e') + ';flex-shrink:0"></span>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:12px;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + d.name + '</div>' +
+        '<div style="font-size:10px;color:#999">' + d.id + ' · ' + (d.type || '') + '</div>' +
+      '</div>' +
+      '<span style="font-size:10px;color:' + (statusColors[d.status] || '#9e9e9e') + ';flex-shrink:0">' + (statusLabels[d.status] || '') + '</span>' +
+    '</div>';
+  }).join('');
+}
+
+function armToggleDeviceSelect(deviceId, rowEl) {
+  armSelectedDevices = armSelectedDevices || [];
+  var idx = armSelectedDevices.indexOf(deviceId);
+  var checkbox = rowEl.querySelector('input[type="checkbox"]');
+  if (idx >= 0) {
+    armSelectedDevices.splice(idx, 1);
+    checkbox.checked = false;
+    rowEl.style.background = '';
+  } else {
+    armSelectedDevices.push(deviceId);
+    checkbox.checked = true;
+    rowEl.style.background = '#E0F7F7';
+  }
+}
+
+function armFilterDeviceList(query) {
+  var container = document.getElementById('armDeviceList');
+  if (!container) return;
+  var rows = container.children;
+  var q = query.toLowerCase();
+  for (var i = 0; i < rows.length; i++) {
+    var text = rows[i].textContent.toLowerCase();
+    rows[i].style.display = text.indexOf(q) >= 0 ? 'flex' : 'none';
   }
 }
 
 function saveAlarmRuleModal() {
   var name = document.getElementById('armName').value.trim();
-  if (!name) { showToast('请输入告警类型名称', 'error'); document.getElementById('armName').focus(); return; }
-  var targetType = document.getElementById('armTargetType').value;
-  var targetId = document.getElementById('armTargetId').value;
-  if (!targetId) { showToast('请选择' + (targetType === 'product' ? '产品' : '设备'), 'error'); return; }
+  if (!name) { showToast('请输入告警规则名称', 'error'); document.getElementById('armName').focus(); return; }
+  var isProduct = document.getElementById('armTargetTypeProduct').checked;
+  var targetType = isProduct ? 'product' : 'device';
+  var targetId, devices;
+  if (isProduct) {
+    targetId = document.getElementById('armTargetIdProduct').value;
+    if (!targetId) { showToast('请选择产品', 'error'); return; }
+    devices = [];
+  } else {
+    devices = armSelectedDevices || [];
+    if (devices.length === 0) { showToast('请至少选择一个设备', 'error'); return; }
+    targetId = devices[0];
+  }
   var severity = armGetSelectedSeverity();
   var desc = document.getElementById('armDesc').value.trim();
   var clearRule = document.getElementById('armClearRule').value.trim();
@@ -1266,13 +1400,13 @@ function saveAlarmRuleModal() {
     var r = rules.find(x=>x.id===armEditingId);
     r.name = name; r.severity = severity;
     r.condition = conditionStr; r.description = desc; r.clearRule = clearRule;
-    r.targetType = targetType; r.targetId = targetId;
+    r.targetType = targetType; r.targetId = targetId; r.devices = devices;
     showToast('告警规则已更新', 'success');
   } else {
     var newId = 'RULE-' + String(rules.length + 1).padStart(3, '0');
     rules.push({
-      id: newId, name: name, type: targetType === 'product' ? '产品级' : '设备级', deviceType: targetId, condition: conditionStr,
-      devices: [], severity: severity, enabled: true, description: desc,
+      id: newId, name: name, type: isProduct ? '产品级' : '设备级', deviceType: targetId, condition: conditionStr,
+      devices: devices, severity: severity, enabled: true, description: desc,
       createRule: conditionStr, clearRule: clearRule, triggerCount: 0,
       lastTrigger: null, lastTriggerBy: null, createdAt: new Date().toISOString().slice(0,10),
       updatedBy: '当前用户', actions: ['发送告警通知'],

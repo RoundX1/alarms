@@ -1386,7 +1386,7 @@ function openConfig(nodeId) {
           <div class="config-field">
             <div class="config-label">Webhook 接收地址 (URL) <span title="此 URL 唯一且不可修改，点击右侧按钮直接复制" style="cursor:help">ⓘ</span></div>
             <div style="display:flex;gap:8px">
-              <input class="config-input" type="text" value="https://iot-api.platform.com/v1/rules/webhook/${node.config.webhookId || webhookId}" readonly style="flex:1;background:#f5f5f5">
+              <input class="config-input" type="text" value="https://cat-api.platform.com/v1/rules/webhook/${node.config.webhookId || webhookId}" readonly style="flex:1;background:#f5f5f5">
               <button class="action-btn" style="padding:6px 12px;border:1px solid #ddd;border-radius:5px;background:#f5f5f5;cursor:pointer;font-size:11px;white-space:nowrap" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('input').value);this.textContent='已复制'">复制</button>
             </div>
           </div>
@@ -1500,7 +1500,7 @@ function openConfig(nodeId) {
 
           <div class="config-field">
             <div class="config-label">消费者组 ID (Group ID) <span style="color:#f44336">*</span> <span title="同一个 Group ID 内的消费者会共同消费该 Topic 下的数据，实现负载均衡" style="cursor:help">ⓘ</span></div>
-            <input class="config-input" type="text" placeholder="例如: iiot-rule-engine-group" value="${node.config.groupId || ''}" onchange="updateNodeConfig(${node.id},'groupId',this.value)">
+            <input class="config-input" type="text" placeholder="例如: cat-rule-engine-group" value="${node.config.groupId || ''}" onchange="updateNodeConfig(${node.id},'groupId',this.value)">
           </div>
 
           <div class="config-field">
@@ -1770,7 +1770,7 @@ function openConfig(nodeId) {
           </div>
           <div class="config-field">
             <div class="config-label">连接地址</div>
-            <input class="config-input" placeholder="如: jdbc:mysql://localhost:3306/iot_db" value="${node.config.dbConnection || ''}" onchange="updateNodeConfig(${node.id}, 'dbConnection', this.value)" />
+            <input class="config-input" placeholder="如: jdbc:mysql://localhost:3306/cat_db" value="${node.config.dbConnection || ''}" onchange="updateNodeConfig(${node.id}, 'dbConnection', this.value)" />
           </div>
           <div class="config-field">
             <div class="config-label">目标表</div>

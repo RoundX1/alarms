@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>产品 - IoT</title>
+<title>产品 - CAT</title>
 <style>
 :root {
   --primary: #008B8B;
@@ -840,7 +840,7 @@ tbody tr:hover {
 .pd-toggle input { opacity: 0; width: 0; height: 0; }
 .pd-toggle-slider { position: absolute; inset: 0; background: #ccc; border-radius: 20px; transition: 0.3s; }
 .pd-toggle-slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 2px; bottom: 2px; background: #fff; border-radius: 50%; transition: 0.3s; }
-.pd-toggle input:checked + .pd-toggle-slider { background: var(--danger); }
+.pd-toggle input:checked + .pd-toggle-slider { background: var(--primary); }
 .pd-toggle input:checked + .pd-toggle-slider::before { transform: translateX(16px); }
 
 /* Config rows in drawer */
@@ -1194,7 +1194,7 @@ tbody tr:hover {
 
 <!-- Sidebar -->
 <aside class="sidebar">
-  <div class="sidebar-logo">🚇 IoT</div>
+  <div class="sidebar-logo">🚇 CAT</div>
   <nav class="sidebar-menu">
     <div class="menu-group">
       <div class="menu-item has-submenu expanded" onclick="toggleSubmenu(this)">
@@ -2240,9 +2240,9 @@ init();
     </div>
     <div class="pd-alarm-modal-body">
       <div class="pd-alarm-form-group">
-        <label class="pd-alarm-form-label">告警类型 <span class="required">*</span></label>
+        <label class="pd-alarm-form-label">告警规则名称 <span class="required">*</span></label>
         <input type="text" class="pd-alarm-form-input" id="pdAlarmFormName" placeholder="例如：高温告警" autocomplete="off">
-        <div class="pd-alarm-form-hint">告警类型的唯一标识，用于区分不同告警</div>
+        <div class="pd-alarm-form-hint">告警规则名称的唯一标识，用于区分不同告警规则</div>
       </div>
       <div class="pd-alarm-form-group">
         <label class="pd-alarm-form-label">告警级别 <span class="required">*</span></label>
