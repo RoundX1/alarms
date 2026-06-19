@@ -92,6 +92,16 @@
     font-weight: 600; color: #333; font-size: 14px;
   }
 
+  /* Header Toolbar */
+  .header-toolbar { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  .header-toolbar-btn { width: 34px; height: 34px; border-radius: 6px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #999; transition: all 0.15s; position: relative; }
+  .header-toolbar-btn:hover { background: #f5f5f5; color: #666; }
+  .header-toolbar-btn svg { width: 18px; height: 18px; }
+  .toolbar-notif-badge { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 50%; background: #e53935; border: 2px solid #fff; }
+  .header-user { display: flex; align-items: center; gap: 8px; margin-left: 4px; padding-left: 12px; border-left: 1px solid #e8e8e8; cursor: pointer; }
+  .user-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #008B8B, #00A0A0); display: flex; align-items: center; justify-content: center; color: #fff; }
+  .user-name { font-size: 13px; color: #555; font-weight: 500; }
+
   /* ===== MAIN LAYOUT ===== */
   .main { display: flex; height: 100vh; margin-left: 200px; }
 
@@ -121,6 +131,12 @@
   .category-header.collapsed .arrow { transform: rotate(-90deg); }
   .category-items { overflow: hidden; transition: max-height 0.3s ease; }
   .category-items.collapsed { max-height: 0 !important; }
+
+  .asset-tree-container::-webkit-scrollbar { width: 2px; }
+  .asset-tree-container::-webkit-scrollbar-track { background: transparent; }
+  .asset-tree-container::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.06); border-radius: 2px; }
+  .asset-tree-container::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.12); }
+  .asset-tree-container { scrollbar-width: none; }
 
   .cat-input .category-header { background: linear-gradient(90deg, #E3F2FD 0%, transparent 100%); color: #1565C0; }
   .cat-transform .category-header { background: linear-gradient(90deg, #F3E5F5 0%, transparent 100%); color: #7B1FA2; }
@@ -292,14 +308,14 @@
     display: flex; align-items: center; justify-content: space-between;
   }
   .config-header h4 { font-size: 14px; font-weight: 600; }
-  .config-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #666; padding: 0 4px; }
+  .config-close { background: none; border: none; font-size: 16px; cursor: pointer; color: #666; padding: 0 4px; }
   .config-close:hover { color: #333; }
   .config-body { flex: 1; overflow-y: auto; padding: 16px; }
   .config-field { margin-bottom: 14px; }
   .config-label { font-size: 12px; color: #666; margin-bottom: 4px; font-weight: 500; }
   .config-input, .config-select, .config-textarea {
-    width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px;
-    font-size: 13px; outline: none; background: #fff; transition: border-color 0.2s;
+    width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px;
+    font-size: 12px; outline: none; background: #fff; transition: border-color 0.2s;
   }
   .config-input:focus, .config-select:focus, .config-textarea:focus { border-color: #7C4DFF; }
   .config-input[readonly], .config-input:disabled { background: #f5f5f5; color: #666; }
@@ -444,7 +460,7 @@
   </div>
   <nav class="nav-sidebar-menu">
     <div class="nav-menu-group">
-      <div class="nav-menu-item has-submenu" onclick="toggleNavSubmenu(this)">
+      <div class="nav-menu-item has-submenu" data-submenu-toggle="nav">
         <span class="nav-menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
         <span class="nav-menu-text">设备管理</span>
         <span class="nav-menu-arrow"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg></span>
@@ -477,60 +493,24 @@
       <!-- Input Nodes -->
       <div class="node-category cat-input">
         <div class="category-header" onclick="toggleCategory(this)">
-          <span class="arrow">▼</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>数据输入
+          <span class="arrow">▼</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>数据输入
         </div>
-        <div class="category-items" style="max-height:500px">
-          <div class="node-item input-item" draggable="true" data-type="input" data-id="modbus_client">
-            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
-            <div class="node-info"><div class="node-name">Modbus Client</div><div class="node-cond">Modbus TCP/RTU</div></div>
-            <span class="drag-handle"></span>
+        <div class="category-items asset-tree-container" style="background: linear-gradient(90deg, #E3F2FD, #A8D0FF); padding: 8px; border-radius: 8px; max-height: 436px; overflow-y: auto; overflow-x: hidden;">
+            <div style="padding:0 4px 8px">
+              <div style="position:relative">
+                <input type="text" id="assetTreeSearch" placeholder="搜索点位..." style="width:100%;padding:7px 10px 7px 32px;border:1px solid #e0e0e0;border-radius:8px;font-size:12px;outline:none;box-sizing:border-box;background:#f5f5f5;transition:all 0.2s" onfocus="this.style.background='#fff';this.style.borderColor='#1565C0'" onblur="this.style.background='#f5f5f5';this.style.borderColor='#e0e0e0'">
+                <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:#999">🔍</span>
+              </div>
+            </div>
+            <div id="assetTreeSidebar">
+            </div>
           </div>
-          <div class="node-item input-item" draggable="true" data-type="input" data-id="opcua_client">
-            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span>
-            <div class="node-info"><div class="node-name">OPC UA Client</div><div class="node-cond">OPC UA Server</div></div>
-            <span class="drag-handle"></span>
-          </div>
-          <div class="node-item input-item" draggable="true" data-type="input" data-id="mqtt_subscriber">
-            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg></span>
-            <div class="node-info"><div class="node-name">MQTT Subscriber</div><div class="node-cond">MQTT Broker</div></div>
-            <span class="drag-handle"></span>
-          </div>
-          <div class="node-item input-item" draggable="true" data-type="input" data-id="kafka_consumer">
-            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 9h16"/><path d="M9 4v16"/></svg></span>
-            <div class="node-info"><div class="node-name">Kafka Consumer</div><div class="node-cond">Kafka Topic</div></div>
-            <span class="drag-handle"></span>
-          </div>
-          <div class="node-item input-item" draggable="true" data-type="input" data-id="http_receiver">
-            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
-            <div class="node-info"><div class="node-name">HTTP/WebSocket</div><div class="node-cond">REST API / WS</div></div>
-            <span class="drag-handle"></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Transform Nodes -->
-      <div class="node-category cat-transform">
-        <div class="category-header" onclick="toggleCategory(this)">
-          <span class="arrow">▼</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>数据处理
-        </div>
-        <div class="category-items" style="max-height:500px">
-          <div class="node-item transform-item" draggable="true" data-type="transform" data-id="script_transform">
-            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
-            <div class="node-info"><div class="node-name">Script</div><div class="node-cond">JS/Python 脚本</div></div>
-            <span class="drag-handle"></span>
-          </div>
-          <div class="node-item transform-item" draggable="true" data-type="transform" data-id="data_filter">
-            <span class="node-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></span>
-            <div class="node-info"><div class="node-name">Data Filter/Switch</div><div class="node-cond">数据分流路由</div></div>
-            <span class="drag-handle"></span>
-          </div>
-        </div>
       </div>
 
       <!-- Rule Nodes -->
       <div class="node-category cat-rule">
         <div class="category-header" onclick="toggleCategory(this)">
-          <span class="arrow">▼</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>规则引擎
+          <span class="arrow">▼</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>条件
         </div>
         <div class="category-items" style="max-height:500px">
           <div class="node-item rule-item" draggable="true" data-type="rule" data-id="condition">
@@ -597,6 +577,19 @@
         <span class="chain-name" id="chainNameDisplay">新建规则链</span>
       </div>
       <div id="bindingInfo" style="display:none;margin-left:auto;font-size:12px;color:#666;"></div>
+      <div class="header-toolbar">
+        <button class="header-toolbar-btn" title="通知" data-toast-message="暂无新通知" data-toast-type="info">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="toolbar-notif-badge"></span>
+        </button>
+        <button class="header-toolbar-btn" title="帮助" data-toast-message="帮助文档暂未开放" data-toast-type="info">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </button>
+        <div class="header-user">
+          <div class="user-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <span class="user-name">管理员</span>
+        </div>
+      </div>
     </div>
     <!-- Canvas Toolbar (migrated from header) -->
     <div class="canvas-toolbar">
@@ -712,16 +705,8 @@
   </div>
 </div>
 
+<script src="prototype-common.js"></script>
 <script>
-// ===== NAV SIDEBAR =====
-function toggleNavSubmenu(el) {
-  const submenu = el.nextElementSibling;
-  const arrow = el.querySelector('.nav-menu-arrow');
-  el.classList.toggle('expanded');
-  arrow.classList.toggle('open');
-  submenu.classList.toggle('open');
-}
-
 // ===== STATE =====
 const state = {
   nodes: [],
@@ -737,15 +722,14 @@ const state = {
   history: [],
   historyIndex: -1,
   maxHistory: 50,
+  chainId: null,
+  chainName: '',
+  chainDesc: '',
 };
 
 const NODE_DEFS = {
     // Input Nodes
-    modbus_client:    { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', name: 'Modbus Client', cond: 'Modbus TCP/RTU', type: 'input' },
-    opcua_client:     { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>', name: 'OPC UA Client', cond: 'OPC UA Server', type: 'input' },
-    mqtt_subscriber:  { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>', name: 'MQTT Subscriber', cond: 'MQTT Broker', type: 'input' },
-    kafka_consumer:   { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 9h16"/><path d="M9 4v16"/></svg>', name: 'Kafka Consumer', cond: 'Kafka Topic', type: 'input' },
-    http_receiver:    { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>', name: 'HTTP/WebSocket', cond: 'REST API / WS', type: 'input' },
+    asset_data_source: { icon: '🟩', name: '设备/资产数据源', cond: '选择产品/设备/指标', type: 'input' },
     // Transform Nodes
     script_transform: { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>', name: 'Script', cond: 'JS/Python 脚本', type: 'transform' },
     data_filter:      { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>', name: 'Data Filter/Switch', cond: '数据分流路由', type: 'transform' },
@@ -791,6 +775,26 @@ const DEVICES = [
 
 let deviceModalTargetNodeId = null;
 let selectedDeviceIds = [];
+
+const DEVICE_TYPES = {
+  hvac: { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M17 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/></svg>', name: '暖通设备' },
+  fan: { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 12L12 2"/></svg>', name: '通风设备' },
+  pump: { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12A10 10 0 1 1 12 2"/><path d="M22 2 12 12"/></svg>', name: '水泵设备' },
+  door: { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>', name: '屏蔽门' },
+  escalator: { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="20" x2="18" y2="4"/><polyline points="13 4 18 4 18 9"/><polyline points="6 11 6 20 11 20"/></svg>', name: '电扶梯' },
+  fire: { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.45 1.5-5.5.86.54 1.84 2.5 1.5 5.5.5 1 .5 1.62 0 3a2.5 2.5 0 0 0 2.5 2.5"/></svg>', name: '消防设备' },
+  power: { icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>', name: '供电设备' },
+};
+
+const TRIGGER_DEVICE_MAP = {
+  condition: ['hvac', 'fan', 'pump', 'fire', 'power'],
+  alarm: ['hvac', 'fan', 'pump', 'door', 'escalator', 'fire', 'power'],
+  rpc_control: ['fan', 'pump', 'door', 'escalator', 'power'],
+  script_transform: ['hvac', 'fan', 'pump', 'door', 'escalator', 'fire', 'power'],
+  data_filter: ['hvac', 'fan', 'pump', 'door', 'escalator', 'fire', 'power'],
+  sql_executor: ['hvac', 'fan', 'pump', 'door', 'escalator', 'fire', 'power'],
+  notification: [],
+};
 
 // ===== DOM REFS =====
 const canvasContainer = document.getElementById('canvasContainer');
@@ -860,6 +864,16 @@ function addNode(defId, type, x, y) {
 }
 
 function renderNode(node) {
+  // 移除已存在的同 ID 节点，防止重复渲染
+  const existing = document.getElementById(`node-${node.id}`);
+  if (existing) {
+    // 清理绑定到 document 的事件监听器
+    if (existing._nodeDragHandler) {
+      document.removeEventListener('mousemove', existing._nodeDragHandler);
+    }
+    existing.remove();
+  }
+
   const el = document.createElement('div');
   el.className = 'canvas-node ' + node.type + '-node';
   el.id = `node-${node.id}`;
@@ -869,7 +883,7 @@ function renderNode(node) {
   // Build node inner content
   let nodeContent = `
     <div class="port port-in" data-node="${node.id}" data-port="in"></div>
-    <div class="node-header"><span class="node-icon">${node.icon}</span>${node.name}</div>
+    <div class="node-header">${node.name}</div>
     <div class="node-cond">${node.cond}</div>
     <div class="port port-out" data-node="${node.id}" data-port="out"></div>
     <div class="node-delete" data-node="${node.id}">✕</div>
@@ -1135,9 +1149,9 @@ function openConfig(nodeId) {
   const node = state.nodes.find(n => n.id === nodeId);
   if (!node) return;
   selectNode(nodeId);
-  const typeLabel = { input: '数据输入', transform: '数据处理', rule: '规则引擎', action: '动作执行' };
+  const typeLabel = { input: '数据输入', transform: '数据处理', rule: '条件', action: '动作执行' };
   const badgeClass = { input: 'badge-input', transform: 'badge-transform', rule: 'badge-rule', action: 'badge-action' };
-  configTitle.innerHTML = `${node.icon} ${node.name} <span class="config-badge ${badgeClass[node.type]}">${typeLabel[node.type]}</span>`;
+  configTitle.innerHTML = `${node.name} <span class="config-badge ${badgeClass[node.type]}">${typeLabel[node.type]}</span>`;
 
   // Initialize config if not exists
   if (!node.config) node.config = {};
@@ -1172,392 +1186,127 @@ function openConfig(nodeId) {
       { id: 'g4', label: '控制中心', count: 3 },
     ] : [];
 
-    const assocSection = `
-      <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
-        <div class="config-label" style="margin-bottom:10px;font-size:13px;font-weight:600;color:#333"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>数据源关联</div>
+    // 设备/资产数据源
+    if (node.defId === 'asset_data_source') {
+      const selectedProduct = node.config.productId || '';
+      const selectedDevice = node.config.deviceId || '';
+      let selectedMetrics = node.config.metrics || [];
+      const prodDef = PRODUCT_DEFINITIONS[selectedProduct] || null;
+      const deviceList = PRODUCT_DEVICES[selectedProduct] || [];
+      const deviceObj = deviceList.find(d => d.id === selectedDevice) || null;
+      const metricsList = PRODUCT_METRICS[selectedProduct] || [];
 
-        <div class="config-field">
-          <div class="config-label">关联维度</div>
-          <div style="display:flex;gap:16px">
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#444">
-              <input type="radio" name="assocDim_${node.id}" value="product" ${assocDim==='product'?'checked':''} onchange="updateNodeConfig(${node.id},'assocDimension','product');toggleAssocMode('${node.id}','product')">
-              按产品（物模型）
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#444">
-              <input type="radio" name="assocDim_${node.id}" value="device" ${assocDim==='device'?'checked':''} onchange="updateNodeConfig(${node.id},'assocDimension','device');toggleAssocMode('${node.id}','device')">
-              按特定设备
-            </label>
+      // 如果 config 中没有 metrics 但产品有定义的点位，自动填充所有点位（用于触发条件和实时状态）
+      if (selectedMetrics.length === 0 && metricsList.length > 0 && selectedProduct) {
+        selectedMetrics = metricsList.map(m => m.id);
+      }
+
+      // 轮询配置
+      const pollMode = node.config.pollMode || 'poll';
+      const pollInterval = node.config.pollInterval || 60;
+      // 备注
+      const nodeRemark = node.config.remark || '';
+
+      // 构建设备下拉选项
+      const deviceOptionsHtml = deviceList.map(d =>
+        `<option value="${d.id}" ${d.id === selectedDevice ? 'selected' : ''}>${d.name}</option>`
+      ).join('');
+
+      // 根据原始 config 判断绑定层级（不要用自动填充后的 selectedMetrics）
+      const originalMetrics = node.config.metrics || [];
+      const entityType = selectedDevice ? (originalMetrics.length > 0 ? 'point' : 'device') : (selectedProduct ? 'product' : '');
+
+      // 抽屉中该设备所有点位（带圆形勾选框）
+      const drawerMetricsHtml = (selectedProduct && deviceObj) ? `
+        <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:11px;color:#999">点位选择</span>
+            <div style="display:flex;gap:6px">
+              <button style="font-size:10px;color:#1565C0;background:#e3f2fd;border:1px solid #bbdefb;border-radius:4px;cursor:pointer;padding:2px 8px;font-weight:500" onclick="drawerSelectAllMetrics(${node.id})" onmouseenter="this.style.background='#bbdefb'" onmouseleave="this.style.background='#e3f2fd'">全选</button>
+              <button style="font-size:10px;color:#666;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:4px;cursor:pointer;padding:2px 8px;font-weight:500" onclick="drawerClearMetrics(${node.id})" onmouseenter="this.style.background='#e0e0e0'" onmouseleave="this.style.background='#f5f5f5'">清空</button>
+            </div>
           </div>
+          ${metricsList.map(m => {
+            const isChecked = (node.config.metrics || []).includes(m.id);
+            return `<div style="display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:4px;cursor:pointer;transition:all 0.15s" onclick="toggleDrawerMetric(${node.id},'${m.id}')" onmouseenter="this.style.background='#f5f5f5'" onmouseleave="this.style.background='transparent'">
+              <span style="width:14px;height:14px;border-radius:50%;border:1.5px solid ${isChecked?'#1565C0':'#ccc'};background:${isChecked?'#1565C0':'#fff'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s">
+                ${isChecked ? '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+              </span>
+              <span style="font-size:12px;color:${isChecked?'#1565C0':'#555'};flex:1">${m.name}</span>
+            </div>`;
+          }).join('')}
         </div>
+      ` : '';
 
-        <div id="assoc_product_fields_${node.id}" style="display:${assocDim==='product'?'block':'none'}">
-          <div class="config-field">
-            <div class="config-label">选择产品 <span style="color:#f44336">*</span></div>
-            <select class="config-select" onchange="updateNodeConfig(${node.id},'assocProduct',this.value);refreshAssocFilters(${node.id},this.value)">
-              <option value="">-- 请选择产品 --</option>
-              ${allProducts.map(p => `<option value="${p.id}" ${assocProduct===p.id?'selected':''}>${p.name}（${p.category}）</option>`).join('')}
-            </select>
+      const boundDeviceHtml = (selectedProduct) ? `
+        <div style="display:flex;flex-direction:column;gap:4px;padding:8px 12px;background:#f0f7ff;border-radius:6px;border:1px solid #d6e4ff;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:12px;color:#1565C0;flex-shrink:0">🔧 设备：</span>
+            <span style="font-size:13px;font-weight:500;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">${deviceObj ? deviceObj.name : selectedDevice}</span>
+          </div>
+          ${deviceObj ? `<div style="font-size:11px;color:#888;padding-left:20px;line-height:1.4">${deviceObj.assetPath}</div>` : ''}
+          ${drawerMetricsHtml}
+        </div>
+      ` : '';
+
+      const noDataSourceHtml = (!selectedProduct) ? '<div style="padding:10px 12px;background:#fafafa;border-radius:6px;border:1px dashed #ddd;color:#999;font-size:12px;margin-bottom:10px">⚠️ 尚未绑定数据源，请先在左侧目录树选择产品/设备</div>' : '';
+
+      inputConfigPanel = `
+        <div style="margin-top:16px;padding-top:12px">
+
+          <!-- 🔹 1. 数据源 -->
+          <div style="margin-bottom:16px">
+            <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:10px">🔹 1. 数据源</div>
+
+            ${boundDeviceHtml}
+            ${noDataSourceHtml}
+
+            <div style="font-size:11px;color:#999;padding:6px 0">💡 如需修改数据源，请重新从左侧目录树选择</div>
           </div>
 
-          <div id="assoc_filter_section_${node.id}" style="display:${assocProduct?'block':'none'}">
+          <!-- 🔹 2. 触发条件配置 -->
+          <div style="margin-bottom:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <div style="font-size:13px;font-weight:600;color:#333">🔹 2. 触发条件 <span style="font-size:11px;color:#999;font-weight:400">(选择字段并设置触发阈值)</span></div>
+            </div>
+            ${selectedMetrics.length > 0 ? `
+            <div id="triggerConditions_${node.id}" style="display:flex;flex-direction:column;gap:10px">
+              ${renderTriggerConditions(node, metricsList, selectedMetrics)}
+            </div>
+            <div style="display:flex;justify-content:flex-start;margin-top:10px">
+              <button style="padding:4px 14px;background:#f0f7ff;color:#1565C0;border:1px solid #d6e4ff;border-radius:4px;font-size:12px;cursor:pointer" onclick="addTriggerCondition(${node.id})" title="添加条件">+ 添加条件</button>
+            </div>
+            ` : '<div style="font-size:12px;color:#999;padding:12px;text-align:center;background:#fafafa;border-radius:6px">⚠️ 请先绑定数据源并选择点位</div>'}
+          </div>
+
+          <!-- 🔹 3. 触发机制 -->
+          <div style="margin-bottom:16px">
+            <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:10px">🔹 3. 触发机制 <span style="font-size:11px;color:#999;font-weight:400">(何时取)</span></div>
             <div class="config-field">
-              <div class="config-label">数据过滤</div>
-              <div style="font-size:11px;color:#999;margin-bottom:8px">默认该产品下所有设备的数据都会进入这条规则链。勾选可按设备分组过滤。</div>
-              <div style="display:flex;flex-wrap:wrap;gap:8px" id="assoc_filter_tags_${node.id}">
-                ${deviceGroups.map(g => {
-                  const checked = assocFilters.includes(g.id);
-                  return `<label style="display:flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid ${checked?'#7C4DFF':'#ddd'};border-radius:20px;cursor:pointer;font-size:12px;color:${checked?'#7C4DFF':'#666'};background:${checked?'#f3e5f5':'#fff'};transition:all 0.2s;user-select:none" onclick="toggleAssocFilter(${node.id},'${g.id}',this)">
-                    <input type="checkbox" ${checked?'checked':''} style="display:none">
-                    ${g.label}
-                    <span style="font-size:10px;color:#999;margin-left:2px">(${g.count})</span>
-                  </label>`;
-                }).join('')}
+              <div class="config-label">执行频率</div>
+              <div style="display:flex;gap:16px;margin-top:4px">
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#555;cursor:pointer">
+                  <input type="radio" name="pollMode_${node.id}" value="poll" ${pollMode==='poll'?'checked':''} onchange="updateNodeConfig(${node.id},'pollMode','poll')" /> 定时轮询
+                </label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#555;cursor:pointer">
+                  <input type="radio" name="pollMode_${node.id}" value="event" ${pollMode==='event'?'checked':''} onchange="updateNodeConfig(${node.id},'pollMode','event')" /> 事件触发 (MQTT/HTTP)
+                </label>
               </div>
-              ${assocFilters.length > 0 ? `<div style="margin-top:8px;font-size:11px;color:#7C4DFF">已选择 ${assocFilters.length} 个分组：${assocFilters.map(fid => { const g = deviceGroups.find(d=>d.id===fid); return g ? g.label : fid; }).join('、')}</div>` : ''}
             </div>
-          </div>
-        </div>
-
-        <div id="assoc_device_fields_${node.id}" style="display:${assocDim==='device'?'block':'none'}">
-          <div class="config-field">
-            <div class="config-label">选择设备 <span style="color:#f44336">*</span></div>
-            <div style="position:relative">
-              <input class="config-input" type="text" placeholder="搜索设备名称或 ID ..." id="deviceSearch_${node.id}" oninput="filterDeviceList(${node.id},this.value)">
-              <div style="position:absolute;right:10px;top:50%;transform:translateY(-50%)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
-            </div>
-            <div id="deviceSelectList_${node.id}" style="margin-top:8px;max-height:180px;overflow-y:auto;border:1px solid #eee;border-radius:6px">
-              ${generateDeviceSelectList(node)}
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Modbus Client
-    if (node.defId === 'modbus_client') {
-      const savedMode = node.config.connectionMode || 'TCP';
-      const isRTU = savedMode === 'RTU';
-      inputConfigPanel = `
-        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
-          <div class="config-label" style="margin-bottom:10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Modbus Client 数据接入配置</div>
-          
-          <div class="config-field">
-            <div class="config-label">连接模式</div>
-            <div style="display:flex;gap:12px">
-              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-                <input type="radio" name="connectionMode_${node.id}" value="TCP" ${savedMode==='TCP'?'checked':''} onchange="updateNodeConfig(${node.id},'connectionMode',this.value);toggleModbusMode('${node.id}','TCP')">
-                Modbus TCP
-              </label>
-              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-                <input type="radio" name="connectionMode_${node.id}" value="RTU" ${savedMode==='RTU'?'checked':''} onchange="updateNodeConfig(${node.id},'connectionMode',this.value);toggleModbusMode('${node.id}','RTU')">
-                Modbus RTU (串口)
-              </label>
+            <div class="config-field" style="margin-top:8px" id="pollIntervalField_${node.id}">
+              <div class="config-label">轮询间隔</div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <input class="config-input" type="number" min="1" style="width:80px" value="${pollInterval}" onchange="updateNodeConfig(${node.id},'pollInterval',parseInt(this.value)||60)" />
+                <span style="font-size:12px;color:#999">秒</span>
+              </div>
             </div>
           </div>
 
-          <div id="tcp_fields_${node.id}" style="display:${isRTU?'none':'block'}">
-            <div class="config-field">
-              <div class="config-label">IP 地址 <span style="color:#f44336">*</span></div>
-              <input class="config-input" type="text" placeholder="例如: 192.168.1.100" value="${node.config.host || ''}" onchange="updateNodeConfig(${node.id},'host',this.value)">
-            </div>
-            <div class="config-field">
-              <div class="config-label">端口号 <span style="color:#f44336">*</span></div>
-              <input class="config-input" type="number" placeholder="502" value="${node.config.port || '502'}" min="1" max="65535" onchange="updateNodeConfig(${node.id},'port',this.value)">
-            </div>
-          </div>
-
-          <div id="rtu_fields_${node.id}" style="display:${isRTU?'block':'none'}">
-            <div class="config-field">
-              <div class="config-label">串口号 <span style="color:#f44336">*</span></div>
-              <select class="config-select" onchange="updateNodeConfig(${node.id},'serialPort',this.value)">
-                ${['COM1','COM2','COM3','/dev/ttyUSB0','/dev/ttyUSB1'].map(p => `<option value="${p}" ${node.config.serialPort===p?'selected':''}>${p}</option>`).join('')}
-              </select>
-            </div>
-            <div class="config-field">
-              <div class="config-label">波特率</div>
-              <select class="config-select" onchange="updateNodeConfig(${node.id},'baudRate',this.value)">
-                ${[4800,9600,14400,19200,115200].map(b => `<option value="${b}" ${(node.config.baudRate||9600)==b?'selected':''}>${b}</option>`).join('')}
-              </select>
-            </div>
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">轮询周期 (ms) <span style="color:#f44336">*</span> <span title="系统向底层 PLC/仪表发起数据请求的时间间隔" style="cursor:help">ⓘ</span></div>
-            <input class="config-input" type="number" placeholder="5000" value="${node.config.pollingInterval || '5000'}" min="1000" onchange="updateNodeConfig(${node.id},'pollingInterval',this.value)">
-            <div style="font-size:10px;color:#999;margin-top:3px">工业场景轮询周期不得低于 1000ms</div>
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">寄存器数据映射配置 <span title="配置需要采集的寄存器地址并映射为 JSON 字段名" style="cursor:help">ⓘ</span></div>
-            <div id="registerList_${node.id}">
-              ${generateRegisterMappingRows(node)}
-            </div>
-            <button class="action-btn" style="margin-top:8px;padding:6px 12px;border:1px solid #1565C0;color:#1565C0;border-radius:5px;background:transparent;cursor:pointer;font-size:12px" onclick="addRegisterRow(${node.id})">+ 添加寄存器映射</button>
-          </div>
         </div>
       `;
     }
 
-    // MQTT Subscriber
-    else if (node.defId === 'mqtt_subscriber') {
-      const authMode = node.config.authMode || '账号密码认证';
-      const isAuth = authMode !== '匿名访问';
-      inputConfigPanel = `
-        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
-          <div class="config-label" style="margin-bottom:10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>MQTT 订阅客户端配置</div>
-          
-          <div class="config-field">
-            <div class="config-label">Broker 服务器地址 <span style="color:#f44336">*</span> <span title="支持 mqtt:// 或安全加密的 mqtts://" style="cursor:help">ⓘ</span></div>
-            <input class="config-input" type="text" placeholder="例如: mqtt://broker.emqx.io:1883" value="${node.config.brokerUrl || ''}" onchange="updateNodeConfig(${node.id},'brokerUrl',this.value)">
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">客户端 ID (Client ID)</div>
-            <div style="display:flex;gap:8px">
-              <input class="config-input" type="text" placeholder="自动生成默认 ID" value="${node.config.clientId || ''}" onchange="updateNodeConfig(${node.id},'clientId',this.value)" style="flex:1">
-              <button class="action-btn" style="padding:6px 12px;border:1px solid #ddd;border-radius:5px;background:#f5f5f5;cursor:pointer;font-size:11px" onclick="this.previousElementSibling.value='mqtt-client-'+Math.random().toString(36).substr(2,9);updateNodeConfig(${node.id},'clientId',this.previousElementSibling.value)">生成</button>
-            </div>
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">订阅主题 (Topic) <span style="color:#f44336">*</span> <span title="支持通配符：'+' 代表单级，'#' 代表多级" style="cursor:help">ⓘ</span></div>
-            <input class="config-input" type="text" placeholder="例如: /factory/+/telemetry" value="${node.config.topic || ''}" onchange="updateNodeConfig(${node.id},'topic',this.value)">
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">服务质量等级 (QoS)</div>
-            <select class="config-select" onchange="updateNodeConfig(${node.id},'qos',this.value)">
-              <option value="0" ${(node.config.qos||1)==0?'selected':''}>0 - 最多交付一次 (At most once)</option>
-              <option value="1" ${(node.config.qos||1)==1?'selected':''}>1 - 至少交付一次 (At least once)</option>
-              <option value="2" ${node.config.qos==2?'selected':''}>2 - 刚好交付一次 (Exactly once)</option>
-            </select>
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">身份认证方式</div>
-            <select class="config-select" onchange="updateNodeConfig(${node.id},'authMode',this.value);toggleMqttAuth('${node.id}',this.value)">
-              <option value="匿名访问" ${authMode==='匿名访问'?'selected':''}>匿名访问</option>
-              <option value="账号密码认证" ${authMode==='账号密码认证'?'selected':''}>账号密码认证</option>
-              <option value="SSL/TLS 证书加密" ${authMode==='SSL/TLS 证书加密'?'selected':''}>SSL/TLS 证书加密</option>
-            </select>
-          </div>
-
-          <div id="mqtt_auth_${node.id}" style="display:${isAuth?'block':'none'}">
-            <div class="config-field">
-              <div class="config-label">用户名 <span style="color:#f44336">*</span></div>
-              <input class="config-input" type="text" placeholder="请输入用户名" value="${node.config.username || ''}" onchange="updateNodeConfig(${node.id},'username',this.value)">
-            </div>
-            <div class="config-field">
-              <div class="config-label">密码 <span style="color:#f44336">*</span></div>
-              <input class="config-input" type="password" placeholder="请输入密码" value="${node.config.password || ''}" onchange="updateNodeConfig(${node.id},'password',this.value)">
-            </div>
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">报文解析格式</div>
-            <select class="config-select" onchange="updateNodeConfig(${node.id},'payloadFormat',this.value)">
-              <option value="JSON 结构体" ${node.config.payloadFormat==='JSON 结构体'?'selected':''}>JSON 结构体</option>
-              <option value="Raw Text" ${node.config.payloadFormat==='Raw Text'?'selected':''}>Raw Text (文本)</option>
-              <option value="Hex Binary" ${node.config.payloadFormat==='Hex Binary'?'selected':''}>Hex Binary (二进制明文)</option>
-            </select>
-          </div>
-        </div>
-      `;
-    }
-
-    // HTTP Receiver
-    else if (node.defId === 'http_receiver') {
-      const webhookId = node.config.webhookUrl ? '' : 'cb7ebd83a2184ff7929' + Math.random().toString(16).substr(2,6);
-      inputConfigPanel = `
-        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
-          <div class="config-label" style="margin-bottom:10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>HTTP Webhook 接收端配置</div>
-          
-          <div style="background:#e3f2fd;border:1px solid #90caf9;border-radius:6px;padding:12px;margin-bottom:12px;font-size:12px;color:#1565c0">
-            本节点将生成一个唯一的免测 Webhook 接口，第三方系统通过 POST 请求将数据推送到此 URL，系统会自动将 Payload 转化为标准 Telemetry 流。
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">支持的请求方法</div>
-            <select class="config-select" disabled>
-              <option selected>POST</option>
-            </select>
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">Webhook 接收地址 (URL) <span title="此 URL 唯一且不可修改，点击右侧按钮直接复制" style="cursor:help">ⓘ</span></div>
-            <div style="display:flex;gap:8px">
-              <input class="config-input" type="text" value="https://cat-api.platform.com/v1/rules/webhook/${node.config.webhookId || webhookId}" readonly style="flex:1;background:#f5f5f5">
-              <button class="action-btn" style="padding:6px 12px;border:1px solid #ddd;border-radius:5px;background:#f5f5f5;cursor:pointer;font-size:11px;white-space:nowrap" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('input').value);this.textContent='已复制'">复制</button>
-            </div>
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">安全认证 Header 键名 <span style="color:#f44336">*</span></div>
-            <input class="config-input" type="text" value="${node.config.authHeaderKey || 'X-Webhook-Token'}" onchange="updateNodeConfig(${node.id},'authHeaderKey',this.value)">
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">安全认证凭证 (Token) <span title="第三方系统请求时，必须在 Header 中携带此 Token 进行身份验签" style="cursor:help">ⓘ</span></div>
-            <div style="display:flex;gap:8px">
-              <input class="config-input" type="password" value="${node.config.authToken || 'sec_b9f87c14aee6420f889ad43e110bb'}" readonly style="flex:1;background:#f5f5f5">
-              <button class="action-btn" style="padding:6px 12px;border:1px solid #ddd;border-radius:5px;background:#f5f5f5;cursor:pointer;font-size:11px" onclick="const t='sec_'+Math.random().toString(16).substr(2,12)+Math.random().toString(16).substr(2,8);this.previousElementSibling.value=t;updateNodeConfig(${node.id},'authToken',t)">重新生成</button>
-            </div>
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">同步响应返回内容 (JSON) <span title="当规则链成功接收请求时，向第三方系统返回的 HTTP 响应体" style="cursor:help">ⓘ</span></div>
-            <textarea class="config-textarea" rows="4" onchange="updateNodeConfig(${node.id},'successResponse',this.value)">${node.config.successResponse || '{\n  "status": "success",\n  "code": 200,\n  "message": "Data received"\n}'}</textarea>
-          </div>
-        </div>
-      `;
-    }
-
-    // OPC UA Client
-    else if (node.defId === 'opcua_client') {
-      const authMode = node.config.authMode || 'ANONYMOUS';
-      const isUserPass = authMode === 'USER_PASS';
-      inputConfigPanel = `
-        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
-          <div class="config-label" style="margin-bottom:10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>OPC UA Client 数据接入配置</div>
-          
-          <div class="config-field">
-            <div class="config-label">Endpoint URL (服务器地址) <span style="color:#f44336">*</span> <span title="OPC UA 服务器的访问终结点地址" style="cursor:help">ⓘ</span></div>
-            <input class="config-input" type="text" placeholder="例如: opc.tcp://192.168.1.200:4840" value="${node.config.endpointUrl || ''}" onchange="updateNodeConfig(${node.id},'endpointUrl',this.value)">
-            <div style="font-size:10px;color:#999;margin-top:3px">必须以 opc.tcp:// 开头</div>
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">安全策略 (Security Policy)</div>
-            <select class="config-select" onchange="updateNodeConfig(${node.id},'securityPolicy',this.value)">
-              ${['None','Basic128Rsa15','Basic256','Basic256Sha256','Aes128_Sha256_RsaOaep'].map(p => `<option value="${p}" ${node.config.securityPolicy===p?'selected':''}>${p}</option>`).join('')}
-            </select>
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">安全模式 (Message Security)</div>
-            <select class="config-select" onchange="updateNodeConfig(${node.id},'securityMode',this.value)">
-              <option value="None" ${node.config.securityMode==='None'?'selected':''}>None</option>
-              <option value="Sign" ${node.config.securityMode==='Sign'?'selected':''}>Sign (签名)</option>
-              <option value="SignAndEncrypt" ${node.config.securityMode==='SignAndEncrypt'?'selected':''}>SignAndEncrypt (签名与加密)</option>
-            </select>
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">身份认证方式</div>
-            <div style="display:flex;gap:12px;flex-wrap:wrap">
-              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-                <input type="radio" name="opcAuth_${node.id}" value="ANONYMOUS" ${authMode==='ANONYMOUS'?'checked':''} onchange="updateNodeConfig(${node.id},'authMode',this.value);toggleOpcAuth('${node.id}','ANONYMOUS')">匿名登录
-              </label>
-              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-                <input type="radio" name="opcAuth_${node.id}" value="USER_PASS" ${authMode==='USER_PASS'?'checked':''} onchange="updateNodeConfig(${node.id},'authMode',this.value);toggleOpcAuth('${node.id}','USER_PASS')">账号密码
-              </label>
-              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-                <input type="radio" name="opcAuth_${node.id}" value="CERTIFICATE" ${authMode==='CERTIFICATE'?'checked':''} onchange="updateNodeConfig(${node.id},'authMode',this.value);toggleOpcAuth('${node.id}','CERTIFICATE')">数字证书
-              </label>
-            </div>
-          </div>
-
-          <div id="opc_userpass_${node.id}" style="display:${isUserPass?'block':'none'}">
-            <div class="config-field">
-              <div class="config-label">用户名 <span style="color:#f44336">*</span></div>
-              <input class="config-input" type="text" value="${node.config.username || ''}" onchange="updateNodeConfig(${node.id},'username',this.value)">
-            </div>
-            <div class="config-field">
-              <div class="config-label">密码 <span style="color:#f44336">*</span></div>
-              <input class="config-input" type="password" value="${node.config.password || ''}" onchange="updateNodeConfig(${node.id},'password',this.value)">
-            </div>
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">发布间隔 / 采样频率 (ms) <span style="color:#f44336">*</span> <span title="OPC UA 服务器向本系统推送数据变更的时间间隔" style="cursor:help">ⓘ</span></div>
-            <input class="config-input" type="number" value="${node.config.publishingInterval || '1000'}" min="100" onchange="updateNodeConfig(${node.id},'publishingInterval',this.value)">
-            <div style="font-size:10px;color:#999;margin-top:3px">采样频率不得低于 100ms</div>
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">OPC UA 节点标签订阅配置 <span title="配置需要订阅的 Node ID 并映射为系统内部的 JSON 键名" style="cursor:help">ⓘ</span></div>
-            <div id="nodeTagsList_${node.id}">
-              ${generateNodeTagsRows(node)}
-            </div>
-            <button class="action-btn" style="margin-top:8px;padding:6px 12px;border:1px solid #7B1FA2;color:#7B1FA2;border-radius:5px;background:transparent;cursor:pointer;font-size:12px" onclick="addNodeTagRow(${node.id})">+ 添加节点标签订阅</button>
-          </div>
-        </div>
-      `;
-    }
-
-    // Kafka Consumer
-    else if (node.defId === 'kafka_consumer') {
-      const secProtocol = node.config.securityProtocol || 'PLAINTEXT';
-      const isSASL = ['SASL_PLAINTEXT','SASL_SSL'].includes(secProtocol);
-      inputConfigPanel = `
-        <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
-          <div class="config-label" style="margin-bottom:10px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M4 4h16v16H4z"/><path d="M4 9h16"/><path d="M9 4v16"/></svg>Kafka 消息消费端配置</div>
-          
-          <div class="config-field">
-            <div class="config-label">Bootstrap Servers (集群地址) <span style="color:#f44336">*</span> <span title="Kafka 集群 Broker 地址列表，多个地址用英文逗号隔开" style="cursor:help">ⓘ</span></div>
-            <input class="config-input" type="text" placeholder="例如: 10.0.0.1:9092,10.0.0.2:9092" value="${node.config.bootstrapServers || ''}" onchange="updateNodeConfig(${node.id},'bootstrapServers',this.value)">
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">消费者组 ID (Group ID) <span style="color:#f44336">*</span> <span title="同一个 Group ID 内的消费者会共同消费该 Topic 下的数据，实现负载均衡" style="cursor:help">ⓘ</span></div>
-            <input class="config-input" type="text" placeholder="例如: cat-rule-engine-group" value="${node.config.groupId || ''}" onchange="updateNodeConfig(${node.id},'groupId',this.value)">
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">消费主题 (Topics) <span style="color:#f44336">*</span></div>
-            <input class="config-input" type="text" placeholder="多个 Topic 请用逗号隔开，如: telemetry-raw, alarm-raw" value="${node.config.topics || ''}" onchange="updateNodeConfig(${node.id},'topics',this.value)">
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">位移重置策略 (Offset Reset)</div>
-            <select class="config-select" onchange="updateNodeConfig(${node.id},'autoOffsetReset',this.value)">
-              <option value="latest" ${node.config.autoOffsetReset==='latest'?'selected':''}>latest - 从最新的消息开始消费</option>
-              <option value="earliest" ${node.config.autoOffsetReset==='earliest'?'selected':''}>earliest - 从最早未消费的消息开始消费</option>
-            </select>
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">安全协议 (Security Protocol)</div>
-            <select class="config-select" onchange="updateNodeConfig(${node.id},'securityProtocol',this.value);toggleKafkaSec('${node.id}',this.value)">
-              <option value="PLAINTEXT" ${secProtocol==='PLAINTEXT'?'selected':''}>PLAINTEXT</option>
-              <option value="SASL_PLAINTEXT" ${secProtocol==='SASL_PLAINTEXT'?'selected':''}>SASL_PLAINTEXT</option>
-              <option value="SASL_SSL" ${secProtocol==='SASL_SSL'?'selected':''}>SASL_SSL</option>
-              <option value="SSL" ${secProtocol==='SSL'?'selected':''}>SSL</option>
-            </select>
-          </div>
-
-          <div id="kafka_sasl_${node.id}" style="display:${isSASL?'block':'none'}">
-            <div class="config-field">
-              <div class="config-label">SASL 认证机制</div>
-              <select class="config-select" onchange="updateNodeConfig(${node.id},'saslMechanism',this.value)">
-                <option value="PLAIN" ${node.config.saslMechanism==='PLAIN'?'selected':''}>PLAIN</option>
-                <option value="SCRAM-SHA-256" ${node.config.saslMechanism==='SCRAM-SHA-256'?'selected':''}>SCRAM-SHA-256</option>
-                <option value="SCRAM-SHA-512" ${node.config.saslMechanism==='SCRAM-SHA-512'?'selected':''}>SCRAM-SHA-512</option>
-              </select>
-            </div>
-            <div class="config-field">
-              <div class="config-label">SASL 用户名 <span style="color:#f44336">*</span></div>
-              <input class="config-input" type="text" value="${node.config.saslUsername || ''}" onchange="updateNodeConfig(${node.id},'saslUsername',this.value)">
-            </div>
-            <div class="config-field">
-              <div class="config-label">SASL 密码 <span style="color:#f44336">*</span></div>
-              <input class="config-input" type="password" value="${node.config.saslPassword || ''}" onchange="updateNodeConfig(${node.id},'saslPassword',this.value)">
-            </div>
-          </div>
-
-          <div class="config-field">
-            <div class="config-label">消息体反序列化格式 <span title="一般工业设备上报至 Kafka 的消息推荐采用 String(JSON) 格式直接解析" style="cursor:help">ⓘ</span></div>
-            <select class="config-select" onchange="updateNodeConfig(${node.id},'valueDeserializer',this.value)">
-              <option value="String (字符串/JSON)" ${node.config.valueDeserializer==='String (字符串/JSON)'?'selected':''}>String (字符串/JSON)</option>
-              <option value="ByteArray" ${node.config.valueDeserializer==='ByteArray'?'selected':''}>ByteArray (字节数组)</option>
-              <option value="Avro" ${node.config.valueDeserializer==='Avro'?'selected':''}>Avro</option>
-            </select>
-          </div>
-        </div>
-      `;
-    }
-
-    typeSpecificSection = assocSection + inputConfigPanel;
+    typeSpecificSection = inputConfigPanel;
   }
 
   // ===== TRANSFORM: 数据处理配置 =====
@@ -1810,42 +1559,195 @@ function openConfig(nodeId) {
       <input class="config-input" value="${node.name}" onchange="updateNodeConfig(${node.id}, 'name', this.value)" />
     </div>
     <div class="config-field">
-      <div class="config-label">条件表达式</div>
-      <textarea class="config-textarea" onchange="updateNodeConfig(${node.id}, 'cond', this.value)">${node.cond}</textarea>
-    </div>
-    <div class="config-field">
-      <div class="config-label">优先级</div>
-      <select class="config-select" onchange="updateNodeConfig(${node.id}, 'priority', this.value)">
-        <option value="low" ${node.config.priority==='low'?'selected':''}>低</option>
-        <option value="medium" ${node.config.priority==='medium' || !node.config.priority?'selected':''}>中</option>
-        <option value="high" ${node.config.priority==='high'?'selected':''}>高</option>
-        <option value="critical" ${node.config.priority==='critical'?'selected':''}>紧急</option>
-      </select>
-    </div>
-    <div class="config-field">
-      <div class="config-label">是否启用</div>
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-        <input type="checkbox" ${node.config.enabled!==false?'checked':''} onchange="updateNodeConfig(${node.id}, 'enabled', this.checked)" />
-        <span style="font-size:13px">${node.config.enabled!==false?'已启用':'已禁用'}</span>
-      </label>
-    </div>
-    <div class="config-field">
       <div class="config-label">备注说明</div>
-      <textarea class="config-textarea" placeholder="添加备注..." onchange="updateNodeConfig(${node.id}, 'description', this.value)">${node.config.description || ''}</textarea>
-    </div>
-    <div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee">
-      <div class="config-label" style="margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>连接信息</div>
-      <div style="font-size:12px;color:#666">
-        <div>入站连接: ${state.connections.filter(c=>c.to===node.id).length} 条</div>
-        <div>出站连接: ${state.connections.filter(c=>c.from===node.id).length} 条</div>
-      </div>
+      <input class="config-input" value="${node.config.remark || ''}" placeholder="可选，描述此节点的用途" onchange="updateNodeConfig(${node.id}, 'remark', this.value)" />
     </div>
     ${typeSpecificSection}
+    <div style="display:flex;justify-content:center;gap:16px;margin-top:20px;padding-top:16px">
+      <button style="width:auto;padding:4px 20px;background:#fff;color:#666;border:1px solid #d9d9d9;border-radius:6px;font-size:12px;cursor:pointer" onclick="closeConfig()">取消</button>
+      <button style="width:auto;padding:4px 20px;background:#1890ff;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer" onclick="closeConfig();showToast('配置已保存','success')">确认</button>
+    </div>
   `;
   configPanel.classList.add('open');
 }
 
 function closeConfig() { configPanel.classList.remove('open'); }
+
+// ===== 数据输入节点配置面板交互函数 =====
+function changeEntityType(nodeId, type) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  if (type === 'product') {
+    node.config.deviceId = '';
+    node.config.metrics = [];
+  } else if (type === 'device') {
+    node.config.metrics = [];
+  }
+  // 重新打开配置面板以刷新
+  openConfig(nodeId);
+  saveHistory();
+}
+
+function changeDevice(nodeId, deviceId) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  node.config.deviceId = deviceId;
+  node.config.metrics = [];
+  node.config.fieldMappings = [];
+  // 更新节点显示（设备级：大字设备名，小字产品名）
+  const prodDef = PRODUCT_DEFINITIONS[node.config.productId];
+  const deviceList = PRODUCT_DEVICES[node.config.productId] || [];
+  const dObj = deviceList.find(d => d.id === deviceId);
+  node.name = dObj ? dObj.name : '数据输入';
+  node.cond = prodDef ? prodDef.name : '';
+  const el = document.getElementById(`node-${nodeId}`);
+  if (el) {
+    el.querySelector('.node-header').innerHTML = node.name;
+    el.querySelector('.node-cond').textContent = node.cond;
+  }
+  openConfig(nodeId);
+  saveHistory();
+}
+
+function fetchMetricKeys(nodeId) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node || !node.config.productId) {
+    showToast('请先在左侧目录树选择产品', 'warning');
+    return;
+  }
+  // 从 sidebarTreeState.checkedDevices 中获取已勾选的设备（二级树不再有点位勾选）
+  const pid = node.config.productId;
+  const did = node.config.deviceId;
+  const metricsList = PRODUCT_METRICS[pid] || [];
+
+  // 二级树中只勾选设备，点位在抽屉中选择
+  // 此函数保留用于兼容，实际点位选择已移至抽屉
+  if (!did) {
+    showToast('请先选择设备', 'warning');
+    return;
+  }
+
+  // 默认选中该设备下所有点位
+  const selectedMetrics = metricsList.map(m => m.id);
+
+  node.config.metrics = selectedMetrics;
+  node.config.fieldMappings = selectedMetrics.map(mid => {
+    const m = metricsList.find(x => x.id === mid);
+    return { key: mid, alias: m ? m.name : mid, type: m ? m.type : 'float' };
+  });
+
+  // 更新节点显示（设备级：大字设备名，小字产品名）
+  const prodDef = PRODUCT_DEFINITIONS[pid];
+  const deviceList = PRODUCT_DEVICES[pid] || [];
+  const dObj = deviceList.find(d => d.id === did);
+  node.name = dObj ? dObj.name : '数据输入';
+  node.cond = prodDef ? prodDef.name : '';
+  const el = document.getElementById(`node-${nodeId}`);
+  if (el) {
+    el.querySelector('.node-header').innerHTML = node.name;
+    el.querySelector('.node-cond').textContent = node.cond;
+  }
+
+  openConfig(nodeId);
+  saveHistory();
+  showToast('已填充 ' + selectedMetrics.length + ' 个点位', 'success');
+}
+
+function updateFieldMapping(nodeId, idx, key, value) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  if (!node.config.fieldMappings) node.config.fieldMappings = [];
+  if (!node.config.fieldMappings[idx]) {
+    node.config.fieldMappings[idx] = { key: node.config.metrics[idx], alias: '', type: 'float' };
+  }
+  node.config.fieldMappings[idx][key] = value;
+  saveHistory();
+}
+
+function autoMapAliases(nodeId) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node || !node.config.metrics) return;
+  const pid = node.config.productId;
+  const metricsList = PRODUCT_METRICS[pid] || [];
+  node.config.fieldMappings = node.config.metrics.map(mid => {
+    const m = metricsList.find(x => x.id === mid);
+    return { key: mid, alias: m ? m.name : mid, type: m ? m.type : 'float' };
+  });
+  openConfig(nodeId);
+  saveHistory();
+  showToast('已智能映射 ' + node.config.metrics.length + ' 个字段别名', 'success');
+}
+
+// ===== 抽屉点位勾选相关函数 =====
+function toggleDrawerMetric(nodeId, metricId) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  node.config.metrics = node.config.metrics || [];
+  const idx = node.config.metrics.indexOf(metricId);
+  if (idx >= 0) {
+    node.config.metrics.splice(idx, 1);
+  } else {
+    node.config.metrics.push(metricId);
+  }
+  syncFieldMappings(nodeId);
+  openConfig(nodeId);
+  saveHistory();
+}
+
+function drawerSelectAllMetrics(nodeId) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node || !node.config.productId) return;
+  const metricsList = PRODUCT_METRICS[node.config.productId] || [];
+  node.config.metrics = metricsList.map(m => m.id);
+  syncFieldMappings(nodeId);
+  openConfig(nodeId);
+  saveHistory();
+}
+
+function drawerClearMetrics(nodeId) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  node.config.metrics = [];
+  node.config.fieldMappings = [];
+  openConfig(nodeId);
+  saveHistory();
+}
+
+function syncFieldMappings(nodeId) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node || !node.config.productId) return;
+  const metricsList = PRODUCT_METRICS[node.config.productId] || [];
+  const existingMap = {};
+  (node.config.fieldMappings || []).forEach(fm => { existingMap[fm.key] = fm; });
+  node.config.fieldMappings = (node.config.metrics || []).map(mid => {
+    const m = metricsList.find(x => x.id === mid);
+    const existing = existingMap[mid];
+    return existing || { key: mid, alias: m ? m.name : mid, type: m ? m.type : 'float' };
+  });
+}
+
+function previewData(nodeId) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node || !node.config.metrics || node.config.metrics.length === 0) {
+    showToast('暂无点位数据，无法预览', 'warning');
+    return;
+  }
+  const pid = node.config.productId;
+  const metricsList = PRODUCT_METRICS[pid] || [];
+  const fieldMappings = node.config.fieldMappings || [];
+  const preview = {};
+  node.config.metrics.forEach((mid, idx) => {
+    const m = metricsList.find(x => x.id === mid);
+    const alias = (fieldMappings[idx] && fieldMappings[idx].alias) || (m ? m.name : mid);
+    const rt = getRealtimePoint(pid + ':' + mid);
+    preview[alias] = rt ? rt.value : (Math.random() * 100).toFixed(1);
+  });
+  const el = document.getElementById('dataPreview_' + nodeId);
+  if (el) {
+    el.style.display = 'block';
+    el.textContent = JSON.stringify(preview, null, 2);
+  }
+}
 
 function updateNodeConfig(nodeId, key, value) {
   const node = state.nodes.find(n => n.id === nodeId);
@@ -1854,13 +1756,167 @@ function updateNodeConfig(nodeId, key, value) {
     node[key] = value;
     const el = document.getElementById(`node-${nodeId}`);
     if (el) {
-      el.querySelector('.node-header').innerHTML = `<span class="node-icon">${node.icon}</span>${node.name}`;
+      el.querySelector('.node-header').innerHTML = `${node.name}`;
       el.querySelector('.node-cond').textContent = node.cond;
     }
   } else {
     node.config[key] = value;
   }
   saveHistory();
+}
+
+function renderTriggerConditions(node, metricsList, displayMetrics) {
+  let conditions = node.config.triggerConditions || [];
+  // 默认至少显示一个条件框
+  if (conditions.length === 0) {
+    conditions = [{ field: '', op: '>', value: '' }];
+    node.config.triggerConditions = conditions;
+  }
+  // 初始化 triggerLogic 数组（每两个条件之间的关系）
+  if (!node.config.triggerLogic) {
+    node.config.triggerLogic = [];
+  }
+  const selectedMetrics = displayMetrics || node.config.metrics || [];
+  const triggerLogic = node.config.triggerLogic;
+
+  // 表达式预览行：用彩色标签显示 AND/OR，点击可切换
+  let previewHtml = '';
+  if (conditions.length >= 2) {
+    const parts = conditions.map((cond, idx) => {
+      const m = metricsList.find(x => x.id === cond.field);
+      const label = m ? m.name : (cond.field || '???');
+      const val = cond.value || '?';
+      return `<span style="font-size:11px;color:#333">${label} ${cond.op} ${val}</span>`;
+    });
+    const logicParts = parts.map((part, idx) => {
+      if (idx === 0) return part;
+      const logic = triggerLogic[idx - 1] || 'AND';
+      const isAnd = logic === 'AND';
+      return ` <span style="display:inline-block;padding:1px 8px;border-radius:3px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid ${isAnd ? '#52c41a' : '#fa8c16'};background:${isAnd ? '#f6ffed' : '#fff7e6'};color:${isAnd ? '#389e0d' : '#d46b08'};vertical-align:middle;margin:0 2px" onclick="toggleTriggerLogic(${node.id},${idx - 1})" title="点击切换">${logic}</span> ${part}`;
+    });
+    previewHtml = `<div style="padding:8px 12px;background:#fafafa;border-radius:6px;border:1px solid #e8e8e8;margin-bottom:10px;font-size:11px;line-height:1.8;word-break:break-all">${logicParts.join('')}</div>`;
+  }
+
+  // 条件列表（不再插入 AND/OR 按钮）
+  const conditionsHtml = conditions.map((cond, idx) => {
+    const m = metricsList.find(x => x.id === cond.field);
+    const unit = m ? m.unit : '';
+    const expr = cond.field && cond.value
+      ? `${m ? m.name : cond.field} ${cond.op} ${cond.value}${unit}`
+      : '';
+
+    return `
+    <div style="padding:10px;background:#f0f7ff;border-radius:6px;border:1px solid #d6e4ff">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="font-size:11px;color:#1565C0;font-weight:500">条件 ${idx + 1}</span>
+        ${conditions.length > 1 ? `<button style="margin-left:auto;padding:2px 6px;background:#fff;color:#ff4d4f;border:1px solid #ffccc7;border-radius:3px;font-size:10px;cursor:pointer" onclick="removeTriggerCondition(${node.id},${idx})">删除</button>` : ''}
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <select class="config-select" style="flex:1;font-size:11px;padding:4px 6px;min-width:100px" onchange="updateTriggerCondition(${node.id},${idx},'field',this.value)">
+          <option value="">— 选择字段 —</option>
+          ${selectedMetrics.map(mid => {
+            const mm = metricsList.find(x => x.id === mid);
+            const label = mm ? mm.name + ' (' + mid + ')' : mid;
+            return `<option value="${mid}" ${cond.field===mid?'selected':''}>${label}</option>`;
+          }).join('')}
+        </select>
+        <select class="config-select" style="width:52px;flex-shrink:0;font-size:11px;padding:4px 4px" onchange="updateTriggerCondition(${node.id},${idx},'op',this.value)">
+          <option value=">" ${cond.op==='>'?'selected':''}>&gt;</option>
+          <option value="<" ${cond.op==='<'?'selected':''}>&lt;</option>
+          <option value=">=" ${cond.op==='>='?'selected':''}>&ge;</option>
+          <option value="<=" ${cond.op==='<='?'selected':''}>&le;</option>
+          <option value="==" ${cond.op==='=='?'selected':''}>=</option>
+          <option value="!=" ${cond.op==='!='?'selected':''}>&ne;</option>
+        </select>
+        <input class="config-input" type="number" style="width:60px;font-size:11px;padding:4px 6px" placeholder="阈值" value="${cond.value || ''}" onchange="updateTriggerCondition(${node.id},${idx},'value',this.value)" />
+        <span style="font-size:11px;color:#999;flex-shrink:0">${unit}</span>
+      </div>
+      ${expr ? `<div style="font-size:11px;color:#1565C0;margin-top:6px">${expr}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  return previewHtml + conditionsHtml;
+}
+
+function addTriggerCondition(nodeId) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  if (!node.config.triggerConditions) node.config.triggerConditions = [];
+  if (!node.config.triggerLogic) node.config.triggerLogic = [];
+  node.config.triggerConditions.push({ field: '', op: '>', value: '' });
+  // 新条件与上一个条件之间默认 AND
+  node.config.triggerLogic.push('AND');
+  saveHistory();
+  openConfig(nodeId);
+}
+
+function removeTriggerCondition(nodeId, idx) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node || !node.config.triggerConditions) return;
+  node.config.triggerConditions.splice(idx, 1);
+  // 同步移除对应的逻辑关系
+  if (node.config.triggerLogic) {
+    // triggerLogic[idx-1] 是第 idx 个条件前面的关系
+    // triggerLogic[idx] 是第 idx 个条件后面的关系
+    // 删除第 idx 个条件后，需要移除 triggerLogic[idx-1]（如果存在）
+    if (idx > 0 && node.config.triggerLogic.length >= idx) {
+      node.config.triggerLogic.splice(idx - 1, 1);
+    } else if (idx === 0 && node.config.triggerLogic.length > 0) {
+      node.config.triggerLogic.splice(0, 1);
+    }
+  }
+  saveHistory();
+  openConfig(nodeId);
+}
+
+function updateTriggerCondition(nodeId, idx, key, value) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node || !node.config.triggerConditions) return;
+  if (!node.config.triggerConditions[idx]) return;
+  node.config.triggerConditions[idx][key] = value;
+  saveHistory();
+  openConfig(nodeId);
+}
+
+function toggleTriggerLogic(nodeId, logicIdx) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node || !node.config.triggerLogic) return;
+  if (node.config.triggerLogic[logicIdx] === 'OR') {
+    node.config.triggerLogic[logicIdx] = 'AND';
+  } else {
+    node.config.triggerLogic[logicIdx] = 'OR';
+  }
+  saveHistory();
+  openConfig(nodeId);
+}
+
+function renderRealtimeStatus(node, metricsList) {
+  // 实时状态面板已移除，保留函数用于兼容
+  return '';
+}
+
+function updateTriggerField(nodeId, value) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  node.config.triggerField = value;
+  saveHistory();
+  openConfig(nodeId);
+}
+
+function updateTriggerOp(nodeId, value) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  node.config.triggerOp = value;
+  saveHistory();
+  openConfig(nodeId);
+}
+
+function updateTriggerValue(nodeId, value) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  node.config.triggerValue = value;
+  saveHistory();
+  openConfig(nodeId);
 }
 
 // ===== CONTEXT MENU =====
@@ -2057,7 +2113,7 @@ function closeTestModal() { document.getElementById('testModal').classList.remov
 // ===== SAVE =====
 document.getElementById('btnSave').addEventListener('click', () => {
   if (state.nodes.length === 0) { showToast('画布为空，无法保存', 'warning'); return; }
-  document.getElementById('saveModal').classList.add('open');
+  confirmSave();
 });
 
 function closeSaveModal() { document.getElementById('saveModal').classList.remove('open'); }
@@ -2098,7 +2154,7 @@ function renderDeviceSelectList(search) {
     const isSelected = selectedDeviceIds.includes(d.id);
     const isSuggested = suggestedTypes.includes(d.type);
     return `
-      <div class="device-select-item ${isSelected ? 'selected' : ''}" onclick="toggleDeviceSelect('${d.id}', this)">
+      <div class="device-select-item ${isSelected ? 'selected' : ''}" onclick="toggleDeviceModalSelect('${d.id}', this)">
         <div class="ds-check">✓</div>
         <span class="ds-icon">${DEVICE_TYPES[d.type]?.icon || '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>'}</span>
         <div class="ds-info">
@@ -2113,7 +2169,7 @@ function renderDeviceSelectList(search) {
 
 function filterModalDeviceList(val) { renderDeviceSelectList(val); }
 
-function toggleDeviceSelect(deviceId, el) {
+function toggleDeviceModalSelect(deviceId, el) {
   const idx = selectedDeviceIds.indexOf(deviceId);
   if (idx >= 0) {
     selectedDeviceIds.splice(idx, 1);
@@ -2161,118 +2217,925 @@ function removeDeviceFromTrigger(nodeId, deviceId) {
 }
 
 function confirmSave() {
-  const name = document.getElementById('ruleName').value;
-  const desc = document.getElementById('ruleDesc').value;
+  const name = state.chainName || '未命名规则链';
+  const desc = state.chainDesc || '';
   const data = {
     name, description: desc,
     nodes: state.nodes.map(n => ({ id: n.id, defId: n.defId, type: n.type, name: n.name, cond: n.cond, x: Math.round(n.x), y: Math.round(n.y), config: n.config })),
     connections: state.connections,
     createdAt: new Date().toISOString(),
   };
-  // Download as JSON
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `${name}.json`; a.click();
-  URL.revokeObjectURL(url);
-  closeSaveModal();
-  showToast(`规则链 "${name}" 已保存`, 'success');
+  // 保存到 sessionStorage，与规则链列表页共享数据
+  const allData = JSON.parse(sessionStorage.getItem('allChainData') || '{}');
+  const chainId = state.chainId || (Date.now());
+  allData[chainId] = data;
+  sessionStorage.setItem('allChainData', JSON.stringify(allData));
+  showToast(`规则链 "${name}" 已保存到列表`, 'success');
 }
 
-// ===== HELPERS: Dynamic Form Components =====
+// ===== HELPERS: Asset Data Source =====
+// ===== 设备层 (Device Level) —— 定义业务上下文 =====
+// 资产路径、生命周期状态、动态属性
+const PRODUCT_DEVICES = {
+  inverter_10mw: [
+    { id: 'inv_01', name: '逆变器#01', assetPath: '厂区A/车间1/逆变器#01', lifecycle: 'running', location: '屋顶光伏区', ratedPower: '10MW', owner: '张工' },
+    { id: 'inv_02', name: '逆变器#02', assetPath: '厂区A/车间1/逆变器#02', lifecycle: 'running', location: '屋顶光伏区', ratedPower: '10MW', owner: '张工' },
+    { id: 'inv_03', name: '逆变器#03', assetPath: '厂区A/车间2/逆变器#03', lifecycle: 'maintenance', location: '屋顶光伏区', ratedPower: '10MW', owner: '李工' }
+  ],
+  env_monitor: [
+    { id: 'env_01', name: '温湿度传感器-1F', assetPath: '1号线/人民广场站/站厅层/温湿度传感器-1F', lifecycle: 'running', location: '站厅层东侧', ratedPower: '5W', owner: '王工' },
+    { id: 'env_02', name: 'CO₂检测仪-B1', assetPath: '1号线/人民广场站/设备层/CO₂检测仪-B1', lifecycle: 'running', location: '设备层通道', ratedPower: '3W', owner: '王工' },
+    { id: 'env_03', name: 'PM2.5监测站-A口', assetPath: '1号线/人民广场站/A出入口/PM2.5监测站', lifecycle: 'offline', location: 'A出入口', ratedPower: '8W', owner: '赵工' }
+  ],
+  ventilation: [
+    { id: 'fan_01', name: '送风机-1#机组', assetPath: '1号线/南京东路站/通风机房/送风机-1#', lifecycle: 'running', location: '通风机房A', ratedPower: '75kW', owner: '刘工' },
+    { id: 'fan_02', name: '排风机-2#机组', assetPath: '1号线/南京东路站/通风机房/排风机-2#', lifecycle: 'fault', location: '通风机房B', ratedPower: '55kW', owner: '刘工' }
+  ],
+  drainage: [
+    { id: 'pump_01', name: '污水泵-1#池', assetPath: '1号线/中山公园站/泵房/污水泵-1#', lifecycle: 'running', location: '地下泵房', ratedPower: '15kW', owner: '陈工' },
+    { id: 'pump_02', name: '雨水泵-2#池', assetPath: '1号线/中山公园站/泵房/雨水泵-2#', lifecycle: 'standby', location: '地下泵房', ratedPower: '22kW', owner: '陈工' }
+  ],
+  platform_door: [
+    { id: 'psd_01', name: '屏蔽门-上行A组', assetPath: '1号线/人民广场站/上行站台/屏蔽门-A组', lifecycle: 'running', location: '上行站台', ratedPower: '2kW', owner: '杨工' },
+    { id: 'psd_02', name: '屏蔽门-下行B组', assetPath: '1号线/人民广场站/下行站台/屏蔽门-B组', lifecycle: 'running', location: '下行站台', ratedPower: '2kW', owner: '杨工' }
+  ],
+  escalator: [
+    { id: 'esc_01', name: '扶梯-1#出入口', assetPath: '1号线/人民广场站/1#出入口/扶梯', lifecycle: 'running', location: '1#出入口', ratedPower: '11kW', owner: '周工' },
+    { id: 'esc_02', name: '直梯-站厅层', assetPath: '1号线/人民广场站/站厅层/直梯', lifecycle: 'maintenance', location: '站厅层中部', ratedPower: '7.5kW', owner: '周工' }
+  ],
+  fire_system: [
+    { id: 'fire_01', name: '烟感控制器-1F', assetPath: '1号线/人民广场站/1F/烟感控制器', lifecycle: 'running', location: '1F走廊', ratedPower: '1W', owner: '吴工' },
+    { id: 'fire_02', name: '消防栓监测-B1', assetPath: '1号线/人民广场站/B1/消防栓监测', lifecycle: 'running', location: 'B1设备区', ratedPower: '1W', owner: '吴工' }
+  ],
+  power_supply: [
+    { id: 'pwr_01', name: '配电柜-1#变压器', assetPath: '1号线/人民广场站/变电所/配电柜-1#', lifecycle: 'running', location: '主变电所', ratedPower: '2000kVA', owner: '郑工' },
+    { id: 'pwr_02', name: 'UPS主机-控制室', assetPath: '1号线/人民广场站/控制室/UPS主机', lifecycle: 'running', location: '车站控制室', ratedPower: '80kVA', owner: '郑工' }
+  ]
+};
 
-// Modbus register mapping rows
-function generateRegisterMappingRows(node) {
-  const rows = node.config.registerMappings || [{ slaveId: 1, functionCode: '03 Read Holding Registers (保持寄存器)', startAddress: '', fieldName: '' }];
-  return rows.map((r, i) => `
-    <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center" id="reg_row_${node.id}_${i}">
-      <input type="number" min="1" max="247" value="${r.slaveId}" placeholder="从站号" style="width:15%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px" onchange="updateRegisterRow(${node.id},${i},'slaveId',this.value)">
-      <select style="width:35%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px" onchange="updateRegisterRow(${node.id},${i},'functionCode',this.value)">
-        ${['01 Read Coils (线圈)','02 Read Discrete Inputs (离散输入)','03 Read Holding Registers (保持寄存器)','04 Read Input Registers (输入寄存器)'].map(f => `<option value="${f}" ${r.functionCode===f?'selected':''}>${f}</option>`).join('')}
-      </select>
-      <input type="text" placeholder="起始地址" value="${r.startAddress || ''}" style="width:20%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px" onchange="updateRegisterRow(${node.id},${i},'startAddress',this.value)">
-      <input type="text" placeholder="映射字段名" value="${r.fieldName || ''}" style="width:25%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px" onchange="updateRegisterRow(${node.id},${i},'fieldName',this.value)">
-      <button onclick="removeRegisterRow(${node.id},${i})" style="background:none;border:none;color:#f44336;cursor:pointer;font-size:14px;padding:2px 4px">✕</button>
-    </div>
-  `).join('');
+const LIFECYCLE_LABELS = {
+  online: '在线',
+  offline: '离线',
+  maintenance: '检修',
+  running: '运行',
+  fault: '故障',
+  standby: '备用'
+};
+const LIFECYCLE_COLORS = {
+  online: '#1890ff',
+  offline: '#999',
+  maintenance: '#faad14',
+  running: '#52c41a',
+  fault: '#f5222d',
+  standby: '#722ed1'
+};
+
+// ===== 点位层 (Metric/Point Level) —— 定义计算逻辑 =====
+// 数据数值、质量戳、时间戳、死区阈值
+const PRODUCT_METRICS = {
+  inverter_10mw: [
+    { id: 'ua', name: 'A相电压', unit: 'V', type: 'float', deadband: 0.5 },
+    { id: 'ub', name: 'B相电压', unit: 'V', type: 'float', deadband: 0.5 },
+    { id: 'uc', name: 'C相电压', unit: 'V', type: 'float', deadband: 0.5 },
+    { id: 'power', name: '当前功率', unit: 'kW', type: 'float', deadband: 5.0 },
+    { id: 'temp', name: '轴承温度', unit: '°C', type: 'float', deadband: 0.2 }
+  ],
+  env_monitor: [
+    { id: 'temp', name: '温度', unit: '°C', type: 'float', deadband: 0.1 },
+    { id: 'humidity', name: '湿度', unit: '%RH', type: 'float', deadband: 0.5 },
+    { id: 'co2', name: 'CO₂浓度', unit: 'ppm', type: 'int', deadband: 5 },
+    { id: 'pm25', name: 'PM2.5', unit: 'μg/m³', type: 'float', deadband: 1.0 }
+  ],
+  ventilation: [
+    { id: 'fan_speed', name: '风机转速', unit: 'rpm', type: 'int', deadband: 10 },
+    { id: 'air_flow', name: '风量', unit: 'm³/h', type: 'float', deadband: 50.0 },
+    { id: 'filter_dp', name: '滤网压差', unit: 'Pa', type: 'float', deadband: 2.0 }
+  ],
+  drainage: [
+    { id: 'water_level', name: '水位', unit: 'm', type: 'float', deadband: 0.01 },
+    { id: 'pump_status', name: '泵运行状态', unit: '', type: 'bool', deadband: 0 },
+    { id: 'flow_rate', name: '流量', unit: 'm³/h', type: 'float', deadband: 1.0 }
+  ],
+  platform_door: [
+    { id: 'door_status', name: '门状态', unit: '', type: 'int', deadband: 0 },
+    { id: 'open_count', name: '开关次数', unit: '次', type: 'int', deadband: 0 },
+    { id: 'fault_code', name: '故障码', unit: '', type: 'int', deadband: 0 }
+  ],
+  escalator: [
+    { id: 'run_status', name: '运行状态', unit: '', type: 'int', deadband: 0 },
+    { id: 'speed', name: '运行速度', unit: 'm/s', type: 'float', deadband: 0.01 },
+    { id: 'step_count', name: '梯级计数', unit: '级', type: 'int', deadband: 0 }
+  ],
+  fire_system: [
+    { id: 'smoke_level', name: '烟雾浓度', unit: '%/m', type: 'float', deadband: 0.1 },
+    { id: 'alarm_status', name: '报警状态', unit: '', type: 'bool', deadband: 0 },
+    { id: 'battery_volt', name: '电池电压', unit: 'V', type: 'float', deadband: 0.05 }
+  ],
+  power_supply: [
+    { id: 'voltage', name: '电压', unit: 'V', type: 'float', deadband: 0.5 },
+    { id: 'current', name: '电流', unit: 'A', type: 'float', deadband: 0.1 },
+    { id: 'power_factor', name: '功率因数', unit: '', type: 'float', deadband: 0.01 },
+    { id: 'freq', name: '频率', unit: 'Hz', type: 'float', deadband: 0.01 }
+  ]
+};
+
+// ===== 产品层 (Product Level) —— 定义逻辑模板 =====
+// 模型标识、公共属性列表、单位字典、阈值基准
+const PRODUCT_DEFINITIONS = {
+  inverter_10mw: {
+    name: '10MW逆变器',
+    modelId: 'MODEL-INV-10MW-001',
+    protocol: 'Modbus TCP',
+    commonAttrs: ['运行状态', '故障码', '并网状态', '发电量累计'],
+    unitDict: { temp: '°C', voltage: 'V', current: 'A', power: 'kW', power_factor: '', freq: 'Hz' },
+    baseline: {
+      temp: { min: 20, max: 65, warning: 55, critical: 65 },
+      voltage: { min: 360, max: 420, warning: 415, critical: 420 },
+      power: { min: 0, max: 10000, warning: 9000, critical: 10000 }
+    }
+  },
+  env_monitor: {
+    name: '环境监控设备',
+    modelId: 'MODEL-ENV-001',
+    protocol: 'MQTT',
+    commonAttrs: ['运行状态', '传感器状态', '电池电量'],
+    unitDict: { temp: '°C', humidity: '%RH', co2: 'ppm', pm25: 'μg/m³' },
+    baseline: {
+      temp: { min: 10, max: 35, warning: 30, critical: 35 },
+      humidity: { min: 20, max: 80, warning: 75, critical: 80 },
+      co2: { min: 300, max: 1500, warning: 1000, critical: 1500 }
+    }
+  },
+  ventilation: {
+    name: '通风系统',
+    modelId: 'MODEL-VNT-001',
+    protocol: 'OPC UA',
+    commonAttrs: ['运行状态', '故障码', '手自动状态'],
+    unitDict: { fan_speed: 'rpm', air_flow: 'm³/h', filter_dp: 'Pa' },
+    baseline: {
+      fan_speed: { min: 0, max: 1800, warning: 1600, critical: 1800 },
+      filter_dp: { min: 0, max: 500, warning: 400, critical: 500 }
+    }
+  },
+  drainage: {
+    name: '排水系统',
+    modelId: 'MODEL-DRN-001',
+    protocol: 'Modbus RTU',
+    commonAttrs: ['运行状态', '故障码', '液位报警'],
+    unitDict: { water_level: 'm', flow_rate: 'm³/h' },
+    baseline: {
+      water_level: { min: 0, max: 4.5, warning: 3.5, critical: 4.5 },
+      flow_rate: { min: 0, max: 250, warning: 200, critical: 250 }
+    }
+  },
+  platform_door: {
+    name: '屏蔽门系统',
+    modelId: 'MODEL-PSD-001',
+    protocol: 'CAN Bus',
+    commonAttrs: ['运行状态', '故障码', '开关门次数'],
+    unitDict: { door_status: '', open_count: '次', fault_code: '' },
+    baseline: {
+      open_count: { min: 0, max: 1000000, warning: 800000, critical: 1000000 }
+    }
+  },
+  escalator: {
+    name: '电扶梯系统',
+    modelId: 'MODEL-ESC-001',
+    protocol: 'CAN Bus',
+    commonAttrs: ['运行状态', '故障码', '急停状态'],
+    unitDict: { run_status: '', speed: 'm/s', step_count: '级' },
+    baseline: {
+      speed: { min: 0.45, max: 0.75, warning: 0.72, critical: 0.75 }
+    }
+  },
+  fire_system: {
+    name: '消防系统',
+    modelId: 'MODEL-FIR-001',
+    protocol: 'MQTT',
+    commonAttrs: ['运行状态', '自检状态', '屏蔽状态'],
+    unitDict: { smoke_level: '%/m', battery_volt: 'V' },
+    baseline: {
+      smoke_level: { min: 0, max: 20, warning: 10, critical: 20 },
+      battery_volt: { min: 3.0, max: 4.2, warning: 3.3, critical: 3.0 }
+    }
+  },
+  power_supply: {
+    name: '供电系统',
+    modelId: 'MODEL-PWR-001',
+    protocol: 'OPC UA',
+    commonAttrs: ['运行状态', '故障码', '开关状态'],
+    unitDict: { voltage: 'V', current: 'A', power_factor: '', freq: 'Hz' },
+    baseline: {
+      voltage: { min: 360, max: 420, warning: 415, critical: 420 },
+      current: { min: 0, max: 180, warning: 160, critical: 180 }
+    }
+  }
+};
+
+// 兼容旧代码的快捷访问
+const PRODUCT_NAMES = {};
+Object.keys(PRODUCT_DEFINITIONS).forEach(k => { PRODUCT_NAMES[k] = PRODUCT_DEFINITIONS[k].name; });
+
+// ===== 触发器关联数据 =====
+// 产品级触发器：适用于该产品下所有设备/点位
+const PRODUCT_TRIGGERS = {
+  inverter_10mw: [
+    { id: 'TRG-INV-001', name: '逆变器过温告警', type: 'threshold', condition: 'temp > 65°C', severity: 'critical', status: 'enabled' },
+    { id: 'TRG-INV-002', name: '逆变器电压异常', type: 'threshold', condition: 'voltage < 360V OR voltage > 420V', severity: 'warning', status: 'enabled' },
+    { id: 'TRG-INV-003', name: '逆变器功率超限', type: 'threshold', condition: 'power > 9000kW', severity: 'warning', status: 'enabled' },
+    { id: 'TRG-INV-004', name: '逆变器离线检测', type: 'lifecycle', condition: 'lifecycle = offline', severity: 'critical', status: 'enabled' }
+  ],
+  env_monitor: [
+    { id: 'TRG-ENV-001', name: '温度过高告警', type: 'threshold', condition: 'temp > 35°C', severity: 'warning', status: 'enabled' },
+    { id: 'TRG-ENV-002', name: '湿度过高告警', type: 'threshold', condition: 'humidity > 80%', severity: 'warning', status: 'enabled' },
+    { id: 'TRG-ENV-003', name: 'CO₂浓度超标', type: 'threshold', condition: 'co2 > 1500ppm', severity: 'critical', status: 'enabled' },
+    { id: 'TRG-ENV-004', name: 'PM2.5超标告警', type: 'threshold', condition: 'pm25 > 150μg/m³', severity: 'warning', status: 'disabled' }
+  ],
+  ventilation: [
+    { id: 'TRG-VNT-001', name: '风机转速异常', type: 'threshold', condition: 'fan_speed > 1800rpm', severity: 'warning', status: 'enabled' },
+    { id: 'TRG-VNT-002', name: '滤网压差过大', type: 'threshold', condition: 'filter_dp > 500Pa', severity: 'warning', status: 'enabled' }
+  ],
+  drainage: [
+    { id: 'TRG-DRN-001', name: '水位过高告警', type: 'threshold', condition: 'water_level > 4.5m', severity: 'critical', status: 'enabled' },
+    { id: 'TRG-DRN-002', name: '排水流量异常', type: 'threshold', condition: 'flow_rate > 250m³/h', severity: 'warning', status: 'enabled' }
+  ],
+  platform_door: [
+    { id: 'TRG-PSD-001', name: '屏蔽门故障检测', type: 'event', condition: 'fault_code != 0', severity: 'critical', status: 'enabled' },
+    { id: 'TRG-PSD-002', name: '开关门次数超限', type: 'threshold', condition: 'open_count > 800000', severity: 'warning', status: 'enabled' }
+  ],
+  escalator: [
+    { id: 'TRG-ESC-001', name: '电扶梯速度异常', type: 'threshold', condition: 'speed > 0.75m/s', severity: 'critical', status: 'enabled' },
+    { id: 'TRG-ESC-002', name: '电扶梯急停检测', type: 'event', condition: 'run_status = emergency_stop', severity: 'critical', status: 'enabled' }
+  ],
+  fire_system: [
+    { id: 'TRG-FIR-001', name: '烟雾浓度超标', type: 'threshold', condition: 'smoke_level > 20%/m', severity: 'critical', status: 'enabled' },
+    { id: 'TRG-FIR-002', name: '消防电池低压', type: 'threshold', condition: 'battery_volt < 3.0V', severity: 'warning', status: 'enabled' },
+    { id: 'TRG-FIR-003', name: '消防报警触发', type: 'event', condition: 'alarm_status = true', severity: 'critical', status: 'enabled' }
+  ],
+  power_supply: [
+    { id: 'TRG-PWR-001', name: '供电电压异常', type: 'threshold', condition: 'voltage < 360V OR voltage > 420V', severity: 'critical', status: 'enabled' },
+    { id: 'TRG-PWR-002', name: '供电电流过载', type: 'threshold', condition: 'current > 180A', severity: 'warning', status: 'enabled' }
+  ]
+};
+
+// 设备级触发器：特定设备的特殊触发器
+const DEVICE_TRIGGERS = {
+  'inv_01': [
+    { id: 'TRG-DEV-001', name: '逆变器#01专属维护提醒', type: 'schedule', condition: '运行时间 > 8760h', severity: 'warning', status: 'enabled' }
+  ],
+  'env_03': [
+    { id: 'TRG-DEV-002', name: 'PM2.5监测站离线告警', type: 'lifecycle', condition: 'lifecycle = offline', severity: 'critical', status: 'enabled' }
+  ],
+  'fan_02': [
+    { id: 'TRG-DEV-003', name: '排风机故障检测', type: 'lifecycle', condition: 'lifecycle = fault', severity: 'critical', status: 'enabled' }
+  ],
+  'esc_02': [
+    { id: 'TRG-DEV-004', name: '直梯检修状态提醒', type: 'lifecycle', condition: 'lifecycle = maintenance', severity: 'warning', status: 'enabled' }
+  ]
+};
+
+// 点位级触发器：特定点位的精确触发器
+const METRIC_TRIGGERS = {
+  'inverter_10mw:ua': [
+    { id: 'TRG-MET-001', name: 'A相电压瞬时跌落', type: 'threshold', condition: 'ua < 340V (持续3s)', severity: 'critical', status: 'enabled' }
+  ],
+  'inverter_10mw:temp': [
+    { id: 'TRG-MET-002', name: '轴承温度快速上升', type: 'rate', condition: 'Δtemp/Δt > 5°C/min', severity: 'warning', status: 'enabled' }
+  ],
+  'env_monitor:co2': [
+    { id: 'TRG-MET-003', name: 'CO₂浓度持续上升', type: 'trend', condition: 'co2连续上升5分钟', severity: 'warning', status: 'enabled' }
+  ],
+  'drainage:water_level': [
+    { id: 'TRG-MET-004', name: '水位快速上涨', type: 'rate', condition: 'Δlevel/Δt > 0.5m/10min', severity: 'critical', status: 'enabled' }
+  ],
+  'fire_system:smoke_level': [
+    { id: 'TRG-MET-005', name: '烟雾浓度突变', type: 'rate', condition: 'Δsmoke/Δt > 2%/m/s', severity: 'critical', status: 'enabled' }
+  ]
+};
+
+const TRIGGER_TYPE_LABELS = {
+  threshold: '阈值',
+  lifecycle: '生命周期',
+  event: '事件',
+  schedule: '定时',
+  rate: '变化率',
+  trend: '趋势'
+};
+
+const SEVERITY_COLORS = {
+  critical: '#f5222d',
+  warning: '#faad14',
+  info: '#1890ff'
+};
+
+const STATUS_LABELS = {
+  enabled: '启用',
+  disabled: '停用'
+};
+
+// ===== MOCK: 实时库数据（原型用）=====
+// 说明：原型阶段用确定性随机数据模拟“实时库”返回的最新点位与短期趋势。
+// 后续对接真实实时库时，只需要替换 getRealtimePoint/getRealtimeSeries 即可。
+function _hashStr(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0);
 }
 
-function addRegisterRow(nodeId) {
+const METRIC_RANGES = {
+  temp: [18, 38],
+  humidity: [30, 85],
+  co2: [350, 2000],
+  pm25: [0, 180],
+  ua: [360, 420],
+  ub: [360, 420],
+  uc: [360, 420],
+  voltage: [360, 420],
+  current: [0, 200],
+  power: [0, 1200],
+  power_factor: [0.6, 1.0],
+  freq: [49.6, 50.4],
+  fan_speed: [0, 1800],
+  air_flow: [0, 12000],
+  filter_dp: [0, 600],
+  water_level: [0, 5],
+  flow_rate: [0, 300],
+  speed: [0, 1.2],
+  smoke_level: [0, 30],
+  battery_volt: [3.3, 4.2],
+  open_count: [0, 100000],
+  step_count: [0, 1000000]
+};
+
+function formatTs(ts) {
+  const d = new Date(ts);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+function _rand01(seed) {
+  // xorshift32
+  let x = seed >>> 0;
+  x ^= x << 13; x >>>= 0;
+  x ^= x >> 17; x >>>= 0;
+  x ^= x << 5;  x >>>= 0;
+  return (x >>> 0) / 4294967295;
+}
+
+function getRealtimePoint(productId, deviceId, metricId) {
+  const def = (PRODUCT_METRICS[productId] || []).find(m => m.id === metricId) || { id: metricId, name: metricId, unit: '', type: 'float' };
+  const key = `${productId}|${deviceId}|${metricId}`;
+  const now = Date.now();
+  const baseSeed = _hashStr(key) ^ _hashStr(String(Math.floor(now / 5000))); // 5秒一跳，模拟“实时变化”
+  const r = _rand01(baseSeed);
+  const range = METRIC_RANGES[metricId] || [0, 100];
+  let value;
+  if (def.type === 'bool') {
+    value = r > 0.5;
+  } else if (def.type === 'int') {
+    value = Math.round(range[0] + (range[1] - range[0]) * r);
+  } else {
+    // float
+    value = range[0] + (range[1] - range[0]) * r;
+    // 常见指标保留 2 位小数
+    value = Math.round(value * 100) / 100;
+  }
+
+  // 质量码（模拟）
+  const qSeed = _hashStr(key + '|q') ^ _hashStr(String(Math.floor(now / 15000)));
+  const qr = _rand01(qSeed);
+  const quality = qr > 0.92 ? 'BAD' : (qr > 0.75 ? 'UNCERTAIN' : 'GOOD');
+
+  // 计算变化率：与上一周期值对比
+  const prevSeed = _hashStr(key) ^ _hashStr(String(Math.floor((now - 5000) / 5000)));
+  const prevR = _rand01(prevSeed);
+  let prevValue;
+  if (def.type === 'bool') {
+    prevValue = prevR > 0.5;
+  } else if (def.type === 'int') {
+    prevValue = Math.round(range[0] + (range[1] - range[0]) * prevR);
+  } else {
+    prevValue = Math.round((range[0] + (range[1] - range[0]) * prevR) * 100) / 100;
+  }
+  let changeRate = 0;
+  if (def.type !== 'bool' && prevValue !== 0) {
+    changeRate = Math.round(((value - prevValue) / Math.abs(prevValue)) * 10000) / 100;
+  }
+
+  // 采集周期（模拟：根据指标类型不同）
+  const cycleSeed = _hashStr(key + '|cycle');
+  const cycleOptions = [1000, 2000, 5000, 10000, 30000, 60000];
+  const sampleCycle = cycleOptions[Math.floor(_rand01(cycleSeed) * cycleOptions.length)];
+
+  // 今日数据条数（模拟）
+  const countSeed = _hashStr(key + '|count') ^ _hashStr(String(Math.floor(now / 86400000)));
+  const todayCount = Math.floor(_rand01(countSeed) * 5000) + 500;
+
+  return {
+    productId, deviceId, metricId,
+    metricName: def.name,
+    unit: def.unit || '',
+    type: def.type || 'float',
+    deadband: def.deadband || 0,
+    ts: now,
+    quality,
+    value,
+    changeRate,
+    sampleCycle,
+    todayCount
+  };
+}
+
+function getRealtimeSeries(productId, deviceId, metricId, count) {
+  const n = count || 12;
+  const now = Date.now();
+  const arr = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const ts = now - i * 60 * 1000; // 1分钟一个点
+    const key = `${productId}|${deviceId}|${metricId}|${Math.floor(ts / 60000)}`;
+    const r = _rand01(_hashStr(key));
+    const def = (PRODUCT_METRICS[productId] || []).find(m => m.id === metricId) || { unit: '', type: 'float' };
+    const range = METRIC_RANGES[metricId] || [0, 100];
+    let v;
+    if (def.type === 'bool') v = r > 0.5 ? 1 : 0;
+    else if (def.type === 'int') v = Math.round(range[0] + (range[1] - range[0]) * r);
+    else v = Math.round((range[0] + (range[1] - range[0]) * r) * 100) / 100;
+    arr.push({ ts, value: v });
+  }
+  return arr;
+}
+
+function renderSparkline(series, width, height) {
+  const w = width || 120;
+  const h = height || 32;
+  if (!series || series.length === 0) return '';
+  const ys = series.map(p => p.value);
+  const min = Math.min(...ys);
+  const max = Math.max(...ys);
+  const range = (max - min) || 1;
+  const padX = 2, padY = 2;
+  const innerW = w - padX * 2;
+  const innerH = h - padY * 2;
+  const points = series.map((p, idx) => {
+    const x = padX + innerW * (idx / (series.length - 1 || 1));
+    const y = padY + innerH * (1 - (p.value - min) / range);
+    return `${Math.round(x)},${Math.round(y)}`;
+  }).join(' ');
+  return `
+    <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="display:block">
+      <polyline points="${points}" fill="none" stroke="#7C4DFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+      <polyline points="${points} ${w-padX},${h-padY} ${padX},${h-padY}" fill="rgba(124,77,255,0.12)" stroke="none"></polyline>
+    </svg>
+  `;
+}
+
+function pickPreviewDevice(productId, deviceId) {
+  if (deviceId) return deviceId;
+  const devices = PRODUCT_DEVICES[productId] || [];
+  return devices.length ? devices[0].id : '';
+}
+
+function renderRealtimePreview(node) {
+  const pid = node.config.productId || '';
+  if (!pid) {
+    return `<div style="font-size:12px;color:#999">请先在上方选择产品/设备/指标</div>`;
+  }
+  const did = pickPreviewDevice(pid, node.config.deviceId || '');
+  const metricsSelected = (node.config.metrics || []);
+  const metricDefs = PRODUCT_METRICS[pid] || [];
+  const metrics = metricsSelected.length ? metricsSelected : metricDefs.slice(0, 3).map(m => m.id); // 未选择指标时，默认展示 3 个常用指标
+  const device = (PRODUCT_DEVICES[pid] || []).find(d => d.id === did);
+  const deviceName = device ? device.name : (did || '—');
+
+  const rows = metrics.map(mid => {
+    const p = getRealtimePoint(pid, did, mid);
+    const series = getRealtimeSeries(pid, did, mid, 12);
+    const qColor = p.quality === 'GOOD' ? '#52c41a' : (p.quality === 'UNCERTAIN' ? '#faad14' : '#ff4d4f');
+    const changeColor = p.changeRate > 0 ? '#f5222d' : (p.changeRate < 0 ? '#52c41a' : '#999');
+    const changeIcon = p.changeRate > 0 ? '↑' : (p.changeRate < 0 ? '↓' : '—');
+    let valueText = p.value;
+    if (p.type === 'bool') valueText = p.value ? '是' : '否';
+    // 采集周期格式化
+    let cycleText;
+    if (p.sampleCycle < 1000) cycleText = p.sampleCycle + 'ms';
+    else if (p.sampleCycle < 60000) cycleText = (p.sampleCycle / 1000) + 's';
+    else cycleText = (p.sampleCycle / 60000) + 'min';
+    return `
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;border:1px solid #f0f0f0;border-radius:8px;background:#fff;margin-bottom:8px">
+        <div style="flex:1;min-width:0;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div style="font-size:13px;font-weight:600;color:#333;white-space:nowrap">${p.metricName}</div>
+            <span style="font-size:10px;color:#666;background:#f5f5f5;border:1px solid #eee;border-radius:10px;padding:2px 8px;white-space:nowrap">${p.metricId}${p.unit ? ' · ' + p.unit : ''}</span>
+          </div>
+          <div style="margin-top:8px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+            <div style="font-size:20px;font-weight:700;color:#1565C0;white-space:nowrap">${valueText}</div>
+            ${p.unit ? `<div style="font-size:12px;color:#999;white-space:nowrap">${p.unit}</div>` : ''}
+            ${p.type !== 'bool' ? `<div style="font-size:11px;color:${changeColor};background:${changeColor}08;border-radius:4px;padding:2px 8px;white-space:nowrap">${changeIcon} ${Math.abs(p.changeRate)}%</div>` : ''}
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:#999;line-height:1.8">
+            <div style="display:flex;flex-wrap:wrap;gap:6px 12px">
+              <span title="最新采集时间" style="white-space:nowrap">${formatTs(p.ts)}</span>
+              <span title="数据质量码" style="white-space:nowrap">质量：<b style="color:${qColor}">${p.quality}</b></span>
+              <span title="采集周期" style="white-space:nowrap">周期：${cycleText}</span>
+              <span title="今日累计数据条数" style="white-space:nowrap">今日：${p.todayCount.toLocaleString()} 条</span>
+              ${p.deadband ? `<span title="死区阈值（变化小于此值不触发更新）" style="white-space:nowrap">死区: ${p.deadband}</span>` : ''}
+            </div>
+          </div>
+        </div>
+        <div style="width:100px;flex-shrink:0;margin-top:4px">
+          ${renderSparkline(series, 100, 28)}
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:#bbb;margin-top:2px">
+            <span>${series.length ? series[0].value : ''}</span>
+            <span>${series.length ? series[series.length-1].value : ''}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    ${rows || `<div style="font-size:12px;color:#999">暂无可预览指标</div>`}
+  `;
+}
+
+function refreshRealtimePreview(nodeId) {
   const node = state.nodes.find(n => n.id === nodeId);
   if (!node) return;
-  node.config.registerMappings = node.config.registerMappings || [];
-  node.config.registerMappings.push({ slaveId: 1, functionCode: '03 Read Holding Registers (保持寄存器)', startAddress: '', fieldName: '' });
-  openConfig(nodeId);
+  const container = document.getElementById('realtimePreview_' + nodeId);
+  if (!container) return;
+  container.innerHTML = renderRealtimePreview(node);
 }
 
-function updateRegisterRow(nodeId, index, field, value) {
-  const node = state.nodes.find(n => n.id === nodeId);
-  if (!node || !node.config.registerMappings) return;
-  node.config.registerMappings[index][field] = value;
-  document.getElementById(`reg_row_${nodeId}_${index}`).querySelector('input,select').dispatchEvent(new Event('change'));
+function generateAssetTree(node) {
+  const selectedProduct = node.config.productId || '';
+  const selectedDevice = node.config.deviceId || '';
+  const selectedMetrics = node.config.metrics || [];
+  let html = '';
+
+  Object.keys(PRODUCT_NAMES).forEach(pid => {
+    const pname = PRODUCT_NAMES[pid];
+    const isProductOpen = pid === selectedProduct;
+    const devices = PRODUCT_DEVICES[pid] || [];
+    html += `<div class="asset-tree-product" style="border-bottom:1px solid #eee">
+      <div class="asset-tree-node product-node" style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:13px;font-weight:500;color:#333;background:#fff;user-select:none" onclick="toggleAssetTreeNode(${node.id},'product','${pid}')">
+        <span style="font-size:10px;color:#999;transition:transform 0.2s;${isProductOpen?'transform:rotate(90deg)':''}">▶</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#008B8B" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        ${pname}
+        ${pid === selectedProduct ? '<span style="margin-left:auto;font-size:10px;color:#008B8B;background:#E0F7F7;padding:1px 6px;border-radius:10px">已选</span>' : ''}
+      </div>
+      <div class="asset-tree-children" style="display:${isProductOpen?'block':'none'}">`;
+
+    devices.forEach(d => {
+      const isDeviceOpen = pid === selectedProduct && d.id === selectedDevice;
+      const metrics = PRODUCT_METRICS[pid] || [];
+      html += `<div class="asset-tree-device" style="border-bottom:1px solid #f0f0f0">
+        <div class="asset-tree-node device-node" style="display:flex;align-items:center;gap:8px;padding:7px 12px 7px 28px;cursor:pointer;font-size:12px;color:#555;background:#fff;user-select:none" onclick="toggleAssetTreeNode(${node.id},'device','${pid}','${d.id}')">
+          <span style="font-size:9px;color:#bbb;transition:transform 0.2s;${isDeviceOpen?'transform:rotate(90deg)':''}">▶</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          ${d.name}
+          ${d.id === selectedDevice ? '<span style="margin-left:auto;font-size:10px;color:#008B8B;background:#E0F7F7;padding:1px 6px;border-radius:10px">已选</span>' : ''}
+        </div>
+        <div class="asset-tree-children" style="display:${isDeviceOpen?'block':'none'}">`;
+
+      metrics.forEach(m => {
+        const isChecked = pid === selectedProduct && d.id === selectedDevice && selectedMetrics.includes(m.id);
+        html += `<div class="asset-tree-node metric-node" style="display:flex;align-items:center;gap:8px;padding:6px 12px 6px 48px;cursor:pointer;font-size:12px;color:#666;background:#fff;user-select:none" onclick="toggleAssetMetricNode(${node.id},'${pid}','${d.id}','${m.id}',this)">
+          <span style="width:14px;height:14px;border-radius:3px;border:1.5px solid ${isChecked?'#008B8B':'#ccc'};background:${isChecked?'#008B8B':'#fff'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s">
+            ${isChecked ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+          </span>
+          ${m.name}
+        </div>`;
+      });
+
+      html += `</div></div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  return html;
 }
 
-function removeRegisterRow(nodeId, index) {
-  const node = state.nodes.find(n => n.id === nodeId);
-  if (!node || !node.config.registerMappings) return;
-  node.config.registerMappings.splice(index, 1);
-  openConfig(nodeId);
-}
-
-// OPC UA node tags rows
-function generateNodeTagsRows(node) {
-  const rows = node.config.nodeTags || [{ namespaceIndex: 2, identifierType: 's (字符串)', nodeIdentifier: '', jsonKey: '' }];
-  return rows.map((r, i) => `
-    <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center" id="tag_row_${node.id}_${i}">
-      <input type="number" min="0" value="${r.namespaceIndex}" placeholder="ns" style="width:15%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px" onchange="updateNodeTagRow(${node.id},${i},'namespaceIndex',this.value)">
-      <select style="width:25%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px" onchange="updateNodeTagRow(${node.id},${i},'identifierType',this.value)">
-        ${['s (字符串)','i (整数)','g (GUID)','b (二进制)'].map(t => `<option value="${t}" ${r.identifierType===t?'selected':''}>${t}</option>`).join('')}
-      </select>
-      <input type="text" placeholder="节点标识符" value="${r.nodeIdentifier || ''}" style="width:35%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px" onchange="updateNodeTagRow(${node.id},${i},'nodeIdentifier',this.value)">
-      <input type="text" placeholder="映射字段" value="${r.jsonKey || ''}" style="width:20%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px" onchange="updateNodeTagRow(${node.id},${i},'jsonKey',this.value)">
-      <button onclick="removeNodeTagRow(${node.id},${i})" style="background:none;border:none;color:#f44336;cursor:pointer;font-size:14px;padding:2px 4px">✕</button>
-    </div>
-  `).join('');
-}
-
-function addNodeTagRow(nodeId) {
+function toggleAssetTreeNode(nodeId, level, productId, deviceId) {
   const node = state.nodes.find(n => n.id === nodeId);
   if (!node) return;
-  node.config.nodeTags = node.config.nodeTags || [];
-  node.config.nodeTags.push({ namespaceIndex: 2, identifierType: 's (字符串)', nodeIdentifier: '', jsonKey: '' });
+
+  if (level === 'product') {
+    if (node.config.productId === productId) {
+      node.config.productId = '';
+      node.config.deviceId = '';
+      node.config.metrics = [];
+    } else {
+      node.config.productId = productId;
+      node.config.deviceId = '';
+      node.config.metrics = [];
+    }
+  } else if (level === 'device') {
+    if (node.config.deviceId === deviceId) {
+      node.config.deviceId = '';
+      node.config.metrics = [];
+    } else {
+      node.config.deviceId = deviceId;
+      node.config.metrics = [];
+    }
+  }
+
   openConfig(nodeId);
 }
 
-function updateNodeTagRow(nodeId, index, field, value) {
+function toggleAssetMetricNode(nodeId, productId, deviceId, metricId, el) {
   const node = state.nodes.find(n => n.id === nodeId);
-  if (!node || !node.config.nodeTags) return;
-  node.config.nodeTags[index][field] = value;
-}
-
-function removeNodeTagRow(nodeId, index) {
-  const node = state.nodes.find(n => n.id === nodeId);
-  if (!node || !node.config.nodeTags) return;
-  node.config.nodeTags.splice(index, 1);
+  if (!node) return;
+  node.config.productId = productId;
+  node.config.deviceId = deviceId;
+  node.config.metrics = node.config.metrics || [];
+  const idx = node.config.metrics.indexOf(metricId);
+  if (idx >= 0) {
+    node.config.metrics.splice(idx, 1);
+  } else {
+    node.config.metrics.push(metricId);
+  }
   openConfig(nodeId);
 }
 
-// Toggle visibility functions
-function toggleModbusMode(nodeId, mode) {
-  document.getElementById('tcp_fields_' + nodeId).style.display = mode === 'TCP' ? 'block' : 'none';
-  document.getElementById('rtu_fields_' + nodeId).style.display = mode === 'RTU' ? 'block' : 'none';
+function generateSelectionSummary(node) {
+  const pid = node.config.productId || '';
+  const did = node.config.deviceId || '';
+  const mids = node.config.metrics || [];
+  const pname = PRODUCT_NAMES[pid] || pid;
+  const devices = PRODUCT_DEVICES[pid] || [];
+  const device = devices.find(d => d.id === did);
+  const dname = device ? device.name : (did || '');
+  const metrics = PRODUCT_METRICS[pid] || [];
+  const mnames = mids.map(mid => { const m = metrics.find(x => x.id === mid); return m ? m.name : mid; });
+  const deviceLine = did ? `设备：${dname}` : `设备：全部设备（${devices.length}台）`;
+  const metricLine = mids.length ? `指标：${mnames.join('、')}` : `指标：全部指标（${metrics.length}个）`;
+  return `<div style="margin-bottom:2px">产品：${pname}</div><div style="margin-bottom:2px">${deviceLine}</div><div>${metricLine}</div>`;
 }
 
-function toggleMqttAuth(nodeId, mode) {
-  document.getElementById('mqtt_auth_' + nodeId).style.display = mode !== '匿名访问' ? 'block' : 'none';
+// ===== SIDEBAR ASSET TREE =====
+// 二级独立勾选：产品（只展开，无勾选）→ 设备（带勾选框）
+// checkedDevices: { "productId:deviceId": true } — 用户直接勾选的设备
+let sidebarTreeState = { expandedProducts: {}, checkedDevices: {}, search: '' };
+
+function isDeviceChecked(pid, did) {
+  return !!sidebarTreeState.checkedDevices[pid + ':' + did];
 }
 
-function toggleOpcAuth(nodeId, mode) {
-  document.getElementById('opc_userpass_' + nodeId).style.display = mode === 'USER_PASS' ? 'block' : 'none';
+function toggleDeviceCheck(pid, did) {
+  const key = pid + ':' + did;
+  if (sidebarTreeState.checkedDevices[key]) {
+    delete sidebarTreeState.checkedDevices[key];
+  } else {
+    sidebarTreeState.checkedDevices[key] = true;
+  }
+  renderSidebarAssetTree();
 }
 
-function toggleKafkaSec(nodeId, protocol) {
-  const isSASL = ['SASL_PLAINTEXT', 'SASL_SSL'].includes(protocol);
-  document.getElementById('kafka_sasl_' + nodeId).style.display = isSASL ? 'block' : 'none';
+function renderCheckbox(state, size) {
+  const s = size || 13;
+  const inner = s <= 13 ? 9 : 10;
+  if (state === 'checked') {
+    return `<span style="width:${s}px;height:${s}px;border-radius:2px;border:1.5px solid #ccc;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="${inner}" height="${inner}" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>`;
+  } else if (state === 'indeterminate') {
+    return `<span style="width:${s}px;height:${s}px;border-radius:2px;border:1.5px solid #ccc;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="${inner}" height="${inner}" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"/></svg></span>`;
+  }
+  return `<span style="width:${s}px;height:${s}px;border-radius:2px;border:1.5px solid #ccc;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0"></span>`;
+}
+
+// ===== 专属图标系统 =====
+const EXPAND_ICON = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+
+// 产品专属图标
+const PRODUCT_ICONS = {
+  inverter_10mw: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
+  env_monitor: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`,
+  ventilation: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>`,
+  drainage: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/><path d="M12 14v8"/></svg>`,
+  platform_door: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>`,
+  escalator: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6H4z"/><path d="M14 4h6v6h-6z"/><path d="M4 20l16-16"/></svg>`,
+  fire_system: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.56 2.9A7 7 0 0 1 19 9v4m-2 4H2a3 3 0 0 0 3-3V9a7 7 0 0 1 7-7h9a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-1"/></svg>`,
+  power_supply: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>`
+};
+
+// 设备类型专属图标
+const DEVICE_ICONS = {
+  inverter: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 12h16"/><path d="M12 4v16"/></svg>`,
+  sensor: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="14.83" y1="9.17" x2="18.36" y2="5.64"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>`,
+  fan: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2v20"/><path d="M2 12h20"/><path d="M4.93 4.93l14.14 14.14"/><path d="M19.07 4.93L4.93 19.07"/></svg>`,
+  pump: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8"/><path d="M5 10h14"/><path d="M8 10v10a4 4 0 0 0 8 0V10"/></svg>`,
+  door: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>`,
+  escalator: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6H4z"/><path d="M14 4h6v6h-6z"/><path d="M4 20l16-16"/></svg>`,
+  fire: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.56 2.9A7 7 0 0 1 19 9v4m-2 4H2a3 3 0 0 0 3-3V9a7 7 0 0 1 7-7h9a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-1"/></svg>`,
+  power: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>`
+};
+
+// 点位类型专属图标
+const METRIC_ICONS = {
+  voltage: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
+  current: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+  power: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>`,
+  temp: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>`,
+  humidity: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`,
+  co2: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>`,
+  pm25: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/><circle cx="12" cy="12" r="3"/></svg>`,
+  speed: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
+  flow: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
+  level: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/><path d="M12 14v8"/></svg>`,
+  status: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`,
+  count: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  default: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>`
+};
+
+// 辅助：根据设备ID获取图标
+function getDeviceIcon(deviceId) {
+  if (deviceId.startsWith('inv')) return DEVICE_ICONS.inverter;
+  if (deviceId.startsWith('env')) return DEVICE_ICONS.sensor;
+  if (deviceId.startsWith('fan')) return DEVICE_ICONS.fan;
+  if (deviceId.startsWith('pump')) return DEVICE_ICONS.pump;
+  if (deviceId.startsWith('psd')) return DEVICE_ICONS.door;
+  if (deviceId.startsWith('esc')) return DEVICE_ICONS.escalator;
+  if (deviceId.startsWith('fire')) return DEVICE_ICONS.fire;
+  if (deviceId.startsWith('pwr')) return DEVICE_ICONS.power;
+  return DEVICE_ICONS.sensor;
+}
+
+// 辅助：根据点位ID获取图标
+function getMetricIcon(metricId) {
+  if (metricId.includes('volt')) return METRIC_ICONS.voltage;
+  if (metricId.includes('current')) return METRIC_ICONS.current;
+  if (metricId.includes('power')) return METRIC_ICONS.power;
+  if (metricId.includes('temp')) return METRIC_ICONS.temp;
+  if (metricId.includes('humidity')) return METRIC_ICONS.humidity;
+  if (metricId.includes('co2')) return METRIC_ICONS.co2;
+  if (metricId.includes('pm25')) return METRIC_ICONS.pm25;
+  if (metricId.includes('speed')) return METRIC_ICONS.speed;
+  if (metricId.includes('flow')) return METRIC_ICONS.flow;
+  if (metricId.includes('level')) return METRIC_ICONS.level;
+  if (metricId.includes('status') || metricId.includes('run')) return METRIC_ICONS.status;
+  if (metricId.includes('count')) return METRIC_ICONS.count;
+  return METRIC_ICONS.default;
+}
+
+function renderSidebarAssetTree() {
+  const container = document.getElementById('assetTreeSidebar');
+  if (!container) return;
+
+  let html = '';
+  const search = sidebarTreeState.search || '';
+
+  Object.keys(PRODUCT_NAMES).forEach(pid => {
+    const pname = PRODUCT_NAMES[pid];
+    const isOpen = sidebarTreeState.expandedProducts[pid] || false;
+    const devices = PRODUCT_DEVICES[pid] || [];
+
+    // 搜索过滤
+    const productMatch = !search || pname.toLowerCase().includes(search);
+    const matchedDevices = devices.filter(d => {
+      if (!search) return true;
+      return d.name.toLowerCase().includes(search);
+    });
+    if (!productMatch && matchedDevices.length === 0) return;
+
+    // 产品行 - 无勾选框，只展开
+    html += `<div style="margin:2px 6px;border-radius:6px;overflow:hidden">
+      <div class="tree-row tree-product" style="display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:13px;font-weight:500;user-select:none;border-radius:6px;transition:all 0.15s;color:#333;cursor:pointer;" onclick="toggleSidebarProduct('${pid}')" onmouseenter="this.style.background='#f5f5f5'" onmouseleave="this.style.background='transparent'">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;flex-shrink:0;transition:transform 0.2s;${isOpen?'transform:rotate(90deg)':''};color:#999">${EXPAND_ICON}</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;color:#666;flex-shrink:0">${PRODUCT_ICONS[pid] || PRODUCT_ICONS.inverter_10mw}</span>
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${pname}</span>
+        <span style="font-size:11px;color:#1565C0;flex-shrink:0">${devices.length}台</span>
+      </div>
+      <div style="display:${isOpen?'block':'none'}">`;
+
+    devices.forEach(d => {
+      // 搜索过滤设备
+      if (search && !d.name.toLowerCase().includes(search) && !pname.toLowerCase().includes(search)) return;
+
+      const isChecked = isDeviceChecked(pid, d.id);
+
+      // 设备行 - 圆形勾选框
+      html += `<div style="margin:1px 0 1px 20px;border-radius:6px;overflow:hidden">
+        <div class="tree-row tree-device" style="display:flex;align-items:center;gap:7px;padding:7px 10px;font-size:12px;user-select:none;border-radius:6px;transition:all 0.15s;color:${isChecked ? '#1565C0' : '#555'};cursor:pointer;" onclick="toggleDeviceCheck('${pid}','${d.id}')" onmouseenter="this.style.background='#f5f5f5'" onmouseleave="this.style.background='transparent'">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;flex-shrink:0;cursor:pointer">
+            <span style="width:14px;height:14px;border-radius:50%;border:1.5px solid ${isChecked?'#1565C0':'#ccc'};background:${isChecked?'#1565C0':'#fff'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s">
+              ${isChecked ? '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+            </span>
+          </span>
+          <span style="display:inline-flex;align-items:center;gap:4px;color:${isChecked ? '#1565C0' : '#888'};flex-shrink:0">${getDeviceIcon(d.id)}</span>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</span>
+        </div>
+      </div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  // Submit button
+  const totalChecked = Object.keys(sidebarTreeState.checkedDevices).length;
+  const canSubmit = totalChecked > 0;
+  html += '<div style="padding:10px 12px">';
+  if (canSubmit) {
+    html += '<button style="width:100%;padding:8px 0;border:none;border-radius:8px;background:#1565C0;color:#fff;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;box-shadow:0 1px 3px rgba(21,101,192,0.3)" onclick="submitSidebarAssetNodes()" onmouseenter="this.style.background="#0D47A1"" onmouseleave="this.style.background="#1565C0"">确认添加到画布 (' + totalChecked + '台设备)</button>';
+  } else {
+    html += '<button style="width:100%;padding:8px 0;border:none;border-radius:8px;background:#e0e0e0;color:#999;font-size:12px;font-weight:500;cursor:default;transition:all 0.2s">确认添加到画布</button>';
+  }
+  html += '</div>';
+
+  container.innerHTML = html;
+}
+
+function filterAssetTree(keyword) {
+  sidebarTreeState.search = keyword.toLowerCase().trim();
+  renderSidebarAssetTree();
+}
+
+function toggleSidebarProduct(pid) {
+  if (sidebarTreeState.expandedProducts[pid]) {
+    delete sidebarTreeState.expandedProducts[pid];
+  } else {
+    sidebarTreeState.expandedProducts[pid] = true;
+  }
+  renderSidebarAssetTree();
+}
+
+function submitSidebarAssetNodes() {
+  // 计算新节点起始位置：基于已有数据输入节点的最大 y 坐标，避免重叠
+  const existingInputNodes = state.nodes.filter(n => n.defId === 'asset_data_source');
+  const startY = existingInputNodes.length > 0
+    ? Math.max(...existingInputNodes.map(n => n.y)) + 120
+    : 80;
+  let nodeIndex = 0;
+
+  // 辅助：获取产品对应协议
+  function getProtocol(pid) {
+    const def = PRODUCT_DEFINITIONS[pid];
+    return def ? def.protocol : '—';
+  }
+
+  // 去重：只添加画布上不存在的新节点
+  const existingNodes = state.nodes.filter(n => n.defId === 'asset_data_source');
+  function isNodeExists(pid, did) {
+    return existingNodes.some(n => {
+      return n.config.productId === pid && n.config.deviceId === did;
+    });
+  }
+
+  const checkedDeviceKeys = Object.keys(sidebarTreeState.checkedDevices);
+
+  // 按产品分组
+  const productGroups = {};
+  checkedDeviceKeys.forEach(key => {
+    const parts = key.split(':');
+    const pid = parts[0], did = parts[1];
+    if (!productGroups[pid]) productGroups[pid] = [];
+    productGroups[pid].push(did);
+  });
+
+  // 创建设备级节点（metrics为空）
+  Object.keys(productGroups).forEach(pid => {
+    const pname = PRODUCT_NAMES[pid] || pid;
+    const allDevices = PRODUCT_DEVICES[pid] || [];
+    const selectedDeviceIds = productGroups[pid];
+
+    selectedDeviceIds.forEach(did => {
+      if (isNodeExists(pid, did)) return;
+      const device = allDevices.find(d => d.id === did);
+      const dname = device ? device.name : did;
+
+      const node = {
+        id: state.nextId++,
+        defId: 'asset_data_source',
+        type: 'input',
+        name: dname,
+        cond: pname,
+        x: 80,
+        y: startY + nodeIndex * 120,
+        config: { productId: pid, deviceId: did, metrics: [], protocol: getProtocol(pid), pollMode: 'poll', pollInterval: 60, fieldMappings: [] }
+      };
+      state.nodes.push(node);
+      nodeIndex++;
+    });
+  });
+
+  saveHistory();
+  // 只渲染新添加的节点（最后 nodeIndex 个）
+  const newNodes = state.nodes.slice(-nodeIndex);
+  newNodes.forEach(n => renderNode(n));
+  renderConnections();
+  updateStats();
+
+  // 保存计数
+  const totalCount = checkedDeviceKeys.length;
+
+  // 保留目录树勾选和展开状态
+  renderSidebarAssetTree();
+
+  showToast('已添加 ' + totalCount + ' 个数据输入节点', 'success');
 }
 
 // ===== HELPERS: Association Dimension =====
@@ -2395,6 +3258,10 @@ function loadChainFromURL() {
   // 新建规则链，显示空画布
   if (chainId === 'new') {
     const chainName = params.get('name') || '新建规则链';
+    // 记录当前规则链信息
+    state.chainId = 'new_' + Date.now();
+    state.chainName = chainName;
+    state.chainDesc = '';
     // 更新规则链名称显示
     const nameDisplayEl = document.getElementById('chainNameDisplay');
     if (nameDisplayEl) nameDisplayEl.textContent = chainName;
@@ -2426,11 +3293,11 @@ function loadChainFromURL() {
   if (!chainData) {
     const chainTemplates = {
       '1': {
-        name: 'Modbus温度超限告警',
+        name: '逆变器温度超限告警',
         nodes: [
-          { id: 1, defId: 'modbus_client', type: 'input', name: 'Modbus Client', cond: 'Modbus TCP/RTU', x: 100, y: 200, config: { host: '192.168.1.100', port: 502, slaveId: 1 } },
-          { id: 2, defId: 'condition', type: 'rule', name: 'Condition 判断', cond: 'IF-AND-OR 逻辑', x: 350, y: 200, config: { field: 'temperature', operator: '>', value: '80' } },
-          { id: 3, defId: 'alarm', type: 'action', name: 'Alarm 系统告警', cond: '生成告警记录', x: 600, y: 200, config: { severity: 'critical', message: '温度超限告警' } },
+          { id: 1, defId: 'asset_data_source', type: 'input', name: '设备/资产数据源', cond: '选择产品/设备/指标', x: 80, y: 200, config: { productId: 'inverter_10mw', deviceId: 'inv_01', metrics: ['temp', 'power'], protocol: 'Modbus TCP', pollMode: 'poll', pollInterval: 60, fieldMappings: [{key:'temp',alias:'温度',type:'float'},{key:'power',alias:'当前功率',type:'float'}] } },
+          { id: 2, defId: 'condition', type: 'rule', name: 'Condition 判断', cond: 'IF-AND-OR 逻辑', x: 420, y: 200, config: { field: 'temperature', operator: '>', value: '80' } },
+          { id: 3, defId: 'alarm', type: 'action', name: 'Alarm 系统告警', cond: '生成告警记录', x: 760, y: 200, config: { severity: 'critical', message: '逆变器温度超限告警' } },
         ],
         connections: [
           { from: 1, to: 2 },
@@ -2438,27 +3305,23 @@ function loadChainFromURL() {
         ]
       },
       '2': {
-        name: 'OPC UA压力异常检测',
+        name: '环境监控异常检测',
         nodes: [
-          { id: 1, defId: 'opcua_client', type: 'input', name: 'OPC UA Client', cond: 'OPC UA Server', x: 100, y: 200, config: { endpoint: 'opc.tcp://localhost:4840' } },
-          { id: 2, defId: 'data_filter', type: 'transform', name: 'Data Filter/Switch', cond: '数据分流路由', x: 350, y: 200, config: { filterType: 'threshold' } },
-          { id: 3, defId: 'condition', type: 'rule', name: 'Condition 判断', cond: 'IF-AND-OR 逻辑', x: 600, y: 150, config: { field: 'pressure', operator: '>', value: '10' } },
-          { id: 4, defId: 'alarm', type: 'action', name: 'Alarm 系统告警', cond: '生成告警记录', x: 850, y: 150, config: { severity: 'major' } },
-          { id: 5, defId: 'rpc_control', type: 'action', name: 'RPC Control', cond: '设备反向控制', x: 850, y: 280, config: { method: 'emergencyStop' } },
+          { id: 1, defId: 'asset_data_source', type: 'input', name: '设备/资产数据源', cond: '选择产品/设备/指标', x: 80, y: 200, config: { productId: 'env_monitor', deviceId: 'env_01', metrics: ['temp', 'humidity'], protocol: 'MQTT', pollMode: 'poll', pollInterval: 60, fieldMappings: [{key:'temp',alias:'温度',type:'float'},{key:'humidity',alias:'湿度',type:'float'}] } },
+          { id: 2, defId: 'condition', type: 'rule', name: 'Condition 判断', cond: 'IF-AND-OR 逻辑', x: 420, y: 200, config: { field: 'co2', operator: '>', value: '1000' } },
+          { id: 3, defId: 'alarm', type: 'action', name: 'Alarm 系统告警', cond: '生成告警记录', x: 760, y: 200, config: { severity: 'major' } },
         ],
         connections: [
           { from: 1, to: 2 },
           { from: 2, to: 3 },
-          { from: 3, to: 4 },
-          { from: 2, to: 5 },
         ]
       },
       '3': {
-        name: 'Kafka数据转发至时序库',
+        name: '供电系统异常检测',
         nodes: [
-          { id: 1, defId: 'kafka_consumer', type: 'input', name: 'Kafka Consumer', cond: 'Kafka Topic', x: 100, y: 200, config: { topic: 'sensor-data', groupId: 'consumer-group-1' } },
-          { id: 2, defId: 'script_transform', type: 'transform', name: 'Script', cond: 'JS/Python 脚本', x: 350, y: 200, config: { script: 'return data.map(d => ({ ...d, timestamp: Date.now() }));' } },
-          { id: 3, defId: 'sql_executor', type: 'action', name: 'SQL Executor', cond: '数据持久化', x: 600, y: 200, config: { table: 'sensor_readings' } },
+          { id: 1, defId: 'asset_data_source', type: 'input', name: '设备/资产数据源', cond: '选择产品/设备/指标', x: 80, y: 200, config: { productId: 'power_supply', deviceId: 'pwr_01', metrics: ['voltage', 'current', 'power_factor'], protocol: 'OPC UA', pollMode: 'poll', pollInterval: 60, fieldMappings: [{key:'voltage',alias:'电压',type:'float'},{key:'current',alias:'电流',type:'float'},{key:'power_factor',alias:'功率因数',type:'float'}] } },
+          { id: 2, defId: 'condition', type: 'rule', name: 'Condition 判断', cond: 'IF-AND-OR 逻辑', x: 420, y: 200, config: { field: 'voltage', operator: '<', value: '360' } },
+          { id: 3, defId: 'alarm', type: 'action', name: 'Alarm 系统告警', cond: '生成告警记录', x: 760, y: 200, config: { severity: 'warning', message: '电压过低告警' } },
         ],
         connections: [
           { from: 1, to: 2 },
@@ -2477,6 +3340,11 @@ function loadChainFromURL() {
     return;
   }
   const chainName = chain.name;
+
+  // 记录当前规则链信息
+  state.chainId = chainId;
+  state.chainName = chainName;
+  state.chainDesc = chain.description || '';
 
   // 清除画布
   state.nodes = [];
@@ -2501,10 +3369,56 @@ function loadChainFromURL() {
       y: nodeData.y,
       config: nodeData.config || {}
     };
+
+    // 数据输入节点：根据 config 恢复显示名称和侧边栏状态
+    if (node.defId === 'asset_data_source' && node.config) {
+      const pid = node.config.productId;
+      const did = node.config.deviceId;
+      const mids = node.config.metrics || [];
+
+      if (pid) {
+        // 展开产品
+        sidebarTreeState.expandedProducts[pid] = true;
+
+        // 恢复勾选状态到侧边栏（二级树：只勾选设备）
+        if (did) {
+          sidebarTreeState.checkedDevices[pid + ':' + did] = true;
+        }
+
+        // 节点名称规则：设备级 name=设备名 cond=产品名；点位级 name=点位名 cond=产品/设备
+        const pname = PRODUCT_NAMES[pid] || pid;
+        const devices = PRODUCT_DEVICES[pid] || [];
+        const deviceObj = devices.find(d => d.id === did);
+        const dname = deviceObj ? deviceObj.name : did;
+        const metrics = PRODUCT_METRICS[pid] || [];
+
+        if (!did) {
+          // 产品级（无设备时）
+          node.name = pname;
+          node.cond = '';
+        } else if (mids.length === 0) {
+          // 设备级：大字设备名，小字产品名
+          node.name = dname;
+          node.cond = pname;
+        } else {
+          // 点位级：大字点位名，小字产品 / 设备
+          const mnames = mids.map(mid => {
+            const m = metrics.find(x => x.id === mid);
+            return m ? m.name : mid;
+          });
+          node.name = mnames.join(', ');
+          node.cond = pname + ' / ' + dname;
+        }
+      }
+    }
+
     state.nodes.push(node);
     if (nodeData.id >= state.nextId) state.nextId = nodeData.id + 1;
     renderNode(node);
   });
+
+  // 加载完成后刷新侧边栏目录树
+  renderSidebarAssetTree();
 
   // 渲染连线
   chain.connections.forEach(conn => {
@@ -2527,57 +3441,58 @@ function loadChainFromURL() {
     }
   }
 
-  // 显示绑定信息（产品/设备）- 对应 rule-chain-list.html 中的16个规则链
-  const RULE_BINDINGS = {
-    '1': { products: [{id:'PRD-001',name:'环境温度传感器'}], devices: [{id:'DEV-001',name:'1号站台温度传感器'},{id:'DEV-002',name:'2号站台温度传感器'},{id:'DEV-003',name:'A出口CO₂传感器'}], groups: [{name:'一楼车间'}] },
-    '2': { products: [{id:'PRD-004',name:'通风机组'}], devices: [{id:'DEV-004',name:'1号通风机组'},{id:'DEV-005',name:'2号通风机组'},{id:'DEV-006',name:'3号通风机组'}], groups: [] },
-    '3': { products: [{id:'PRD-005',name:'排水泵监控'}], devices: [{id:'DEV-007',name:'1号集水池'},{id:'DEV-008',name:'2号集水池'},{id:'DEV-009',name:'3号集水池'}], groups: [{name:'排水组'}] },
-    '4': { products: [{id:'PRD-001',name:'环境温度传感器'},{id:'PRD-002',name:'屏蔽门控制器'}], devices: [{id:'DEV-010',name:'1号站台屏蔽门'},{id:'DEV-011',name:'2号站台屏蔽门'}], groups: [{name:'北京分公司'}] },
-    '5': { products: [{id:'PRD-006',name:'电扶梯监控'}], devices: [{id:'DEV-012',name:'A出口电扶梯'},{id:'DEV-013',name:'B出口电扶梯'},{id:'DEV-014',name:'C出口电扶梯'}], groups: [] },
-    '6': { products: [{id:'PRD-003',name:'烟感探测器'}], devices: [{id:'DEV-015',name:'1号烟感'},{id:'DEV-016',name:'2号烟感'},{id:'DEV-017',name:'3号烟感'}], groups: [{name:'消防组'}] },
-    '7': { products: [{id:'PRD-007',name:'配电柜监控'}], devices: [{id:'DEV-018',name:'UPS电源'},{id:'DEV-019',name:'1号配电柜'},{id:'DEV-020',name:'2号配电柜'}], groups: [{name:'供电组'}] },
-    '8': { products: [{id:'PRD-001',name:'环境温度传感器'}], devices: [{id:'DEV-021',name:'4号站台温度'},{id:'DEV-022',name:'5号站台温度'},{id:'DEV-023',name:'6号站台温度'}], groups: [{name:'夜间监测组'}] },
-    '9': { products: [{id:'PRD-001',name:'环境温度传感器'},{id:'PRD-005',name:'排水泵监控'}], devices: [{id:'DEV-024',name:'环境传感器A'},{id:'DEV-025',name:'排水泵1号'}], groups: [{name:'一楼车间'},{name:'排水组'}] },
-    '10': { products: [{id:'PRD-007',name:'配电柜监控'}], devices: [{id:'DEV-026',name:'备用电源'},{id:'DEV-027',name:'应急配电柜'}], groups: [{name:'供电组'}] },
-    '11': { products: [{id:'PRD-002',name:'门禁控制器'}], devices: [{id:'DEV-028',name:'A出口门禁'},{id:'DEV-029',name:'B出口门禁'}], groups: [{name:'安全组'}] },
-    '12': { products: [{id:'PRD-002',name:'门禁控制器'},{id:'PRD-006',name:'电扶梯监控'}], devices: [{id:'DEV-030',name:'C出口门禁'},{id:'DEV-031',name:'D出口电扶梯'}], groups: [] },
-    '13': { products: [{id:'PRD-002',name:'门禁控制器'},{id:'PRD-003',name:'烟感探测器'}], devices: [{id:'DEV-032',name:'D出口门禁'},{id:'DEV-033',name:'4号烟感'}], groups: [{name:'消防组'},{name:'安全组'}] },
-    '14': { products: [{id:'PRD-003',name:'烟感探测器'}], devices: [{id:'DEV-034',name:'5号烟感'},{id:'DEV-035',name:'6号烟感'}], groups: [{name:'消防组'}] },
-    '15': { products: [{id:'PRD-004',name:'通风机组'}], devices: [{id:'DEV-036',name:'4号通风机组'},{id:'DEV-037',name:'5号通风机组'}], groups: [] },
-    '16': { products: [{id:'PRD-005',name:'排水泵监控'},{id:'PRD-007',name:'配电柜监控'}], devices: [{id:'DEV-038',name:'备用排水泵'},{id:'DEV-039',name:'3号配电柜'}], groups: [{name:'排水组'}] }
-  };
-  const binding = RULE_BINDINGS[chainId];
+  // 显示绑定信息（产品/设备）- 从实际数据输入节点动态提取
   const bindingEl = document.getElementById('bindingInfo');
-  if (binding && bindingEl && (binding.products.length || binding.devices.length || binding.groups.length)) {
-    let html = '<span style="color:#999;margin-right:4px">绑定：</span>';
-    if (binding.products.length) {
-      html += binding.products.map(p => '<a href="product-detail.html?id=' + p.id + '" style="display:inline-block;padding:2px 8px;background:#e6f7ff;color:#0958d9;border-radius:3px;margin:0 2px;font-size:11px;text-decoration:none;">📦 ' + p.name + '</a>').join('');
-    }
-    if (binding.groups.length) {
-      html += binding.groups.map(g => '<span style="display:inline-block;padding:2px 8px;background:#f6ffed;color:#389e0d;border-radius:3px;margin:0 2px;font-size:11px;">👥 ' + g.name + '</span>').join('');
-    }
-    if (binding.devices.length) {
-      const deviceNames = binding.devices.map(d => d.id + ' - ' + d.name).join('<br>');
-      html += '<span class="device-tooltip" style="display:inline-block;padding:2px 8px;background:#fff7e6;color:#d46b08;border-radius:3px;margin:0 2px;font-size:11px;cursor:pointer;position:relative;">🔧 ' + binding.devices.length + '台设备<span class="tooltip-content" style="display:none;position:absolute;top:100%;right:0;background:#fff;border:1px solid #ddd;border-radius:4px;padding:8px 12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:100;white-space:nowrap;text-align:left;font-size:11px;color:#333;margin-top:4px;max-width:300px;">' + deviceNames + '</span></span>';
-    }
-    bindingEl.innerHTML = html;
-    bindingEl.style.display = 'flex';
-    bindingEl.style.alignItems = 'center';
-    bindingEl.style.gap = '4px';
-    bindingEl.style.flexWrap = 'wrap';
-
-    // 添加设备浮窗鼠标悬停效果
-    setTimeout(() => {
-      const tooltip = bindingEl.querySelector('.device-tooltip');
-      if (tooltip) {
-        tooltip.addEventListener('mouseenter', () => {
-          tooltip.querySelector('.tooltip-content').style.display = 'block';
-        });
-        tooltip.addEventListener('mouseleave', () => {
-          tooltip.querySelector('.tooltip-content').style.display = 'none';
-        });
+  if (bindingEl && chain.nodes) {
+    // 收集所有数据输入节点的产品和设备信息
+    const productSet = new Map();
+    const deviceSet = new Map();
+    chain.nodes.forEach(node => {
+      if (node.defId === 'asset_data_source' && node.config) {
+        const pid = node.config.productId;
+        const did = node.config.deviceId;
+        if (pid) {
+          const pdef = PRODUCT_DEFINITIONS[pid];
+          const pname = pdef ? pdef.name : pid;
+          productSet.set(pid, { id: pid, name: pname });
+        }
+        if (did && pid) {
+          const devices = PRODUCT_DEVICES[pid] || [];
+          const dObj = devices.find(d => d.id === did);
+          const dname = dObj ? dObj.name : did;
+          deviceSet.set(did, { id: did, name: dname, productId: pid });
+        }
       }
-    }, 100);
+    });
+
+    if (productSet.size || deviceSet.size) {
+      let html = '<span style="color:#999;margin-right:4px">绑定：</span>';
+      if (productSet.size) {
+        html += Array.from(productSet.values()).map(p => '<span style="display:inline-block;padding:2px 8px;background:#e6f7ff;color:#0958d9;border-radius:3px;margin:0 2px;font-size:11px;">📦 ' + p.name + '</span>').join('');
+      }
+      if (deviceSet.size) {
+        const deviceNames = Array.from(deviceSet.values()).map(d => d.name).join('<br>');
+        html += '<span class="device-tooltip" style="display:inline-block;padding:2px 8px;background:#fff7e6;color:#d46b08;border-radius:3px;margin:0 2px;font-size:11px;cursor:pointer;position:relative;">🔧 ' + deviceSet.size + '台设备<span class="tooltip-content" style="display:none;position:absolute;top:100%;right:0;background:#fff;border:1px solid #ddd;border-radius:4px;padding:8px 12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:100;white-space:nowrap;text-align:left;font-size:11px;color:#333;margin-top:4px;max-width:300px;">' + deviceNames + '</span></span>';
+      }
+      bindingEl.innerHTML = html;
+      bindingEl.style.display = 'flex';
+      bindingEl.style.alignItems = 'center';
+      bindingEl.style.gap = '4px';
+      bindingEl.style.flexWrap = 'wrap';
+
+      // 添加设备浮窗鼠标悬停效果
+      setTimeout(() => {
+        const tooltip = bindingEl.querySelector('.device-tooltip');
+        if (tooltip) {
+          tooltip.addEventListener('mouseenter', () => {
+            tooltip.querySelector('.tooltip-content').style.display = 'block';
+          });
+          tooltip.addEventListener('mouseleave', () => {
+            tooltip.querySelector('.tooltip-content').style.display = 'none';
+          });
+        }
+      }, 100);
+    }
   }
 
   saveHistory();
@@ -2589,10 +3504,29 @@ function loadChainFromURL() {
 }
 
 // 在 DOM 加载完成后执行
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', loadChainFromURL);
-} else {
+function initApp() {
+  renderSidebarAssetTree();
   loadChainFromURL();
+
+  // 搜索框事件绑定（只绑定一次，因为搜索框不在 renderSidebarAssetTree 渲染范围内）
+  const searchInput = document.getElementById('assetTreeSearch');
+  if (searchInput) {
+    let isComposing = false;
+    searchInput.addEventListener('compositionstart', () => { isComposing = true; });
+    searchInput.addEventListener('compositionend', () => {
+      isComposing = false;
+      filterAssetTree(searchInput.value);
+    });
+    searchInput.addEventListener('input', () => {
+      if (!isComposing) filterAssetTree(searchInput.value);
+    });
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
 }
 </script>
 </body>

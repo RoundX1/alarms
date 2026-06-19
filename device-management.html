@@ -6,7 +6,7 @@
 <title>设备 - CAT</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f0f2f5; height: 100vh; overflow: hidden; margin: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f0f2f5; height: 100vh; overflow: hidden; margin: 0; }
 
   /* ===== HEADER (legacy, kept for reference) ===== */
   .header {
@@ -30,10 +30,27 @@
     font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px;
     transition: all 0.2s;
   }
-  .btn-primary { background: #fff; color: #008B8B; }
-  .btn-primary:hover { background: #f0f0f0; transform: translateY(-1px); }
-  .btn-outline { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
-  .btn-outline:hover { background: rgba(255,255,255,0.25); }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: #fff;
+    color: #008B8B;
+  }
+  .btn-primary:hover {
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
 
   /* ===== NAV SIDEBAR ===== */
   .nav-sidebar {
@@ -199,39 +216,161 @@
   .status-warning { color: #FF9800; }
 
   /* ===== CONTENT AREA ===== */
-  .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 16px 20px; }
 
   /* Toolbar */
   .toolbar {
-    padding: 12px 20px; background: #fff; border-bottom: 1px solid #e8e8e8;
-    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
   }
-  .toolbar-breadcrumb { font-size: 13px; color: #999; }
-  .toolbar-breadcrumb span { color: #333; font-weight: 500; }
-  .toolbar-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-  .toolbar-btn {
-    padding: 6px 12px; border-radius: 6px; border: 1px solid #ddd; background: #fff;
-    cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px;
-    transition: all 0.15s; color: #555;
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #6B7280;
   }
-  .toolbar-btn:hover { border-color: #008B8B; color: #008B8B; }
-  .toolbar-btn.active { background: #008B8B; color: #fff; border-color: #008B8B; }
-  .toolbar-select {
-    padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px;
-    outline: none; background: #fff; color: #555;
+
+  .breadcrumb a {
+    color: #6B7280;
+    text-decoration: none;
   }
-  .toolbar-select:focus { border-color: #008B8B; }
+
+  .breadcrumb a:hover {
+    color: #008B8B;
+  }
+
+  .breadcrumb .separator {
+    color: #9CA3AF;
+  }
+
+  .breadcrumb .current {
+    color: #1F2937;
+    font-weight: 500;
+  }
+
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .filter-select {
+    padding: 6px 30px 6px 10px;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #1F2937;
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' stroke='%236B7280' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    transition: all 0.2s ease;
+  }
+
+  .filter-select:hover {
+    border-color: #008B8B;
+  }
+
+  .filter-select:focus {
+    border-color: #008B8B;
+    box-shadow: 0 0 0 3px rgba(0,139,139,0.1);
+  }
+
+  .view-toggle {
+    display: flex;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .view-toggle button {
+    padding: 6px 10px;
+    border: none;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    line-height: 1;
+  }
+
+  .view-toggle button:not(:last-child) {
+    border-right: 1px solid #E5E7EB;
+  }
+
+  .view-toggle button.active {
+    background: #008B8B;
+    color: #fff;
+  }
+
+  .view-toggle button:hover:not(.active) {
+    background: #E0F7F7;
+  }
+
+  .search-box {
+    position: relative;
+  }
+
+  .search-box input {
+    padding: 6px 10px 6px 32px;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    font-size: 13px;
+    width: 200px;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .search-box input:focus {
+    border-color: #008B8B;
+    box-shadow: 0 0 0 3px rgba(0,139,139,0.1);
+    width: 240px;
+  }
+
+  .search-box::before {
+    content: '🔍';
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+  }
+
+  /* Header Toolbar */
+  .header-toolbar { display: flex; align-items: center; gap: 8px; margin-left: auto; padding-left: 16px; border-left: 1px solid #e8e8e8; }
+  .header-toolbar-btn { width: 34px; height: 34px; border-radius: 6px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #999; transition: all 0.15s; position: relative; }
+  .header-toolbar-btn:hover { background: #f5f5f5; color: #666; }
+  .header-toolbar-btn svg { width: 18px; height: 18px; }
+  .toolbar-notif-badge { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 50%; background: #e53935; border: 2px solid #fff; }
+  .header-user { display: flex; align-items: center; gap: 8px; margin-left: 4px; padding-left: 12px; border-left: 1px solid #e8e8e8; cursor: pointer; }
+  .user-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #008B8B, #00A0A0); display: flex; align-items: center; justify-content: center; color: #fff; }
+  .user-name { font-size: 13px; color: #555; font-weight: 500; }
 
   /* Stats Cards */
   .stats-row {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
-    padding: 16px 20px; flex-shrink: 0;
+    display: flex; align-items: stretch; gap: 0;
+    margin-bottom: 16px;
+    background: #fff; border-radius: 10px;
+    border: 1px solid #f0f0f0;
+    overflow: hidden;
   }
   .stat-card {
-    background: #fff; border-radius: 10px; padding: 16px; border: 1px solid #f0f0f0;
-    display: flex; align-items: center; gap: 14px; transition: box-shadow 0.2s;
+    flex: 1; padding: 16px 20px;
+    display: flex; align-items: center; gap: 14px; transition: all 0.2s;
+    border-right: 1px solid #f0f0f0;
+    cursor: pointer;
   }
-  .stat-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .stat-card:last-child { border-right: none; }
+  .stat-card:hover { background: #f5f5f5; }
+  .stat-card.active { background: #E0F7F7; }
   .stat-icon {
     width: 44px; height: 44px; border-radius: 10px; display: flex;
     align-items: center; justify-content: center; font-size: 20px;
@@ -246,37 +385,59 @@
   /* Device Cards */
   .card-container {
     flex: 1; overflow-y: auto; display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 16px; align-content: start;
   }
   .device-card {
-    background: #fff; border-radius: 10px; border: 1px solid #f0f0f0;
-    padding: 16px; cursor: pointer; transition: all 0.2s; position: relative;
+    background: #fff; border-radius: 8px; border: 1px solid #e8e8e8;
+    padding: 16px; transition: all 0.2s; position: relative;
+    display: flex; flex-direction: column;
   }
-  .device-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-2px); border-color: #008B8B; }
-  .device-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .device-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: #ccc; }
+  .device-card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
   .device-card-avatar {
-    width: 44px; height: 44px; border-radius: 10px; display: flex;
-    align-items: center; justify-content: center; font-size: 22px;
-    font-weight: normal;
+    width: 48px; height: 48px; border-radius: 8px; display: flex;
+    align-items: center; justify-content: center; font-size: 24px;
+    font-weight: normal; flex-shrink: 0; background: #E3F2FD !important;
   }
-  .device-card-info { flex: 1; min-width: 0; }
-  .device-card-name { font-size: 14px; font-weight: 600; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .device-card-code { font-size: 11px; color: #999; margin-top: 2px; }
-  .device-card-status { position: absolute; top: 12px; right: 12px; }
-  .device-card-body { display: flex; flex-direction: column; gap: 6px; }
-  .device-card-row { display: flex; justify-content: space-between; font-size: 12px; }
-  .device-card-row .label { color: #999; }
-  .device-card-row .value { color: #333; font-weight: 500; }
-  .device-card-triggers { margin-top: 10px; padding-top: 10px; border-top: 1px solid #f5f5f5; display: flex; flex-wrap: wrap; gap: 4px; }
-  .device-card-trigger-tag {
-    font-size: 10px; padding: 2px 8px; border-radius: 4px;
-    background: #E3F2FD; color: #1565C0;
+  .device-card-info { flex: 1; min-width: 0; padding-right: 60px; }
+  .device-card-name { font-size: 15px; font-weight: 600; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .device-card-code { font-size: 12px; color: #999; margin-top: 4px; font-family: monospace; }
+  .device-card-status { position: absolute; top: 16px; right: 16px; }
+  .device-card-status .status-badge {
+    background: #fff; border: 1px solid #e0e0e0; color: #666;
+    font-size: 11px; padding: 2px 10px;
   }
+  .device-card-status .status-badge.online { border-color: #4CAF50; color: #4CAF50; background: #fff; }
+  .device-card-status .status-badge.offline { border-color: #9E9E9E; color: #9E9E9E; background: #fff; }
+  .device-card-status .status-badge.alarm { border-color: #f44336; color: #f44336; background: #fff; }
+  .device-card-status .status-badge.warning { border-color: #FF9800; color: #FF9800; background: #fff; }
+  .device-card-status .status-badge::before { display: none; }
+  .device-card-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    margin-bottom: 12px;
+    flex: 1;
+  }
+  .device-card-row { display: flex; flex-direction: column; gap: 2px; }
+  .device-card-row .label { font-size: 11px; color: #999; display: flex; align-items: center; gap: 4px; }
+  .device-card-row .value { font-size: 12px; color: #333; }
+  .device-card-actions {
+    display: flex; align-items: center; justify-content: space-around;
+    padding-top: 12px; border-top: 1px solid #f0f0f0;
+  }
+  .device-card-action {
+    font-size: 12px; color: #666; cursor: pointer;
+    display: flex; align-items: center; gap: 4px;
+    transition: color 0.15s; background: none; border: none; padding: 0;
+  }
+  .device-card-action:hover { color: #008B8B; }
+  .device-card-action svg { width: 14px; height: 14px; }
 
   /* Device Table */
   .table-container {
-    flex: 1; margin: 0 20px 20px; background: #fff; border-radius: 10px;
+    flex: 1; background: #fff; border-radius: 10px;
     border: 1px solid #f0f0f0; overflow: hidden; display: flex; flex-direction: column;
   }
   .table-header-bar {
@@ -318,7 +479,7 @@
     flex-shrink: 0; font-weight: normal;
   }
   .device-name-text .name { font-weight: 500; color: #333; }
-  .device-name-text .code { font-size: 11px; color: #aaa; font-family: 'Courier New', monospace; }
+  .device-name-text .code { font-size: 11px; color: #aaa; font-family: monospace; }
 
   .status-badge {
     display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px;
@@ -479,7 +640,7 @@
   .detail-field { }
   .detail-field .label { font-size: 11px; color: #999; margin-bottom: 3px; }
   .detail-field .value { font-size: 13px; color: #333; font-weight: 500; }
-  .detail-field .value.mono { font-family: 'Courier New', monospace; }
+  .detail-field .value.mono { font-family: monospace; }
 
   /* Trigger association in detail */
   .trigger-card {
@@ -495,7 +656,7 @@
   }
   .trigger-card-info { flex: 1; }
   .trigger-card-info .name { font-size: 13px; font-weight: 500; color: #333; }
-  .trigger-card-info .cond { font-size: 11px; color: #888; font-family: 'Courier New', monospace; }
+  .trigger-card-info .cond { font-size: 11px; color: #888; font-family: monospace; }
   .trigger-card-status { font-size: 11px; }
   .trigger-card-actions { display: flex; gap: 4px; }
 
@@ -565,7 +726,7 @@
   .trigger-select-item .ts-icon { font-size: 20px; }
   .trigger-select-item .ts-info { flex: 1; }
   .trigger-select-item .ts-name { font-size: 13px; font-weight: 500; color: #333; }
-  .trigger-select-item .ts-cond { font-size: 11px; color: #888; font-family: 'Courier New', monospace; }
+  .trigger-select-item .ts-cond { font-size: 11px; color: #888; font-family: monospace; }
   .trigger-select-item .ts-type { font-size: 10px; padding: 2px 6px; border-radius: 3px; background: #E3F2FD; color: #1565C0; }
 
   /* Toast */
@@ -592,7 +753,7 @@
   </div>
   <nav class="nav-sidebar-menu">
     <div class="nav-menu-group">
-      <div class="nav-menu-item has-submenu expanded" onclick="toggleNavSubmenu(this)">
+      <div class="nav-menu-item has-submenu expanded" data-submenu-toggle="nav">
         <span class="nav-menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
         <span class="nav-menu-text">设备管理</span>
         <span class="nav-menu-arrow open">▶</span>
@@ -631,60 +792,76 @@
   <div class="content">
     <!-- Toolbar -->
     <div class="toolbar">
-      <div class="toolbar-breadcrumb">
-        设备 / <span id="currentCategory">全部设备</span>
+      <div class="breadcrumb">
+        <a href="device-management.html">设备</a>
+        <span class="separator">/</span>
+        <span class="current" id="currentCategory">全部设备</span>
       </div>
       <div class="toolbar-right">
-        <button class="toolbar-btn" onclick="showToast('数据已同步', 'info')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>同步数据</button>
-        <button class="toolbar-btn" style="background:#008B8B;color:#fff;border-color:#008B8B" onclick="openAddDeviceModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>添加设备</button>
-        <select class="toolbar-select" id="statusFilter" onchange="filterDevices()">
+        <button class="btn btn-primary" onclick="openAddDeviceModal()">➕ 添加设备</button>
+        <select class="filter-select" id="statusFilter" onchange="filterDevices()">
           <option value="all">全部状态</option>
           <option value="online">在线</option>
           <option value="offline">离线</option>
           <option value="alarm">告警</option>
           <option value="warning">预警</option>
         </select>
-        <select class="toolbar-select" id="stationFilter" onchange="filterDevices()">
+        <select class="filter-select" id="stationFilter" onchange="filterDevices()">
           <option value="all">全部站点</option>
           <option value="1号线-人民广场">1号线-人民广场</option>
           <option value="1号线-南京东路">1号线-南京东路</option>
           <option value="2号线-中山公园">2号线-中山公园</option>
           <option value="2号线-静安寺">2号线-静安寺</option>
         </select>
-        <button class="toolbar-btn" id="viewToggleBtn" onclick="toggleDeviceView()" title="切换视图" style="background:#008B8B;color:#fff;border-color:#008B8B"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+        <div class="search-box">
+          <input type="text" id="tableSearch" placeholder="搜索设备名称/ID..." oninput="filterDevices()">
+        </div>
+        <div class="view-toggle">
+          <button id="viewToggleBtn" onclick="toggleDeviceView()" title="切换视图">🔲</button>
+        </div>
+      </div>
+      <div class="header-toolbar">
+        <button class="header-toolbar-btn" title="通知" data-toast-message="暂无新通知" data-toast-type="info">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="toolbar-notif-badge"></span>
+        </button>
+        <button class="header-toolbar-btn" title="帮助" data-toast-message="帮助文档暂未开放" data-toast-type="info">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </button>
+        <div class="header-user">
+          <div class="user-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <span class="user-name">管理员</span>
+        </div>
       </div>
     </div>
 
     <!-- Stats -->
     <div class="stats-row">
-      <div class="stat-card">
+      <div class="stat-card" onclick="filterByStat('all')" id="statCardAll">
         <div class="stat-icon total"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
         <div><div class="stat-value" id="statTotal">24</div><div class="stat-label">设备总数</div></div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" onclick="filterByStat('online')" id="statCardOnline">
         <div class="stat-icon online"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
         <div><div class="stat-value" id="statOnline">18</div><div class="stat-label">在线运行</div></div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" onclick="filterByStat('alarm')" id="statCardAlarm">
         <div class="stat-icon alarm"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C62828" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <div><div class="stat-value" id="statAlarm">3</div><div class="stat-label">告警中</div></div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" onclick="filterByStat('trigger')" id="statCardTrigger">
         <div class="stat-icon trigger"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7B1FA2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
         <div><div class="stat-value" id="statTrigger">15</div><div class="stat-label">已关联触发器</div></div>
       </div>
     </div>
 
     <!-- Card View -->
-    <div class="card-container" id="cardContainer" style="display:none;padding:0 16px 16px"></div>
+    <div class="card-container" id="cardContainer" style="display:none"></div>
 
     <!-- Table View -->
     <div class="table-container" id="tableContainer">
       <div class="table-header-bar">
         <h4>设备列表</h4>
-        <div class="table-search">
-          <input placeholder="搜索设备名称/编码..." id="tableSearch" oninput="filterDevices()" />
-        </div>
       </div>
       <div class="table-wrapper">
         <table>
@@ -705,13 +882,11 @@
         </table>
       </div>
       <div class="pagination">
-        <span>共 <b id="pageTotal">24</b> 条记录，第 1/3 页</span>
-        <div class="pagination-btns">
-          <button class="page-btn">‹</button>
-          <button class="page-btn active">1</button>
-          <button class="page-btn">2</button>
-          <button class="page-btn">3</button>
-          <button class="page-btn">›</button>
+        <span>共 <b id="pageTotal">24</b> 条记录，第 <span id="pageInfo">1/1</span> 页</span>
+        <div class="pagination-btns" id="paginationBtns">
+          <button class="page-btn" onclick="changePage(-1)">‹</button>
+          <button class="page-btn active" onclick="goToPage(1)">1</button>
+          <button class="page-btn" onclick="changePage(1)">›</button>
         </div>
       </div>
     </div>
@@ -739,6 +914,7 @@
 <!-- TOAST -->
 <div class="toast-container" id="toastContainer"></div>
 
+<script src="prototype-common.js"></script>
 <script>
 // ===== DATA =====
 const DEVICE_TYPES = {
@@ -790,9 +966,11 @@ let devices = [
   { id: 'DEV-024', name: 'D出口电扶梯', type: 'escalator', station: '2号线-静安寺', location: '1F层-D出口', status: 'online', triggers: [], updatedAt: '2026-04-23 14:30', params: { speed: '0.5m/s', direction: '下行', runtime: '7230h' } },
 ];
 
-let currentFilter = { category: 'all', status: 'all', station: 'all', search: '' };
+let currentFilter = { category: 'all', status: 'all', station: 'all', search: '', statTrigger: false };
 let currentDeviceId = null;
 let selectedTriggers = [];
+let currentPage = 1;
+let pageSize = 10;
 
 // ===== INIT =====
 function init() {
@@ -859,6 +1037,7 @@ function getFilteredDevices() {
     if (currentFilter.category !== 'all' && d.type !== currentFilter.category) return false;
     if (statusFilter !== 'all' && d.status !== statusFilter) return false;
     if (stationFilter !== 'all' && d.station !== stationFilter) return false;
+    if (currentFilter.statTrigger && d.triggers.length === 0) return false;
     if (tableSearch && !d.name.toLowerCase().includes(tableSearch) && !d.id.toLowerCase().includes(tableSearch)) return false;
     return true;
   });
@@ -866,14 +1045,77 @@ function getFilteredDevices() {
 
 function filterDevices() {
   const filtered = getFilteredDevices();
+  currentPage = 1;
   renderTable(filtered);
   if (currentView === 'card') renderCards(filtered);
   document.getElementById('pageTotal').textContent = filtered.length;
+  renderPagination(filtered.length);
+}
+
+function filterByStat(type) {
+  // 清除所有卡片的 active 状态
+  ['statCardAll', 'statCardOnline', 'statCardAlarm', 'statCardTrigger'].forEach(id => {
+    document.getElementById(id).classList.remove('active');
+  });
+  // 给当前卡片添加 active
+  document.getElementById('statCard' + type.charAt(0).toUpperCase() + type.slice(1)).classList.add('active');
+
+  const statusFilter = document.getElementById('statusFilter');
+  if (type === 'all') {
+    statusFilter.value = 'all';
+    currentFilter.statTrigger = false;
+  } else if (type === 'online') {
+    statusFilter.value = 'online';
+    currentFilter.statTrigger = false;
+  } else if (type === 'alarm') {
+    statusFilter.value = 'alarm';
+    currentFilter.statTrigger = false;
+  } else if (type === 'trigger') {
+    statusFilter.value = 'all';
+    currentFilter.statTrigger = true;
+  }
+  filterDevices();
+}
+
+function renderPagination(total) {
+  const totalPages = Math.ceil(total / pageSize) || 1;
+  document.getElementById('pageInfo').textContent = currentPage + '/' + totalPages;
+
+  let html = '<button class="page-btn" onclick="changePage(-1)">‹</button>';
+  for (let i = 1; i <= totalPages; i++) {
+    html += '<button class="page-btn ' + (i === currentPage ? 'active' : '') + '" onclick="goToPage(' + i + ')">' + i + '</button>';
+  }
+  html += '<button class="page-btn" onclick="changePage(1)">›</button>';
+  document.getElementById('paginationBtns').innerHTML = html;
+}
+
+function changePage(delta) {
+  const filtered = getFilteredDevices();
+  const totalPages = Math.ceil(filtered.length / pageSize) || 1;
+  const newPage = currentPage + delta;
+  if (newPage >= 1 && newPage <= totalPages) {
+    currentPage = newPage;
+    renderTable(filtered);
+    renderPagination(filtered.length);
+  }
+}
+
+function goToPage(page) {
+  const filtered = getFilteredDevices();
+  const totalPages = Math.ceil(filtered.length / pageSize) || 1;
+  if (page >= 1 && page <= totalPages) {
+    currentPage = page;
+    renderTable(filtered);
+    renderPagination(filtered.length);
+  }
 }
 
 function renderTable(data) {
   const tbody = document.getElementById('deviceTableBody');
-  tbody.innerHTML = data.map(d => {
+  const start = (currentPage - 1) * pageSize;
+  const end = start + pageSize;
+  const pageData = data.slice(start, end);
+  tbody.innerHTML = pageData.map(d => {
     const typeInfo = DEVICE_TYPES[d.type];
     const statusText = { online: '在线', offline: '离线', alarm: '告警', warning: '预警' };
     const triggerNames = d.triggers.map(tid => {
@@ -987,7 +1229,7 @@ let currentView = 'list';
 function setView(view) {
   currentView = view;
   var btn = document.getElementById('viewToggleBtn');
-  btn.innerHTML = view === 'list' ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>';
+  btn.textContent = view === 'list' ? '🔲' : '📋';
   btn.title = view === 'list' ? '切换为卡片视图' : '切换为列表视图';
   document.getElementById('tableContainer').style.display = view === 'list' ? 'flex' : 'none';
   document.getElementById('cardContainer').style.display = view === 'card' ? 'grid' : 'none';
@@ -1003,11 +1245,7 @@ function renderCards(data) {
   const statusText = { online: '在线', offline: '离线', alarm: '告警', warning: '预警' };
   container.innerHTML = data.map(d => {
     const typeInfo = DEVICE_TYPES[d.type];
-    const triggerNames = d.triggers.map(tid => {
-      const t = TRIGGER_DEFS.find(x => x.id === tid);
-      return t ? t : null;
-    }).filter(Boolean);
-    return '<div class="device-card" onclick="location.href=\'device-detail.html?id=' + d.id + '\'"' +
+    return '<div class="device-card">' +
       '<div class="device-card-status"><span class="status-badge ' + d.status + '">' + statusText[d.status] + '</span></div>' +
       '<div class="device-card-header">' +
         '<div class="device-card-avatar" style="background:' + typeInfo.bgColor + '">' + typeInfo.icon + '</div>' +
@@ -1017,21 +1255,29 @@ function renderCards(data) {
         '</div>' +
       '</div>' +
       '<div class="device-card-body">' +
-        '<div class="device-card-row"><span class="label">类型</span><span class="value">' + typeInfo.name + '</span></div>' +
-        '<div class="device-card-row"><span class="label">站点</span><span class="value">' + d.station + '</span></div>' +
-        '<div class="device-card-row"><span class="label">位置</span><span class="value">' + d.location + '</span></div>' +
-        '<div class="device-card-row"><span class="label">更新</span><span class="value">' + d.updatedAt + '</span></div>' +
+        '<div class="device-card-row"><span class="label">产品名称</span><span class="value">' + typeInfo.name + '</span></div>' +
+        '<div class="device-card-row"><span class="label">设备类型</span><span class="value">' + typeInfo.name + '</span></div>' +
+        '<div class="device-card-row"><span class="label">创建时间</span><span class="value">' + d.updatedAt + '</span></div>' +
+        '<div class="device-card-row"><span class="label">所属组件</span><span class="value">' + d.station + '</span></div>' +
       '</div>' +
-      (triggerNames.length > 0 ?
-        '<div class="device-card-triggers">' + triggerNames.map(t => '<span class="device-card-trigger-tag">' + t.icon + ' ' + t.name + '</span>').join('') + '</div>'
-        : '') +
+      '<div class="device-card-actions">' +
+        '<button class="device-card-action" onclick="event.stopPropagation();location.href=\'device-detail.html?id=' + d.id + '\'">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>查看详情' +
+        '</button>' +
+        '<button class="device-card-action" onclick="event.stopPropagation();showToast(\'编辑功能暂未开放\', \'info\')">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>编辑' +
+        '</button>' +
+        '<button class="device-card-action" onclick="event.stopPropagation();showToast(\'删除功能暂未开放\', \'info\')">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>删除' +
+        '</button>' +
+      '</div>' +
     '</div>';
   }).join('');
 }
 
 // ===== ADD DEVICE (placeholder) =====
 function openAddDeviceModal() {
-  showToast('添加设备功能演示', 'info');
+  showToast('当前版本暂不支持添加设备', 'info');
 }
 
 // ===== TOAST =====
@@ -1043,15 +1289,6 @@ function showToast(msg, type = 'info') {
   toast.innerHTML = `<span>${icons[type] || ''}</span> ${msg}`;
   container.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
-}
-
-// ===== NAV SIDEBAR =====
-function toggleNavSubmenu(el) {
-  const submenu = el.nextElementSibling;
-  const arrow = el.querySelector('.nav-menu-arrow');
-  el.classList.toggle('expanded');
-  arrow.classList.toggle('open');
-  submenu.classList.toggle('open');
 }
 
 // ===== START =====
