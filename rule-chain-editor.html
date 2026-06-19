@@ -1190,16 +1190,11 @@ function openConfig(nodeId) {
     if (node.defId === 'asset_data_source') {
       const selectedProduct = node.config.productId || '';
       const selectedDevice = node.config.deviceId || '';
-      let selectedMetrics = node.config.metrics || [];
+      const selectedMetrics = node.config.metrics || [];
       const prodDef = PRODUCT_DEFINITIONS[selectedProduct] || null;
       const deviceList = PRODUCT_DEVICES[selectedProduct] || [];
       const deviceObj = deviceList.find(d => d.id === selectedDevice) || null;
       const metricsList = PRODUCT_METRICS[selectedProduct] || [];
-
-      // 如果 config 中没有 metrics 但产品有定义的点位，自动填充所有点位（用于触发条件和实时状态）
-      if (selectedMetrics.length === 0 && metricsList.length > 0 && selectedProduct) {
-        selectedMetrics = metricsList.map(m => m.id);
-      }
 
       // 轮询配置
       const pollMode = node.config.pollMode || 'poll';
@@ -1724,6 +1719,18 @@ function syncFieldMappings(nodeId) {
     const existing = existingMap[mid];
     return existing || { key: mid, alias: m ? m.name : mid, type: m ? m.type : 'float' };
   });
+  syncTriggerConditions(nodeId);
+}
+
+function syncTriggerConditions(nodeId) {
+  const node = state.nodes.find(n => n.id === nodeId);
+  if (!node || !node.config.triggerConditions) return;
+  const metricSet = new Set(node.config.metrics || []);
+  node.config.triggerConditions = node.config.triggerConditions.map(cond => {
+    if (!cond) return { field: '', op: '>', value: '' };
+    if (!cond.field || metricSet.has(cond.field)) return cond;
+    return { ...cond, field: '' };
+  });
 }
 
 function previewData(nodeId) {
@@ -1777,6 +1784,13 @@ function renderTriggerConditions(node, metricsList, displayMetrics) {
     node.config.triggerLogic = [];
   }
   const selectedMetrics = displayMetrics || node.config.metrics || [];
+  const selectedMetricSet = new Set(selectedMetrics);
+  const selectedMetricDefs = selectedMetrics.map(mid => metricsList.find(x => x.id === mid)).filter(Boolean);
+  conditions = conditions.map(cond => {
+    if (!cond || !cond.field || selectedMetricSet.has(cond.field)) return cond;
+    return { ...cond, field: '' };
+  });
+  node.config.triggerConditions = conditions;
   const triggerLogic = node.config.triggerLogic;
 
   // 表达式预览行：用彩色标签显示 AND/OR，点击可切换
@@ -1806,21 +1820,21 @@ function renderTriggerConditions(node, metricsList, displayMetrics) {
       : '';
 
     return `
-    <div style="padding:10px;background:#f0f7ff;border-radius:6px;border:1px solid #d6e4ff">
+    <div style="padding:10px;background:#f0f7ff;border-radius:6px;border:1px solid #d6e4ff;overflow:hidden">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
         <span style="font-size:11px;color:#1565C0;font-weight:500">条件 ${idx + 1}</span>
         ${conditions.length > 1 ? `<button style="margin-left:auto;padding:2px 6px;background:#fff;color:#ff4d4f;border:1px solid #ffccc7;border-radius:3px;font-size:10px;cursor:pointer" onclick="removeTriggerCondition(${node.id},${idx})">删除</button>` : ''}
       </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <select class="config-select" style="flex:1;font-size:11px;padding:4px 6px;min-width:100px" onchange="updateTriggerCondition(${node.id},${idx},'field',this.value)">
+      <div style="display:flex;gap:6px;align-items:center;min-width:0">
+        <select class="config-select" style="flex:1 1 0;min-width:0;max-width:100%;font-size:11px;padding:4px 6px" onchange="updateTriggerCondition(${node.id},${idx},'field',this.value)">
           <option value="">— 选择字段 —</option>
-          ${selectedMetrics.map(mid => {
-            const mm = metricsList.find(x => x.id === mid);
-            const label = mm ? mm.name + ' (' + mid + ')' : mid;
+          ${selectedMetricDefs.map(mm => {
+            const label = mm.name;
+            const mid = mm.id;
             return `<option value="${mid}" ${cond.field===mid?'selected':''}>${label}</option>`;
           }).join('')}
         </select>
-        <select class="config-select" style="width:52px;flex-shrink:0;font-size:11px;padding:4px 4px" onchange="updateTriggerCondition(${node.id},${idx},'op',this.value)">
+        <select class="config-select" style="width:56px;flex:0 0 56px;font-size:11px;padding:4px 4px" onchange="updateTriggerCondition(${node.id},${idx},'op',this.value)">
           <option value=">" ${cond.op==='>'?'selected':''}>&gt;</option>
           <option value="<" ${cond.op==='<'?'selected':''}>&lt;</option>
           <option value=">=" ${cond.op==='>='?'selected':''}>&ge;</option>
@@ -1828,8 +1842,10 @@ function renderTriggerConditions(node, metricsList, displayMetrics) {
           <option value="==" ${cond.op==='=='?'selected':''}>=</option>
           <option value="!=" ${cond.op==='!='?'selected':''}>&ne;</option>
         </select>
-        <input class="config-input" type="number" style="width:60px;font-size:11px;padding:4px 6px" placeholder="阈值" value="${cond.value || ''}" onchange="updateTriggerCondition(${node.id},${idx},'value',this.value)" />
-        <span style="font-size:11px;color:#999;flex-shrink:0">${unit}</span>
+        <div style="position:relative;flex:0 0 92px;min-width:0;max-width:92px">
+          <input class="config-input" type="number" style="width:100%;max-width:100%;box-sizing:border-box;font-size:11px;padding:4px ${unit ? '26px' : '6px'} 4px 6px" placeholder="阈值" value="${cond.value || ''}" onchange="updateTriggerCondition(${node.id},${idx},'value',this.value)" />
+          ${unit ? `<span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;color:#999;line-height:1;pointer-events:none;white-space:nowrap">${unit}</span>` : ''}
+        </div>
       </div>
       ${expr ? `<div style="font-size:11px;color:#1565C0;margin-top:6px">${expr}</div>` : ''}
     </div>`;
